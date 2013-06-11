@@ -114,6 +114,74 @@
       
   <header class="page-header">
     
+      <h1 class="entry-title"><a href="/blog/20120418">制作 VMware ESXI 5 U盘安装盘</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-18T20:17:00+08:00" pubdate data-updated="true">Apr 18<span>th</span>, 2012</time>
+        
+		
+         | <a href="/blog/20120418#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>有两种方法，使用 unetbootin ，或使用 LinuxLive USB Creator刻录可启动U盘。 
+##使用 unetbootin
+这个方法最自动化，点击两下按钮即可，但是有时候会失败(我用EXSi 5.0 的ISO失败，但是用 EXSi 5.0U1可以成功)，U盘启动不了。 </p>
+
+<ol>
+  <li>单击 光盘镜像，选择ISO文件VMware-VMvisor-Installer-5.0.0.update01-623860.x86_64.iso。 </li>
+  <li>选择U盘，点击“确定”开始刻录。刻录后用U盘启动机器开始安装即可。如下图所示。
+<img src="http://yanjiuyanjiu-wordpress.stor.sinaapp.com/uploads/2012/04/unetbootin1.jpg" /></li>
+</ol>
+
+<h2 id="linuxlive-usb-creator">使用 LinuxLive USB Creator</h2>
+
+<ol>
+  <li>格式化U盘，文件系统为FAT32，并设置为主分区，命令如下：
+     # 使用管理员权限运行cmd 
+     diskpart 
+     list disk 
+     select disk USB number （例如 select dist 1） 
+     clean 
+     create partition primary 
+     active 
+     format fs=fat32 quick 
+     assign 
+     exit</li>
+</ol>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20120418">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
       <h1 class="entry-title"><a href="/blog/20120103">Hadoop 集群安装详细步骤</a></h1>
     
     
@@ -730,7 +798,7 @@ PMD 的 CPD <a href="http://pmd.sourceforge.net/cpd.html">http://pmd.sourceforge
 </section>
 <section>
   <h2>分类目录</h2>
-    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/cloud/'>cloud (1)</a></li><li><a href='/blog/categories/language/'>language (2)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/cloud/'>cloud (1)</a></li><li><a href='/blog/categories/language/'>language (2)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/spark/'>spark (1)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
 </section>
 <section>
   <h2>友情链接</h2>
@@ -770,6 +838,10 @@ PMD 的 CPD <a href="http://pmd.sourceforge.net/cpd.html">http://pmd.sourceforge
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/20130611">使用Scala IDE 阅读spark源码 &#8211; 将sbt项目转化为eclipse项目</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/20130412">LaTeX的各种发行版和编辑器的比较</a>
       </li>
     
@@ -783,10 +855,6 @@ PMD 的 CPD <a href="http://pmd.sourceforge.net/cpd.html">http://pmd.sourceforge
     
       <li class="post">
         <a href="/blog/20130327">机器学习的一些通俗易懂的tutorial</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20130322">一些主流的编程竞赛网站</a>
       </li>
     
   </ul>
