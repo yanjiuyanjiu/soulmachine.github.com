@@ -4,7 +4,7 @@
   <title><![CDATA[Category: tools | 研究研究]]></title>
   <link href="http://www.yanjiuyanjiu.com/blog/categories/tools/atom.xml" rel="self"/>
   <link href="http://www.yanjiuyanjiu.com/"/>
-  <updated>2013-06-11T17:01:05+08:00</updated>
+  <updated>2013-06-14T08:41:37+08:00</updated>
   <id>http://www.yanjiuyanjiu.com/</id>
   <author>
     <name><![CDATA[soulmachine]]></name>
@@ -885,7 +885,7 @@ JAVA_OPTS=”$JAVA_OPTS -Djava.rmi.server.hostname=192.168.0.123 -Dcom.sun.manag
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[CentOS 服务器安装操作全记录]]></title>
+    <title type="html"><![CDATA[安装和配置CentOS服务器的详细步骤]]></title>
     <link href="http://www.yanjiuyanjiu.com/blog/20120423"/>
     <updated>2012-04-23T20:43:00+08:00</updated>
     <id>http://www.yanjiuyanjiu.com/blog/install-and-configure-a-centos-server-from-scratch</id>

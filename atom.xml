@@ -4,7 +4,7 @@
   <title><![CDATA[研究研究]]></title>
   <link href="http://www.yanjiuyanjiu.com/atom.xml" rel="self"/>
   <link href="http://www.yanjiuyanjiu.com/"/>
-  <updated>2013-06-11T17:01:05+08:00</updated>
+  <updated>2013-06-14T08:41:37+08:00</updated>
   <id>http://www.yanjiuyanjiu.com/</id>
   <author>
     <name><![CDATA[soulmachine]]></name>
@@ -12,6 +12,390 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[在CentOS上安装Hadoop]]></title>
+    <link href="http://www.yanjiuyanjiu.com/blog/20130612"/>
+    <updated>2013-06-12T12:39:00+08:00</updated>
+    <id>http://www.yanjiuyanjiu.com/blog/hadoop-installatioin-on-centos</id>
+    <content type="html"><![CDATA[<p>Ubuntu上安装，请参考我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20120103/">在Ubuntu上安装Hadoop</a>。</p>
+
+<p><strong>环境</strong>：CentOS 6.4, JDK 1.7, Hadoop 1.1.2</p>
+
+<h2 id="vmware-workstation-">1. 用vmware workstation 创建三台虚拟机</h2>
+<p>首先用vmware workstation 新建一台CentOS 6.4，装好操作系统，选择 Basic Server，安装JDK，参考我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20120423/">安装和配置CentOS服务器的详细步骤</a>。安装好后然后用浅拷贝<code>Create a linked clone</code> 克隆出两台作为slave，这样有了三台虚拟机。启动三台机器，假设IP分别为<code>192.168.1.131, 192.168.1.132, 192.168.1.133</code>, 131做为master 和 SecondaryNameNode, 身兼两职， 132和133为 slaves。</p>
+
+<h2 id="hostname">2. 修改hostname</h2>
+<p>这一步看起来貌似不必要，其实是必须的，否则最后运行wordcount等例子时，会出现“Too many fetch-failures”。因为HDFS用hostname而不是IP，来相互之间进行通信（见后面的注意1）。</p>
+
+<p>在CentOS上修改hostname，包含两个步骤(假设将hostname1改为hostname2，参考<a href="http://www.ichiayi.com/wiki/tech/linux_hostname">这里</a>，但不需要第一步)：</p>
+
+<ol>
+  <li>将 <code>/etc/sysconfig/network</code> 內的 HOSTNAME 改成 hostname2</li>
+  <li>用<code>hostname</code>命令，临时修改机器名， <code>sudo hostname hostname2</code></li>
+</ol>
+
+<p>用<code>exit</code>命令退出shell，再次登录，命令提示字符串就会变成<code>[dev@hostname2 ~]$</code>。</p>
+
+<p>用上述方法，将131改名为master，132改名为slave01，133改名为slave02。</p>
+
+<p>在三台机器的/etc/hosts文件中，添加以下三行内容</p>
+
+<pre><code>192.168.1.131 master
+192.168.1.132 slave01
+192.168.1.133 slave02
+</code></pre>
+
+<h2 id="section">2. 本地模式和伪分布式模式</h2>
+
+<p>为了能顺利安装成功，我们先练习在单台机器上安装Hadoop。在单台机器上，可以配置成本地模式(local mode)和伪分布式模式(Pseudo-Distributed Mode)，参考官方文档<a href="http://hadoop.apache.org/docs/r1.1.2/single_node_setup.html">Single Node Setup</a>。</p>
+
+<p>将 hadoop-1.1.2-bin.tar.gz 上传到三台机器的 home目录下，然后解压。</p>
+
+<h3 id="confhadoop-envsh-javahome">2.1 编辑 conf/hadoop-env.sh，设置 JAVA_HOME</h3>
+
+<pre><code>cd hadoop-1.1.2
+vim conf/hadoop-env.sh
+</code></pre>
+
+<p>注释掉第8行的JAVA_HOME，设置正确的JDK位置</p>
+
+<pre><code>export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.19.x86_64
+</code></pre>
+
+<h3 id="section-1">2.2 测试本地模式是否正常</h3>
+<p>默认情况下，Hadoop就被配置为本地模式，现在就可以开始测试一下。</p>
+
+<pre><code>$ mkdir input 
+$ cp conf/*.xml input 
+$ bin/hadoop jar hadoop-examples-*.jar grep input output 'dfs[a-z.]+' 
+$ cat output/*
+</code></pre>
+
+<p>可以看到正常的结果，说明本地模式运行成功了，下面开始配置伪分布式模式。</p>
+
+<!-- more -->
+
+<h3 id="ssh">2.3 配置SSH无密码登陆本机</h3>
+
+<pre><code>$ ssh-keygen -t dsa -P '' -f ~/.ssh/id_dsa
+$ cat ~/.ssh/id_dsa.pub &gt;&gt; ~/.ssh/authorized_keys
+</code></pre>
+
+<p>修改sshd的配置文件(需要root权限)</p>
+
+<pre><code>$ sudo vim /etc/ssh/sshd_config
+</code></pre>
+
+<p>找到以下三行，并去掉注释符”#“</p>
+
+<pre><code>RSAAuthentication yes
+PubkeyAuthentication yes
+AuthorizedKeysFile      .ssh/authorized_keys
+</code></pre>
+
+<p>修改了配置文件需要重启sshd服务</p>
+
+<pre><code>sudo service sshd restart
+</code></pre>
+
+<p>修改 <code>authorized_keys</code> 文件的权限，否则ssh登陆的时候还是需要密码。权限的设置非常重要,因为不安全的设置,会让你不能使用RSA功能，参考 <a href="http://www.cnblogs.com/xia520pi/archive/2012/05/16/2504132.html">http://www.cnblogs.com/xia520pi/archive/2012/05/16/2504132.html</a></p>
+
+<pre><code>$ chmod 600 ~/.ssh/authorized_keys
+</code></pre>
+
+<h3 id="section-2">2.4 修改配置文件</h3>
+<p>conf/core-site.xml:</p>
+
+<pre><code>&lt;configuration&gt;
+     &lt;property&gt;
+         &lt;name&gt;fs.default.name&lt;/name&gt;
+         &lt;value&gt;hdfs://localhost:9000&lt;/value&gt;
+     &lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre>
+
+<p>conf/hdfs-site.xml:</p>
+
+<pre><code>&lt;configuration&gt;
+     &lt;property&gt;
+         &lt;name&gt;dfs.replication&lt;/name&gt;
+         &lt;value&gt;1&lt;/value&gt;
+     &lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre>
+
+<p>conf/mapred-site.xml:</p>
+
+<pre><code>&lt;configuration&gt;
+     &lt;property&gt;
+         &lt;name&gt;mapred.job.tracker&lt;/name&gt;
+         &lt;value&gt;localhost:9001&lt;/value&gt;
+     &lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre>
+
+<h3 id="hadoop">2.5 启动Hadoop，测试伪分布式模式</h3>
+
+<p>格式化namenode</p>
+
+<pre><code>$ bin/hadoop namenode -format
+</code></pre>
+
+<p>启动 Hadoop 后台进程</p>
+
+<pre><code>$ bin/start-all.sh
+</code></pre>
+
+<p>关闭防火墙</p>
+
+<pre><code>$ sudo service iptables stop
+</code></pre>
+
+<p>现在可以用浏览器打开NameNode和JobTracker的web界面了。<br />
+NameNode - <a href="http://localhost:50070/">http://localhost:50070/</a><br />
+JobTracker - <a href="http://localhost:50030/">http://localhost:50030/</a></p>
+
+<p>将输入数据拷贝到分布式文件系统中:</p>
+
+<pre><code>$ bin/hadoop fs -put conf input
+</code></pre>
+
+<p>如果这时出现 <code>SafeModeException</code> 异常，不用担心，等待几分钟即可。因为hadoop刚刚启动时，会进入安全模式进行自检。</p>
+
+<p>运行 Hadoop 自带的例子:</p>
+
+<pre><code>$ bin/hadoop jar hadoop-examples-*.jar grep input output 'dfs[a-z.]+'
+</code></pre>
+
+<p>查看输出文件:</p>
+
+<pre><code>$ bin/hadoop fs -cat output/*
+</code></pre>
+
+<p>当你做完了后，关闭 Hadoop:</p>
+
+<pre><code>$ bin/stop-all.sh
+</code></pre>
+
+<h2 id="section-3">3. 分布式模式</h2>
+<p>如果有多台机器，就可以把Hadoop 配置成分布式模式(或称为集群模式)。参考官方文档<a href="http://hadoop.apache.org/docs/r1.1.2/cluster_setup.html">Cluster Setup</a>.</p>
+
+<h2 id="master-master">3.1 配置 master 无密码登陆到所有机器（<strong>包括master自己登陆自己</strong>）</h2>
+<p>首先在两台slave上修改sshd的配置文件，然后重启sshd服务。</p>
+
+<pre><code>$ sudo vim /etc/ssh/sshd_config  找到以下三行，并去掉注释符”#“
+
+RSAAuthentication yes
+PubkeyAuthentication yes
+AuthorizedKeysFile      .ssh/authorized_keys
+</code></pre>
+
+<p>修改了配置文件需要重启sshd服务</p>
+
+<pre><code>$ sudo service sshd restart
+</code></pre>
+
+<p>在两台slaves机器上新建 ~/.ssh 目录</p>
+
+<pre><code>$ mkdir ~/.ssh
+</code></pre>
+
+<p>在master机器上执行： </p>
+
+<pre><code>#生成公钥
+$ ssh-keygen -t dsa -P '' -f ~/.ssh/id_dsa
+</code></pre>
+
+<p>把公钥拷贝到所有机器上（包括自己）</p>
+
+<pre><code># 拷贝到自己
+$ cat ~/.ssh/id_dsa.pub &gt;&gt; ~/.ssh/authorized_keys
+# 拷贝到两台slaves机器上
+$ scp ~/.ssh/id_rsa.pub dev@192.168.1.132:~/.ssh/authorized_keys
+$ scp ~/.ssh/id_rsa.pub dev@192.168.1.133:~/.ssh/authorized_keys
+</code></pre>
+
+<p>修改 .ssh目录和authorized_keys 文件的权限</p>
+
+<pre><code>#在三台机器上执行以下命令
+$ chmod 600 ~/.ssh/authorized_keys
+# 在两台 slaves 上执行以下命令
+$ chmod 700 ~/.ssh
+</code></pre>
+
+<p>测试，看看 master 是否可以无密码登陆两台slave</p>
+
+<pre><code>#在 master执行
+$ ssh 192.168.1.132
+$ exit
+$ ssh 192.168.1.133
+$ exit 如果不需要密码，则说明配置成功了。
+</code></pre>
+
+<p>如果登陆不上，试试先关闭两台slaves的防火墙</p>
+
+<pre><code>$ sudo service iptables stop
+</code></pre>
+
+<h3 id="section-4">3.2 修改6个配置文件</h3>
+<p>在 master 上修改配置文件。</p>
+
+<p>编辑 conf/hadoop-env.sh，设置 JAVA_HOME。</p>
+
+<p>在master上编辑 conf/hadoop-env.sh，注释掉第8行的JAVA_HOME，设置正确的JDK位置，确保集群中所有机器的JDK都安装在这个位置，这样待会儿后面可以用scp命令把master的6个配置文件(hadoop-env.sh, core-site.xml, hdfs-site.xml, mapred-site.xml, masters, slaves)拷贝到所有slaves机器上，这样其他机器就不用重复进行配置了。</p>
+
+<p>conf/masters:</p>
+
+<pre><code>master
+</code></pre>
+
+<p>conf/slaves:</p>
+
+<pre><code>slave01
+slave02
+</code></pre>
+
+<p>这两个配置文件的作用是，指定131作为master, 132和133为 slaves。</p>
+
+<p>conf/core-site.xml:</p>
+
+<pre><code>&lt;configuration&gt;
+    &lt;property&gt;
+        &lt;name&gt;fs.default.name&lt;/name&gt;
+        &lt;value&gt;hdfs://master:9000&lt;/value&gt;
+    &lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre>
+
+<p>conf/hdfs-site.xml:</p>
+
+<pre><code>&lt;configuration&gt;
+     &lt;property&gt;
+         &lt;name&gt;dfs.name.dir&lt;/name&gt;
+         &lt;value&gt;/home/dev/hdfs/name&lt;/value&gt;
+     &lt;/property&gt;
+     &lt;property&gt;
+         &lt;name&gt;dfs.data.dir&lt;/name&gt;
+         &lt;value&gt;/home/dev/hdfs/data&lt;/value&gt;
+     &lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre>
+
+<p>要在master创建 /home/dev/hdfs/name 目录，在 slaves上创建 /home/dev/hdfs/data 目录，并<code>chmod g-w /home/dev/hdfs/data</code>（权限不对的话datanode无法启动）。</p>
+
+<p>conf/mapred-site.xml:</p>
+
+<pre><code>&lt;configuration&gt;
+    &lt;property&gt;
+        &lt;name&gt;mapred.job.tracker&lt;/name&gt;
+        &lt;value&gt;master:9001&lt;/value&gt;
+    &lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre>
+
+<h3 id="slaves">3.4 将配置文件拷贝到所有slaves</h3>
+
+<pre><code>$ cd ~/hadoop-1.1.2/conf/
+$ scp hadoop-env.sh core-site.xml hdfs-site.xml mapred-site.xml masters slaves dev@192.168.1.132:~/hadoop-1.1.2/conf/
+$ scp hadoop-env.sh core-site.xml hdfs-site.xml mapred-site.xml masters slaves dev@192.168.1.133:~/hadoop-1.1.2/conf/
+</code></pre>
+
+<h3 id="hadoophomehadoophomebinpath">3.3 设置环境变量HADOOP_HOME，并将<code>$HADOOP_HOME/bin</code>加入PATH</h3>
+<p>所有机器都要设置环境变量HADOOP_HOME，并将<code>$HADOOP_HOME/bin</code>加入PATH，因为master登陆到slave后，要执行<code>$HADOOP_HOME/bin</code> 下的一些命令。</p>
+
+<pre><code>$ vim ~/.bash_profile
+</code></pre>
+
+<p>添加以下内容：</p>
+
+<pre><code>export HADOOP_HOME=$HOME/hadoop-1.1.2
+export PATH=$PATH:$HOME/bin:$HADOOP_HOME/bin::$HADOOP_HOME/sbin
+export CLASSPATH=$CLASSPATH:$HADOOP_HOME/hadoop-core-1.1.2.jar
+</code></pre>
+
+<p>source一下，使得环境变量立刻生效</p>
+
+<pre><code>$ source ~/.bash_profile
+</code></pre>
+
+<h3 id="hadoop-1">3.5 运行 hadoop</h3>
+<p>在master上执行以下命令，启动hadoop</p>
+
+<pre><code>#只需一次，下次启动不再需要格式化，只需 start-all.sh
+$ hadoop  namenode -format
+$ start-all.sh
+</code></pre>
+
+<h3 id="section-5">3.6 检查是否启动成功</h3>
+
+<p>在master上执行：</p>
+
+<pre><code>$ jps
+
+2615 NameNode
+2767 JobTracker
+2874 Jps
+</code></pre>
+
+<p>在一台slave上执行：</p>
+
+<pre><code>$ jps
+
+3415 DataNode
+3582 TaskTracker
+3499 SecondaryNameNode
+3619 Jps
+</code></pre>
+
+<p>在另一台slave上执行：</p>
+
+<pre><code>$ jps
+
+3741 Jps
+3618 DataNode
+3702 TaskTracker
+</code></pre>
+
+<p>可见进程都启动起来了，说明hadoop运行成功。</p>
+
+<h3 id="wordcount">3.7 运行wordcount例子，进一步测试是否安装成功</h3>
+<p>将输入数据拷贝到分布式文件系统中:</p>
+
+<pre><code>$ cd $HADOOP_HOME
+$ hadoop fs -put conf input
+</code></pre>
+
+<p>运行 Hadoop 自带的例子:</p>
+
+<pre><code>$ hadoop jar hadoop-examples-*.jar wordcount input output
+</code></pre>
+
+<p>查看输出文件:</p>
+
+<pre><code>$ hadoop s -ls output
+$ hadoop fs -cat output/part-r-00000
+</code></pre>
+
+<p>如果能看到结果，说明这个例子运行成功。</p>
+
+<h3 id="hadoop-2">3.8 停止 hadoop集群</h3>
+<p>在master上执行：</p>
+
+<pre><code>$ stop-all.sh
+</code></pre>
+
+<h2 id="section-6">4. 排除错误</h2>
+<p>本文已经尽可能的把步骤详细列出来了，但是我相信大部分人不会一次成功。这时候，查找错误就很重要了。查找错误最重要的手段是查看hadoop的日志，一般在logs目录下。把错误消息复制粘贴到google，搜索一下，慢慢找错误。</p>
+
+<h2 id="section-7">注意</h2>
+<ol>
+  <li>所有配置文件只能用hostname，不能用IP。两年前我不懂，还为此<a href="http://stackoverflow.com/questions/8702637/hadoop-conf-fs-default-name-cant-be-setted-ipport-format-directly">在stackoverflow上发了帖子</a>。hadoop会反向解析hostname，即使是用了IP，也会使用hostname 来启动TaskTracker。参考<a href="http://stackoverflow.com/questions/15230946/hdfs-lan-ip-address-hostname-resolution">hdfs LAN ip address hostname resolution</a>，<a href="http://www.makenotes.net/?p=337004">hadoop入门经验总结- 杨贵堂的博客</a>，<a href="http://51mst.iteye.com/blog/1152439">hadoop集群配置</a>。</li>
+  <li>如果在第 3.7步有问题，可以<code>stop-all.sh</code>, 然后<code>hadoop  namenode -format</code>，反复多试几次，一般可以成功。如果不习惯，多看看 logs目录下的日志文件，把错误消息复制粘贴到google，搜索答案。</li>
+  <li>在第2.5步骤，如果出现 <code>SafeModeException</code> 异常，不用担心，等待几分钟即可。因为hadoop刚刚启动时，会进入安全模式进行自检，这需要花点时间。</li>
+</ol>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[使用Scala IDE 阅读spark源码 -- 将sbt项目转化为eclipse项目]]></title>
@@ -2067,7 +2451,7 @@ Windows预设是Big5编码,所以要想’rake generate’的时候不报编码�
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[CentOS 服务器安装操作全记录]]></title>
+    <title type="html"><![CDATA[安装和配置CentOS服务器的详细步骤]]></title>
     <link href="http://www.yanjiuyanjiu.com/blog/20120423"/>
     <updated>2012-04-23T20:43:00+08:00</updated>
     <id>http://www.yanjiuyanjiu.com/blog/install-and-configure-a-centos-server-from-scratch</id>
@@ -3078,402 +3462,249 @@ apr, apr-util官网 http://apr.apache.org , pcre官网为 <a href="http://pcre.o
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Hadoop 集群安装详细步骤]]></title>
+    <title type="html"><![CDATA[在Ubuntu上安装Hadoop]]></title>
     <link href="http://www.yanjiuyanjiu.com/blog/20120103"/>
     <updated>2012-01-03T18:54:00+08:00</updated>
-    <id>http://www.yanjiuyanjiu.com/blog/an-detailed-instruction-for-hadoop-cluster-installation</id>
+    <id>http://www.yanjiuyanjiu.com/blog/hadoop-installation-on-ubuntu</id>
     <content type="html"><![CDATA[<p>本文所使用的版本是 hadoop 1.0.0，即 <a href="http://www.iteye.com/news/23874">2011年12月27日发布的1.0正式版</a>。</p>
 
 <p>详细安装步骤如下，有大步骤，每个步骤里面有小步骤，绝大部分是必选，只有2步是可选的，粗体表示要特别注意的地方。</p>
 
 <h2 id="vmware-workstation-">1. 用vmware workstation 新建三台虚拟机</h2>
-<p>首先用vmware workstation 新建一台ubuntu server，装好操作系统，安装各种必须的软件，包括安装好hadoop。安装好后然后用浅拷贝<code>Create a linked clone</code> 克隆出两台作为slave，这样有了三台ubuntu机器。启动三台机器，假设IP分别为<code>192.168.1.131, 192.168.1.132, 192.168.1.133</code>, 131做为master,132为 slave01, 133为slave02。</p>
+<p>首先用vmware workstation 新建一台ubuntu server，装好操作系统，安装各种必须的软件，包括安装好hadoop。安装好后然后用浅拷贝<code>Create a linked clone</code> 克隆出两台作为slave，这样有了三台ubuntu机器。启动三台机器，假设IP分别为<code>192.168.1.131, 192.168.1.132, 192.168.1.133</code>, 131做为master 和 SecondaryNameNode, 身兼两职，132为 slave01, 133为slave02。</p>
 
 <h2 id="section">2. 修改机器名</h2>
-<p>这一步的作用是让命令行提示看起来好看点，由默认的 dev@bogon变为 dev@master，这步可选，optional，可以跳过。</p>
+<p>这一步看起来貌似不必要，其实是必须的，否则最后运行wordcount等例子时，会出现“Too many fetch-failures”。因为HDFS用hostname而不是IP，来相互之间进行通信（见后面的注意1）。</p>
 
 <ul>
-  <li>192.168.1.131上执行</li>
+  <li>
+    <p>192.168.1.131上执行</p>
+
+    <pre><code>  dev@bogon:~$ sudo vi /etc/hostname
+</code></pre>
+  </li>
 </ul>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">dev@bogon:~<span class="nv">$ </span>sudo vi /etc/hostname
-</span></code></pre></td></tr></table></div></figure></notextile></div>
 <p>输入<code>master</code>，重启，会发现命令提示符变为了 <code>dev@master:~$</code></p>
 
-<ul>
-  <li>192.168.1.132上执行</li>
-</ul>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">dev@bogon:~<span class="nv">$ </span>sudo vi /etc/hostname
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-<p>输入<code>slave01</code>，重启，会发现命令提示符变为了 <code>dev@slave01:~$</code></p>
-
-<ul>
-  <li>192.168.1.133上执行</li>
-</ul>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">dev@bogon:~<span class="nv">$ </span>sudo vi /etc/hostname
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-<p>输入<code>slave02</code>，重启，会发现命令提示符变为了 <code>dev@slave02:~$</code></p>
+<p>用同样的方法，将<code>192.168.1.132</code>改为slave01，<code>192.168.1.133</code>改为slave02。</p>
 
 <!-- more -->
 
 <h2 id="masterhostsslave">3. 修改master的hosts文件，并拷贝到每台slave上</h2>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">dev@master:~<span class="nv">$ </span>sudo vi /etc/hosts
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+<pre><code>dev@master:~$ sudo vi /etc/hosts
+</code></pre>
+
 <p>添加三行内容</p>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">192.168.1.131 master
-</span><span class="line">192.168.1.133 slave01
-</span><span class="line">192.168.1.134 slave02
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+<pre><code>192.168.1.131 master  
+192.168.1.132 slave01  
+192.168.1.133 slave02  
+</code></pre>
+
 <p><strong>注意一定要注释掉</strong></p>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="c"># 127.0.1.1      bogon.localdomain       bogon</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+<pre><code># 127.0.1.1      bogon.localdomain       bogon
+</code></pre>
 
 <p>最后hosts文件内容如下：</p>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">127.0.0.1       localhost
-</span><span class="line"><span class="c"># 127.0.1.1      bogon.localdomain       bogon</span>
-</span><span class="line">192.168.1.131 master
-</span><span class="line">192.168.1.133 slave01
-</span><span class="line">192.168.1.134 slave02
-</span><span class="line"><span class="c"># The following lines are desirable for IPv6 capable hosts</span>
-</span><span class="line">::1     ip6-localhost ip6-loopback
-</span><span class="line">fe00::0 ip6-localnet
-</span><span class="line">ff00::0 ip6-mcastprefix
-</span><span class="line">ff02::1 ip6-allnodes
-</span><span class="line">ff02::2 ip6-allrouters
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+<pre><code>127.0.0.1       localhost
+# 127.0.1.1      bogon.localdomain       bogon
+192.168.1.131 master
+192.168.1.132 slave01
+192.168.1.133 slave02
+# The following lines are desirable for IPv6 capable hosts
+::1     ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+</code></pre>
 
 <ul>
-  <li>将hosts文件拷贝到另外两台台机器上，覆盖原来的hosts文件</li>
-</ul>
+  <li>
+    <p>将hosts文件拷贝到另外两台台机器上，覆盖原来的hosts文件</p>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">dev@master:~<span class="nv">$ </span>scp /etc/hosts dev@192.168.1.132:~
-</span><span class="line">
-</span><span class="line">dev@master:~<span class="nv">$ </span>scp /etc/hosts dev@192.168.1.133:~
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-<ul>
-  <li>在192.168.1.132上执行</li>
-</ul>
+    <pre><code>  dev@master:~$ scp /etc/hosts dev@192.168.1.132:~
+  dev@master:~$ scp /etc/hosts dev@192.168.1.133:~
+</code></pre>
+  </li>
+  <li>
+    <p>在192.168.1.132上执行</p>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">dev@slave01:~<span class="nv">$ </span>sudo mv hosts /etc/hosts
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-<ul>
-  <li>在192.168.1.133上执行</li>
-</ul>
+    <pre><code>  dev@slave01:~$ sudo mv hosts /etc/hosts
+</code></pre>
+  </li>
+  <li>
+    <p>在192.168.1.133上执行</p>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">dev@slave02:~<span class="nv">$ </span>sudo mv hosts /etc/hosts
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+    <pre><code>  dev@slave02:~$ sudo mv hosts /etc/hosts
+</code></pre>
+  </li>
+</ul>
 
 <h2 id="master-">4. 配置 master 无密码登陆到所有机器（<strong>包括本机</strong>）</h2>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">dev@master:~<span class="nv">$ </span>ssh-keygen -t rsa
-</span><span class="line">
-</span><span class="line">dev@master:~<span class="nv">$ </span>cat .ssh/id_rsa.pub &gt;&gt; .ssh/authorized_keys
-</span><span class="line">
-</span><span class="line">dev@master:~<span class="nv">$ </span>scp .ssh/id_rsa.pub dev@192.168.1.132:~/
-</span><span class="line">
-</span><span class="line">dev@master:~<span class="nv">$ </span>scp .ssh/id_rsa.pub dev@192.168.1.133:~/
-</span><span class="line">
-</span><span class="line">dev@slave01:~<span class="nv">$ </span>cat id_rsa.pub &gt;&gt; .ssh/authorized_keys
-</span><span class="line">
-</span><span class="line">dev@slave02:~<span class="nv">$ </span>cat id_rsa.pub &gt;&gt; .ssh/authorized_keys
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+<pre><code>dev@master:~$ ssh-keygen -t rsa
+
+dev@master:~$ cat .ssh/id_rsa.pub &gt;&gt; .ssh/authorized_keys
+
+dev@master:~$ scp .ssh/id_rsa.pub dev@192.168.1.132:~/
+
+dev@master:~$ scp .ssh/id_rsa.pub dev@192.168.1.133:~/
+
+dev@slave01:~$ cat id_rsa.pub &gt;&gt; .ssh/authorized_keys
+
+dev@slave02:~$ cat id_rsa.pub &gt;&gt; .ssh/authorized_keys
+</code></pre>
+
 <p>测试一下，</p>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">dev@master:~<span class="nv">$ </span>ssh slav01
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+<pre><code>dev@master:~$ ssh slav01
+</code></pre>
 
-<p>如果登陆不上，试试先关闭slave01的防火墙，</p>
+<p>如果登不上，试试先关闭slave01的防火墙，</p>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">dev@slave01:~<span class="nv">$ </span>sudo ufw disable
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+<pre><code>dev@slave01:~$ sudo ufw disable
+</code></pre>
 
 <h2 id="hadoop">5. 复制hadoop安装包到所有机器</h2>
 <p>从hadoop.apache.org下载 hadoop-1.0.0-bin.tar.gz，上传到master中，解压，然后复制到其他机器，解压。</p>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">dev@master:~<span class="nv">$ </span>tar -zxvf hadoop-1.0.0-bin.tar.gz
-</span><span class="line">
-</span><span class="line">dev@master:~<span class="nv">$ </span>scp hadoop-1.0.0-bin.tar.gz dev@192.168.1.133:~
-</span><span class="line">
-</span><span class="line">dev@master:~<span class="nv">$ </span>scp hadoop-1.0.0-bin.tar.gz dev@192.168.1.134:~
-</span><span class="line">
-</span><span class="line">dev@slave01:~<span class="nv">$ </span>tar -zxvf hadoop-1.0.0-bin.tar.gz
-</span><span class="line">
-</span><span class="line">dev@slave02:~<span class="nv">$ </span>tar -zxvf hadoop-1.0.0-bin.tar.gz
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+<pre><code>dev@master:~$ tar -zxvf hadoop-1.0.0-bin.tar.gz
+
+dev@master:~$ scp hadoop-1.0.0-bin.tar.gz dev@192.168.1.132:~
+
+dev@master:~$ scp hadoop-1.0.0-bin.tar.gz dev@192.168.1.133:~
+
+dev@slave01:~$ tar -zxvf hadoop-1.0.0-bin.tar.gz
+
+dev@slave02:~$ tar -zxvf hadoop-1.0.0-bin.tar.gz
+</code></pre>
 
 <h2 id="section-1">6. 编辑配置文件</h2>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">dev@master:~<span class="nv">$ </span><span class="nb">cd </span>hadoop-1.0.0/etc/hadoop
-</span><span class="line">
-</span><span class="line">dev@master:~/hadoop-1.0.0/etc/hadoop<span class="nv">$ </span> vi hadoop-env.sh
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+<pre><code>dev@master:~$ cd hadoop-1.0.0/etc/hadoop
+
+dev@master:~/hadoop-1.0.0/etc/hadoop$  vi hadoop-env.sh
+</code></pre>
+
 <p>仅需要设置JAVA_HOME，</p>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nb">export </span><span class="nv">JAVA_HOME</span><span class="o">=</span>/usr/lib/jvm/java-7-openjdk-i386
-</span><span class="line">
-</span><span class="line">dev@master:~/hadoop-1.0.0/etc/hadoop<span class="nv">$ </span> vi core-site.xml
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+<pre><code>export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-i386
+</code></pre>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-</pre></td><td class="code"><pre><code class="xml"><span class="line"><span class="nt">&lt;configuration&gt;</span>
-</span><span class="line"><span class="nt">&lt;property&gt;</span>
-</span><span class="line"><span class="nt">&lt;name&gt;</span>fs.default.name<span class="nt">&lt;/name&gt;</span>
-</span><span class="line"><span class="nt">&lt;value&gt;</span>hdfs://master:9000<span class="nt">&lt;/value&gt;</span>
-</span><span class="line"><span class="nt">&lt;/property&gt;</span>
-</span><span class="line"><span class="nt">&lt;property&gt;</span>
-</span><span class="line"><span class="nt">&lt;name&gt;</span>hadoop.tmp.dir<span class="nt">&lt;/name&gt;</span>
-</span><span class="line"><span class="nt">&lt;value&gt;</span>/home/dev/hadoop_tmp/<span class="nt">&lt;/value&gt;</span>
-</span><span class="line"><span class="nt">&lt;/property&gt;</span>
-</span><span class="line"><span class="nt">&lt;/configuration&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>core-site.xml:</p>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">dev@master:~/hadoop-1.0.0/etc/hadoop<span class="nv">$ </span> vi mapred-site.xml
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+<pre><code>&lt;configuration&gt;
+	&lt;property&gt;
+		&lt;name&gt;fs.default.name&lt;/name&gt;
+		&lt;value&gt;hdfs://master:9000&lt;/value&gt;
+	&lt;/property&gt;
+	&lt;property&gt;
+		&lt;name&gt;hadoop.tmp.dir&lt;/name&gt;
+		&lt;value&gt;/home/dev/hadoop_tmp/&lt;/value&gt;
+	&lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-</pre></td><td class="code"><pre><code class="xml"><span class="line"><span class="nt">&lt;configuration&gt;</span>
-</span><span class="line"><span class="nt">&lt;property&gt;</span>
-</span><span class="line"><span class="nt">&lt;name&gt;</span>mapred.job.tracker<span class="nt">&lt;/name&gt;</span>
-</span><span class="line"><span class="nt">&lt;value&gt;</span>master:9001<span class="nt">&lt;/value&gt;</span>
-</span><span class="line"><span class="nt">&lt;/property&gt;</span>
-</span><span class="line"><span class="nt">&lt;/configuration&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>mapred-site.xml:</p>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">dev@master:~/hadoop-1.0.0/etc/hadoop<span class="nv">$ </span> vi hdfs-site.xml
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+<pre><code>&lt;configuration&gt;
+	&lt;property&gt;
+		&lt;name&gt;mapred.job.tracker&lt;/name&gt;
+		&lt;value&gt;master:9001&lt;/value&gt;
+	&lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-</pre></td><td class="code"><pre><code class="xml"><span class="line"><span class="nt">&lt;configuration&gt;</span>
-</span><span class="line"><span class="nt">&lt;property&gt;</span>
-</span><span class="line"><span class="nt">&lt;name&gt;</span>dfs.replication<span class="nt">&lt;/name&gt;</span>
-</span><span class="line"><span class="nt">&lt;value&gt;</span>3<span class="nt">&lt;/value&gt;</span>
-</span><span class="line"><span class="nt">&lt;/property&gt;</span>
-</span><span class="line"><span class="nt">&lt;/configuration&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>hdfs-site.xml:</p>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">dev@master:~/hadoop-1.0.0/etc/hadoop<span class="nv">$ </span> vi masters
-</span><span class="line">
-</span><span class="line">192.168.1.133
-</span><span class="line">
-</span><span class="line">dev@master:~/hadoop-1.0.0/etc/hadoop<span class="nv">$ </span> vi slaves
-</span><span class="line">
-</span><span class="line">192.168.1.133
-</span><span class="line">
-</span><span class="line">192.168.1.134
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+<pre><code>&lt;configuration&gt;
+	&lt;property&gt;
+		&lt;name&gt;dfs.replication&lt;/name&gt;
+		&lt;value&gt;3&lt;/value&gt;
+	&lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre>
+
+<p>masters:</p>
+
+<pre><code>master
+</code></pre>
+
+<p>slaves:</p>
+
+<pre><code>slave01
+slave02
+</code></pre>
 
 <h2 id="slave">7. 将配置文件拷贝到各台slave</h2>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">dev@master:~/hadoop-1.0.0/etc/hadoop<span class="nv">$ </span>scp hadoop-env.sh core-site.xml hdfs-site.xml mapred-site.xml masters slaves dev@192.168.1.133:~/hadoop-1.0.0/etc/hadoop
-</span><span class="line">
-</span><span class="line">dev@master:~/hadoop-1.0.0/etc/hadoop<span class="nv">$ </span>scp hadoop-env.sh core-site.xml hdfs-site.xml mapred-site.xml masters slaves dev@192.168.1.134:~/hadoop-1.0.0/etc/hadoop
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-<p>（master和slaves这2个配置文件可以不拷贝到slave机器上，只在master上保存即可。待验证）</p>
+<pre><code>dev@master:~/hadoop-1.0.0/etc/hadoop$ scp hadoop-env.sh core-site.xml hdfs-site.xml mapred-site.xml masters slaves dev@192.168.1.132:~/hadoop-1.0.0/etc/hadoop
 
-<h2 id="section-2">8. 设置环境变量</h2>
-<ul>
-  <li>设置master的环境变量</li>
-</ul>
+dev@master:~/hadoop-1.0.0/etc/hadoop$ scp hadoop-env.sh core-site.xml hdfs-site.xml mapred-site.xml masters slaves dev@192.168.1.133:~/hadoop-1.0.0/etc/hadoop
+</code></pre>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">dev@master:~<span class="nv">$ </span>vi .bashrc
-</span><span class="line">
-</span><span class="line"><span class="nb">export </span><span class="nv">JAVA_HOME</span><span class="o">=</span>/usr/lib/jvm/java-7-openjdk-i386
-</span><span class="line"><span class="nb">export </span><span class="nv">CLASSPATH</span><span class="o">=</span><span class="nv">$JAVA_HOME</span>/lib/dt.jar:<span class="nv">$JAVA_HOME</span>/lib/tools.jar
-</span><span class="line"><span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="nv">$PATH</span>:<span class="nv">$JAVA_HOME</span>/bin
-</span><span class="line"><span class="nb">export </span><span class="nv">HADOOP_HOME</span><span class="o">=</span>~/hadoop-1.0.0
-</span><span class="line"><span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="nv">$PATH</span>:<span class="nv">$HADOOP_HOME</span>/bin:<span class="nv">$HADOOP_HOME</span>/sbin
-</span><span class="line"><span class="nb">export </span><span class="nv">CLASSPATH</span><span class="o">=</span><span class="nv">$CLASSPATH</span>:<span class="nv">$HADOOP_HOME</span>/share/hadoop/hadoop-core-1.0.0.jar
-</span><span class="line">
-</span><span class="line"><span class="nb">export </span><span class="nv">HADOOP_HOME</span><span class="o">=</span>~/hadoop-1.0.0
-</span><span class="line">
-</span><span class="line"><span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="nv">$PATH</span>:<span class="nv">$HADOOP_HOME</span>/bin
-</span><span class="line">
-</span><span class="line">dev@master:~<span class="nv">$ </span><span class="nb">source</span> .bashrc
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-<ul>
-  <li>将master上的.bashrc拷贝到其他机器，并source刷新。</li>
-</ul>
+<h2 id="hadoophomehadoophomebinpath">8. 设置环境变量HADOOP_HOME，并将<code>$HADOOP_HOME/bin</code>加入PATH</h2>
+<p>所有机器都要设置环境变量HADOOP_HOME，并将<code>$HADOOP_HOME/bin</code>加入PATH，因为master登陆到slave后，要执行<code>$HADOOP_HOME/bin</code> 下的一些命令。</p>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">dev@master:~<span class="nv">$ </span>scp .bashrc dev@192.168.1.133:~
-</span><span class="line">
-</span><span class="line">dev@master:~<span class="nv">$ </span>scp .bashrc dev@192.168.1.134:~
-</span><span class="line">
-</span><span class="line">dev@slave01:~<span class="nv">$ </span><span class="nb">source</span> .bashrc
-</span><span class="line">
-</span><span class="line">dev@slave02:~<span class="nv">$ </span><span class="nb">source</span> .bashrc
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+<pre><code>$ vi .bashrc
+	
+export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-i386
+export CLASSPATH=$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+export PATH=$PATH:$JAVA_HOME/bin
+export HADOOP_HOME=~/hadoop-1.0.0
+export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
+export CLASSPATH=$CLASSPATH:$HADOOP_HOME/share/hadoop/hadoop-core-1.0.0.jar
+	
+export HADOOP_HOME=~/hadoop-1.0.0
+	
+export PATH=$PATH:$HADOOP_HOME/bin
+	
+$ source .bashrc
+</code></pre>
 
 <h2 id="hadoop-1">9. 运行 hadoop</h2>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">dev@master:~<span class="nv">$ </span>hadoop  namenode -format  （只需一次，下次启动不再需要格式化，只需 start-all.sh）
-</span><span class="line">
-</span><span class="line">dev@master:~<span class="nv">$ </span>start-all.sh
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+<pre><code>#只需一次，下次启动不再需要格式化，只需 start-all.sh
+dev@master:~$ hadoop  namenode -format）
 
-<h2 id="section-3">10. 检查是否运行成功</h2>
+dev@master:~$ start-all.sh
+</code></pre>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">dev@master:~<span class="nv">$ </span>jps
-</span><span class="line">
-</span><span class="line">2615 NameNode
-</span><span class="line">2767 JobTracker
-</span><span class="line">2874 Jps
-</span><span class="line">
-</span><span class="line">dev@slave01:~<span class="nv">$ </span>jps
-</span><span class="line">
-</span><span class="line">3415 DataNode
-</span><span class="line">3582 TaskTracker
-</span><span class="line">3499 SecondaryNameNode
-</span><span class="line">3619 Jps
-</span><span class="line">
-</span><span class="line">dev@slave02:~<span class="nv">$ </span>jps
-</span><span class="line">
-</span><span class="line">3741 Jps
-</span><span class="line">3618 DataNode
-</span><span class="line">3702 TaskTracker
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+<h2 id="section-2">10. 检查是否运行成功</h2>
+
+<pre><code>dev@master:~$ jps
+
+2615 NameNode
+2767 JobTracker
+2874 Jps
+
+dev@slave01:~$ jps
+
+3415 DataNode
+3582 TaskTracker
+3499 SecondaryNameNode
+3619 Jps
+
+dev@slave02:~$ jps
+
+3741 Jps
+3618 DataNode
+3702 TaskTracker
+</code></pre>
 
 <h2 id="hadoop-2">11. 停止 hadoop集群</h2>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">dev@master:~<span class="nv">$ </span>stop-all.sh
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-<p>让 slave 节点也 可以启动 整个hadoop集群</p>
+<pre><code>dev@master:~$ stop-all.sh 让 slave 节点也 可以启动 整个hadoop集群
+</code></pre>
 
-<h2 id="section-4">注意</h2>
+<h2 id="section-3">注意</h2>
 <ol>
+  <li>所有配置文件只能用hostname，不能用IP。两年前我不懂，还为此<a href="http://stackoverflow.com/questions/8702637/hadoop-conf-fs-default-name-cant-be-setted-ipport-format-directly">在stackoverflow上发了帖子</a>。hadoop会反向解析hostname，即使是用了IP，也会使用hostname 来启动TaskTracker。参考<a href="http://stackoverflow.com/questions/15230946/hdfs-lan-ip-address-hostname-resolution">hdfs LAN ip address hostname resolution</a>，<a href="http://www.makenotes.net/?p=337004">hadoop入门经验总结- 杨贵堂的博客</a>，<a href="http://51mst.iteye.com/blog/1152439">hadoop集群配置</a>。</li>
   <li>
     <p>stat-all.sh 启动后，刚刚开始，namenode的日志里有些异常，是正常的，过一两分钟就好了，如果两分钟后，还有异常不断在打印，就有问题了。datanode的日志，从一开始，正常情况下，就没有异常，如果报了异常，说明有异常，要去排除。</p>
   </li>
@@ -3492,15 +3723,12 @@ apr, apr-util官网 http://apr.apache.org , pcre官网为 <a href="http://pcre.o
   <li>
     <p>一定要注释掉 hosts里面的 <code>#127.0.1.1      bogon.localdomain       bogon</code>，参考 <a href="http://blog.sina.com.cn/s/blog_631ffec50100w700.html">Hadoop集群机器命名机制</a>，<a href="http://blog.csdn.net/singno116/article/details/6298995">hadoop集群环境安装中的hosts 配置问题</a>。</p>
   </li>
-  <li>
-    <p>当测试ssh是否能连通时，如果连接不上，先记得要关闭防火墙，<code>sudo ufw disable</code>，参考<a href="http://blog.csdn.net/make19830723/article/details/6230074">hadoop集群安装步骤</a>。</p>
-  </li>
+  <li>当测试ssh是否能连通时，如果连接不上，先记得要关闭防火墙，<code>sudo ufw disable</code>，参考<a href="http://blog.csdn.net/make19830723/article/details/6230074">hadoop集群安装步骤</a>。</li>
 </ol>
 
-<h2 id="section-5">未解决的疑惑</h2>
-<ol>
-  <li>有的很多文章，比如这篇，<a href="http://blog.csdn.net/cuishi0/article/details/6824884">Hadoop集群安装</a>，在core-site.xml, mapred-site.xml，直接写上ip:port，这样就不用修改hosts文件了。可是我这样配置，老是不成功。为此我还<a href="http://stackoverflow.com/questions/8702637/hadoop-conf-fs-default-name-cant-be-setted-ipport-format-directly">在stackoverflow上发了帖子</a>。<a href="http://51mst.iteye.com/blog/1152439">这篇文章</a>又说只能用host:port的形式。因此ip:port的格式是否能成功还待验证。如果有高手用ip:port配置成功过，请在下面留言或给我发email，一起交流:)</li>
-</ol>
+<h2 id="section-4">更新记录</h2>
+<p>2012-01-03 针对 Ubuntu 13.04, Hadoop 1.1.2<br />
+2012-01-03 针对 Ubuntu 10.04, Hadoop 1.0.0</p>
 ]]></content>
   </entry>
   
