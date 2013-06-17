@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>机器学习的一些通俗易懂的tutorial - 研究研究</title>
+  <title>Installing Spark on CentOS - 研究研究</title>
   <meta name="author" content="soulmachine">
 
   
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://www.yanjiuyanjiu.com/blog/20130327">
+  <link rel="canonical" href="http://www.yanjiuyanjiu.com/blog/20130614">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/bootstrap/bootstrap.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/stylesheets/bootstrap/responsive.css" media="screen, projection" rel="stylesheet" type="text/css">
@@ -112,7 +112,7 @@
   
   <header class="page-header">
     
-      <h1 class="entry-title">机器学习的一些通俗易懂的tutorial</h1>
+      <h1 class="entry-title">Installing Spark on CentOS</h1>
     
     
       <p class="meta">
@@ -128,7 +128,7 @@
   
 
 
-<time datetime="2013-03-27T21:50:00+08:00" pubdate data-updated="true">Mar 27<span>th</span>, 2013</time>
+<time datetime="2013-06-14T19:06:00+08:00" pubdate data-updated="true">Jun 14<span>th</span>, 2013</time>
         
 		
          | <a href="#duoshuo_thread">Comments</a>
@@ -138,48 +138,185 @@
   </header>
 
 
-<div class="entry-content"><p>以下记录了我的学习历程，按我的阅读顺序排序。</p>
+<div class="entry-content"><p><strong>Environment</strong>:CentOS 6.4, Hadoop 1.1.2, JDK 1.7, Spark 0.7.2, Scala 2.9.3</p>
 
-<h2 id="section">距离和相似度度量</h2>
-<p><a href="http://webdataanalysis.net/reference-and-source/distance-and-similarity/">距离和相似度度量 » webdataanalysis.net</a></p>
+<p>After a few days hacking , I have found that installing a Spark cluster is exteremely easy :)</p>
 
-<p><a href="http://www.zhihu.com/question/19640394">欧氏距离和余弦相似度的区别是什么？ – 知乎</a></p>
+<h1 id="install-jdk-17">1. Install JDK 1.7.</h1>
+<pre><code>yum search openjdk-devel
+sudo yum install java-1.7.0-openjdk-devel.x86_64
+/usr/sbin/alternatives --config java
+/usr/sbin/alternatives --config javac
+sudo vim /etc/profile
+# add the following lines at the end
+export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.19.x86_64
+export JRE_HOME=$JAVA_HOME/jre
+export PATH=$PATH:$JAVA_HOME/bin
+export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+# save and exit vim
+# make environment variables take effect immediately
+$ source /etc/profile
+# test
+$ java -version
+</code></pre>
 
-<h2 id="knnk-nearest-neighbor">KNN(K Nearest Neighbor)</h2>
-<p><a href="http://coolshell.cn/articles/8052.html">K Nearest Neighbor 算法 _ 酷壳 – CoolShell</a></p>
+<h1 id="install-scala-293">2. Install Scala 2.9.3</h1>
+<p>Spark 0.7.2 depends on Scala 2.9.3, So we must install Scala of version 2.9.3.</p>
 
-<p><a href="http://en.wikipedia.org/wiki/KNN">K-nearest neighbors algorithm – Wikipedia</a></p>
+<p>Download <a href="http://www.scala-lang.org/downloads/distrib/files/scala-2.9.3.tgz">scala-2.9.3.tgz</a> and save it to home directory.</p>
 
-<h2 id="k-means">K-Means</h2>
-<p><a href="http://coolshell.cn/articles/7779.html">K-Means 算法 _ 酷壳 – CoolShell</a></p>
+<pre><code>$ tar -zxf scala-2.9.3.tgz
+$ sudo mv scala-2.9.3 /usr/lib
+$ sudo vim /etc/profile
+# add the following lines at the end
+export SCALA_HOME=/usr/lib/scala-2.9.3
+export PATH=$PATH:$SCALA_HOME/bin
+# save and exit vim
+# make environment variables take effect immediately
+source /etc/profile
+# test
+$ scala -version
+</code></pre>
 
-<p><a href="http://en.wikipedia.org/wiki/K-means">k-means clustering – Wikipedia</a></p>
+<h1 id="download-prebuilt-packages">3. Download prebuilt packages</h1>
+<p>Download prebuilt packages, <a href="http://www.spark-project.org/download-spark-0.7.2-prebuilt-hadoop1">spark-0.7.2-prebuilt-hadoop1.tgz</a>. </p>
 
-<p><a href="http://kylen314.blog.com/2012/09/10/k-means/">K-Means++ _ 愈宅屋</a></p>
+<p>If you want to compile it from scratch, download the source package, but I don’t recommend this way, because in Chinese Mainland the GFW has blocked one of maven repositories, twitter4j.org, which makes the compilation an impossible mission unless you can conquer GFW.</p>
 
-<p><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/20/k-means.html">算法杂货铺——k均值聚类(K-means) – T2噬菌体 – 博客园</a></p>
+<h1 id="local-mode">4. Local Mode</h1>
 
-<p><a href="http://blog.pluskid.org/?p=17">漫谈 Clustering (1)_ k-means « Free Mind</a></p>
+<h2 id="untar-the-tarball-and-set-sparkhome">4.1 Untar the tarball and set SPARK_HOME</h2>
 
-<p><a href="http://www.codeproject.com/Articles/439890/Text-Documents-Clustering-using-K-Means-Algorithm">Text Documents Clustering using K-Means Algorithm – CodeProject</a></p>
+<pre><code>$ tar -zxf spark-0.7.2-prebuilt-hadoop1.tgz
+$ vim ~/.bash_profile
+# add the following lines at the end
+export SPARK_HOME=$HOME/spark-0.7.2
+export PATH=$PATH:$SPARK_HOME/bin
+# save and exit vim
+# make environment variables take effect immediately
+$ source /etc/profile
+</code></pre>
+
+<h2 id="set-the-sparkexamplesjar-environment-variable">4.2 Set the SPARK_EXAMPLES_JAR environment variable</h2>
+<pre><code>$ vim ~/.bash_profile
+# add the following lines at the end
+export SPARK_EXAMPLES_JAR=$SPARK_HOME/examples/target/scala-2.9.3/spark-examples_2.9.3-0.7.2.jar
+# save and exit vim
+# make environment variables take effect immediately
+$ source /etc/profile
+</code></pre>
+
+<p>This is the most important step that must be done , but unfortunately the official docs and most web blogs haven’t mentioned this. I found this step when I bumped into these posts, <a href="https://groups.google.com/forum/?fromgroups#!topic/spark-users/nQ6wB2lcFN8">Running SparkPi</a>, <a href="https://groups.google.com/forum/#!msg/spark-users/x5UczgI-Xm8/wzMm3Mb77-oJ">Null pointer exception when running ./run spark.examples.SparkPi local</a>.</p>
+
+<h2 id="now-you-can-run-sparkpi">4.3 Now you can run SparkPi.</h2>
+
+<pre><code>$ cd ~/spark-0.7.2
+$ ./run spark.examples.SparkPi local 
+</code></pre>
+
+<h1 id="cluster-mode">5. Cluster Mode</h1>
 
 <!-- more -->
 
-<h2 id="pcaprincipal-components-analysis">PCA(Principal Components Analysis)</h2>
-<p><a href="http://www.ce.yildiz.edu.tr/personal/songul/file/1097/principal_components.pdf">2002. Lindsay I Smith. A tutorial on Principal Components Analysis</a></p>
+<h2 id="install-hadoop">5.1 Install hadoop</h2>
+<p>Use VMware Workstation to create three CentOS virtual machines, which’s hostnames are master, slave01, slave02, setup password-less ssh to the slaves, install hadoop on the three machines and start up the hadoop cluster. For more details please read another blog of mine, <a href="http://www.yanjiuyanjiu.com/blog/20130612">在CentOS上安装Hadoop</a>.</p>
 
-<h2 id="em-expectation-maximization">期望最大化(EM, Expectation Maximization)</h2>
-<p><a href="http://www.seanborman.com/publications/EM_algorithm.pdf">2009. Sean Borman. The Expectation Maximization Algorithm A short tutorial</a></p>
+<h2 id="install-jdk-and-scala">5.2 Install JDK and Scala</h2>
+<p>Install JDK 1.7 and Scala 2.9.3 on the three machines, according to section 1 and section 2.</p>
 
-<p>李航.《统计学习方法》，P155 第9章 EM算法及其推广. 2012.</p>
+<h2 id="install-and-configure-spark-on-master">5.3 Install and configure Spark on master</h2>
+<pre><code>$ tar -zxf spark-0.7.2-prebuilt-hadoop1.tgz
+$ vim ~/.bash_profile
+# add the following lines at the end
+export SPARK_HOME=$HOME/spark-0.7.2
+export PATH=$PATH:$SPARK_HOME/bin
+export SPARK_EXAMPLES_JAR=$SPARK_HOME/examples/target/scala-2.9.3/spark-examples_2.9.3-0.7.2.jar
+# save and exit vim
+# make environment variables take effect immediately
+$ source /etc/profile
+</code></pre>
 
-<h2 id="svm-support-vector-machines">支持向量机(SVM, Support Vector Machines)</h2>
-<p><a href="http://cs229.stanford.edu/notes/cs229-notes3.pdf">Andrew Ng. CS229 Lecture notes Support Vector Machines</a></p>
+<p>Set <code>SCALA_HOME</code> in <code>conf/spark-env.sh</code></p>
 
-<h2 id="crf-conditional-random-field">条件随机场(CRF, Conditional Random Field)</h2>
-<p><a href="http://blog.echen.me/2012/01/03/introduction-to-conditional-random-fields/">Introduction to Conditional Random Fields</a></p>
+<pre><code>$ cd $SPARK_HOME/conf
+$ mv spark-env.sh.template spark-env.sh
+$ vim spark-env.sh
+export SCALA_HOME=/usr/lib/scala-2.9.3
+# save and exit
+</code></pre>
 
-<p>李航.《统计学习方法》，P192 第11章 条件随机场. 2012.</p>
+<p>In<code>conf/slaves</code>, add hostnames of Spark workers, one per line.</p>
+
+<pre><code>$ vim slaves
+slave01
+slave02
+# save and exit
+</code></pre>
+
+<h2 id="install-and-configure-spark-on-workers">5.4 Install and configure Spark on workers</h2>
+<p>Copy the spark directory to all slaves</p>
+
+<pre><code>scp -r spark-0.7.2 dev@slave01:~
+scp -r spark-0.7.2 dev@slave02:~
+</code></pre>
+
+<p>Set environment variables on all slaves as section 5.3.</p>
+
+<h2 id="start-spark-cluster">5.5 Start Spark cluster</h2>
+<p>On master</p>
+
+<pre><code>$ cd $SPARK_HONE
+$ bin/start-all.sh
+</code></pre>
+
+<p>Check whether the processes have been started.</p>
+
+<pre><code>$ jps
+11055 Jps
+2313 SecondaryNameNode
+2409 JobTracker
+2152 NameNode
+4822 Master
+</code></pre>
+
+<p>Look at the master’s web UI (<a href="http://localhost:8080">http://localhost:8080</a> by default). You should see the new node listed there, along with its number of CPUs and memory (minus one gigabyte left for the OS).</p>
+
+<h2 id="run-the-sparkpi-example-in-cluster-mode">5.6 run the SparkPi example in cluster mode</h2>
+
+<pre><code>$ cd $SPARK_HONE
+$ ./run spark.examples.SparkPi spark://master:7077
+</code></pre>
+
+<h2 id="read-files-from-hdfs-and-run-wordcount">5.7 read files from HDFS and run WordCount</h2>
+
+<pre><code>$ cd $SPARK_HOME
+$ hadoop fs -put README.md .
+$ ./spark-shell
+scala&gt; val file = sc.textFile("hdfs://master:9000/user/dev/README.md")
+scala&gt; val count = file.flatMap(line =&gt; line.split(" ")).map(word =&gt; (word, 1)).reduceByKey(_+_)
+scala&gt; count.collect()
+</code></pre>
+
+<h2 id="stop-spark-cluster">5.8 Stop Spark cluster</h2>
+
+<pre><code>$ cd $SPARK_HONE
+$ bin/stop-all.sh
+</code></pre>
+
+<h1 id="references">References</h1>
+<ol>
+  <li><a href="http://spark-project.org/docs/latest/spark-standalone.html">Spark Standalone Mode</a></li>
+  <li><a href="https://github.com/mesos/spark/wiki/Running-A-Spark-Standalone-Cluster">Running A Spark Standalone Cluster</a></li>
+  <li><a href="http://sprism.blogspot.com/2012/11/lightning-fast-wordcount-using-spark.html">Lightning-Fast WordCount using Spark Alongside Hadoop</a></li>
+</ol>
+
+<p>The following posts are outdated.</p>
+
+<ol>
+  <li><a href="http://chapeau.freevariable.com/2013/04/installing-spark-on-fedora-18.html">Installing Spark on Fedora 18</a></li>
+  <li><a href="http://rdc.taobao.com/team/jm/archives/1823">Spark随谈（二）—— 安装攻略</a></li>
+  <li><a href="http://www.cnblogs.com/jerrylead/archive/2012/08/13/2636115.html">Spark安装与学习</a></li>
+</ol>
 </div>
 
 
@@ -202,12 +339,12 @@
   
 
 
-<time datetime="2013-03-27T21:50:00+08:00" pubdate data-updated="true">Mar 27<span>th</span>, 2013</time>
+<time datetime="2013-06-14T19:06:00+08:00" pubdate data-updated="true">Jun 14<span>th</span>, 2013</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/machine-learning/'>machine-learning</a>
+    <a class='category' href='/blog/categories/spark/'>spark</a>
   
 </span>
 
@@ -238,7 +375,7 @@
 	
     <section>
       <div id="duoshuo_thread" aria-live="polite"><!-- Duoshuo Comment BEGIN -->
-<div class="ds-thread" data-thread-key="/blog/20130327" data-title="机器学习的一些通俗易懂的tutorial"></div>
+<div class="ds-thread" data-thread-key="/blog/20130614" data-title="Installing Spark on CentOS"></div>
 <script type="text/javascript">
 var duoshuoQuery = {short_name:"yanjiuyanjiu"};
 	(function() {
@@ -256,13 +393,13 @@ var duoshuoQuery = {short_name:"yanjiuyanjiu"};
     <ul class="pager">
       
       <li class="previous"><a class="basic-alignment left"
-        href="/blog/20130322" title="Previous Post:
-        一些主流的编程竞赛网站">&laquo; 一些主流的编程竞赛网站</a></li>
+        href="/blog/20130612" title="Previous Post:
+        在CentOS上安装Hadoop">&laquo; 在CentOS上安装Hadoop</a></li>
       
       <li><a href="/blog/archives">Blog Archives</a></li>
       
-      <li class="next"><a class="basic-alignment right" href="/blog/20130401"
-        title="Next Post: 使用github + Octopress 搭建免费博客">使用github + Octopress 搭建免费博客
+      <li class="next"><a class="basic-alignment right" href="/blog/20130617"
+        title="Next Post: 安装Spark集群(在CentOS上)">安装Spark集群(在CentOS上)
         &raquo;</a></li>
       
     </ul>

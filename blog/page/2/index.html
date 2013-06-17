@@ -114,6 +114,63 @@
       
   <header class="page-header">
     
+      <h1 class="entry-title"><a href="/blog/20130225">KNN与K-Means的区别</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-25T23:41:00+08:00" pubdate data-updated="true">Feb 25<span>th</span>, 2013</time>
+        
+		
+         | <a href="/blog/20130225#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2 id="knnk-nearest-neighbor">KNN(K-Nearest Neighbor)介绍</h2>
+<p>Wikipedia上的<a href="http://en.wikipedia.org/wiki/K-nearest_neighbor_algorithm">KNN词条</a>中有一个比较经典的图如下：</p>
+
+<p><img src="http://yanjiuyanjiu-wordpress.stor.sinaapp.com/uploads/2013/02/022513_0955_KNNKMeans1.png" /></p>
+
+<p>KNN的算法过程是是这样的：</p>
+
+<p>从上图中我们可以看到，图中的数据集是良好的数据，即都打好了label，一类是蓝色的正方形，一类是红色的三角形，那个绿色的圆形是我们待分类的数据。</p>
+
+<p>如果K=3，那么离绿色点最近的有2个红色三角形和1个蓝色的正方形，这3个点投票，于是绿色的这个待分类点属于红色的三角形。</p>
+
+<p>如果K=5，那么离绿色点最近的有2个红色三角形和3个蓝色的正方形，这5个点投票，于是绿色的这个待分类点属于蓝色的正方形。（参考 <a href="http://coolshell.cn/articles/8052.html">酷壳的 K Nearest Neighbor 算法</a>）</p>
+
+<p>我们可以看到，KNN本质是基于一种数据统计的方法！其实很多机器学习算法也是基于数据统计的。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20130225">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
       <h1 class="entry-title"><a href="/blog/20120811">用VisualVM连接 Tomcat 服务器时，如何配置tomcat启动JMX</a></h1>
     
     
@@ -718,141 +775,6 @@ PMD 的 CPD <a href="http://pmd.sourceforge.net/cpd.html">http://pmd.sourceforge
 
     </article>
   
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20100328">使用pdfbox 抽取PDF文件中的文本</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2010-03-28T16:41:00+08:00" pubdate data-updated="true">Mar 28<span>th</span>, 2010</time>
-        
-		
-         | <a href="/blog/20100328#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-<span class="line-number">23</span>
-<span class="line-number">24</span>
-<span class="line-number">25</span>
-<span class="line-number">26</span>
-<span class="line-number">27</span>
-<span class="line-number">28</span>
-<span class="line-number">29</span>
-<span class="line-number">30</span>
-<span class="line-number">31</span>
-<span class="line-number">32</span>
-<span class="line-number">33</span>
-<span class="line-number">34</span>
-<span class="line-number">35</span>
-<span class="line-number">36</span>
-<span class="line-number">37</span>
-<span class="line-number">38</span>
-<span class="line-number">39</span>
-<span class="line-number">40</span>
-<span class="line-number">41</span>
-<span class="line-number">42</span>
-<span class="line-number">43</span>
-<span class="line-number">44</span>
-<span class="line-number">45</span>
-<span class="line-number">46</span>
-<span class="line-number">47</span>
-<span class="line-number">48</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">yanjiuyanjiu</span><span class="o">.</span><span class="na">search</span><span class="o">;</span>
-</span><span class="line">
-</span><span class="line"><span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
-</span><span class="line"><span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
-</span><span class="line">
-</span><span class="line"><span class="kn">import</span> <span class="nn">org.apache.pdfbox.pdmodel.PDDocument</span><span class="o">;</span>
-</span><span class="line"><span class="kn">import</span> <span class="nn">org.apache.pdfbox.util.PDFTextStripper</span><span class="o">;</span>
-</span><span class="line">
-</span><span class="line"><span class="cm">/**</span>
-</span><span class="line"><span class="cm"> * 抽去PDF文件中的文本.</span>
-</span><span class="line"><span class="cm"> * @author soulmachine</span>
-</span><span class="line"><span class="cm"> *</span>
-</span><span class="line"><span class="cm"> */</span>
-</span><span class="line"><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">PDFboxTest</span> <span class="o">{</span>
-</span><span class="line"> <span class="cm">/** 禁止创建对象. */</span>
-</span><span class="line"> <span class="kd">private</span> <span class="nf">PDFboxTest</span><span class="o">()</span> <span class="o">{</span>
-</span><span class="line"> <span class="o">}</span>
-</span><span class="line"> <span class="cm">/**</span>
-</span><span class="line"><span class="cm"> * 抽取PDF中的文本.</span>
-</span><span class="line"><span class="cm"> * @param f PDF文件</span>
-</span><span class="line"><span class="cm"> * @return PDF对应的文本字符串</span>
-</span><span class="line"><span class="cm"> */</span>
-</span><span class="line"> <span class="kd">public</span> <span class="kd">static</span> <span class="n">String</span> <span class="nf">getText</span><span class="o">(</span><span class="kd">final</span> <span class="n">File</span> <span class="n">f</span><span class="o">)</span> <span class="o">{</span>
-</span><span class="line"> <span class="n">String</span> <span class="n">text</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="o">;</span>
-</span><span class="line"> <span class="k">try</span> <span class="o">{</span>
-</span><span class="line"> <span class="n">PDDocument</span> <span class="n">pdfdocument</span> <span class="o">=</span> <span class="n">PDDocument</span><span class="o">.</span><span class="na">load</span><span class="o">(</span><span class="n">f</span><span class="o">);</span>
-</span><span class="line"> <span class="n">PDFTextStripper</span> <span class="n">stripper</span> <span class="o">=</span> <span class="k">new</span> <span class="n">PDFTextStripper</span><span class="o">();</span>
-</span><span class="line"> <span class="n">stripper</span><span class="o">.</span><span class="na">setStartPage</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span> <span class="c1">// 只抽取第1页和第2页</span>
-</span><span class="line"> <span class="n">stripper</span><span class="o">.</span><span class="na">setEndPage</span><span class="o">(</span><span class="mi">2</span><span class="o">);</span>
-</span><span class="line"> <span class="n">text</span> <span class="o">=</span> <span class="n">stripper</span><span class="o">.</span><span class="na">getText</span><span class="o">(</span><span class="n">pdfdocument</span><span class="o">);</span>
-</span><span class="line"> <span class="n">pdfdocument</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
-</span><span class="line">
-</span><span class="line"> <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
-</span><span class="line"> <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
-</span><span class="line"> <span class="o">}</span>
-</span><span class="line">
-</span><span class="line"> <span class="k">return</span> <span class="n">text</span><span class="o">;</span>
-</span><span class="line"> <span class="o">}</span>
-</span><span class="line">
-</span><span class="line"> <span class="cm">/** 测试.</span>
-</span><span class="line"><span class="cm"> *</span>
-</span><span class="line"><span class="cm"> * @param args PDF文件路径</span>
-</span><span class="line"><span class="cm"> */</span>
-</span><span class="line"> <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="kd">final</span> <span class="n">String</span><span class="o">[]</span>  <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
-</span><span class="line"> <span class="n">File</span> <span class="n">file</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">args</span><span class="o">[</span><span class="mi">0</span><span class="o">]);</span>
-</span><span class="line"> <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">PDFboxTest</span><span class="o">.</span><span class="na">getText</span><span class="o">(</span><span class="n">file</span><span class="o">));</span>
-</span><span class="line"> <span class="o">}</span>
-</span><span class="line"><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-</div>
-  
-  
-
-
-    </article>
-  
   <ul class="pager">
     
     <li class="previous"><a href="/blog/page/3/">&larr; Older</a></li>
@@ -872,7 +794,7 @@ PMD 的 CPD <a href="http://pmd.sourceforge.net/cpd.html">http://pmd.sourceforge
 </section>
 <section>
   <h2>分类目录</h2>
-    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (2)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/spark/'>spark (2)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (2)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/spark/'>spark (3)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
 </section>
 <section>
   <h2>友情链接</h2>
@@ -912,7 +834,11 @@ PMD 的 CPD <a href="http://pmd.sourceforge.net/cpd.html">http://pmd.sourceforge
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/20130617">Installing Spark on CentOS</a>
+        <a href="/blog/20130617">安装Spark集群(在CentOS上)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20130614">Installing Spark on CentOS</a>
       </li>
     
       <li class="post">
@@ -925,10 +851,6 @@ PMD 的 CPD <a href="http://pmd.sourceforge.net/cpd.html">http://pmd.sourceforge
     
       <li class="post">
         <a href="/blog/20130412">LaTeX的各种发行版和编辑器的比较</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20130402">我的Octopress配置</a>
       </li>
     
   </ul>

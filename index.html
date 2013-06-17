@@ -114,7 +114,7 @@
       
   <header class="page-header">
     
-      <h1 class="entry-title"><a href="/blog/20130617">Installing Spark on CentOS</a></h1>
+      <h1 class="entry-title"><a href="/blog/20130617">安装Spark集群(在CentOS上)</a></h1>
     
     
       <p class="meta">
@@ -130,10 +130,132 @@
   
 
 
-<time datetime="2013-06-17T19:06:00+08:00" pubdate data-updated="true">Jun 17<span>th</span>, 2013</time>
+<time datetime="2013-06-17T22:16:00+08:00" pubdate data-updated="true">Jun 17<span>th</span>, 2013</time>
         
 		
          | <a href="/blog/20130617#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><strong>环境</strong>:CentOS 6.4, Hadoop 1.1.2, JDK 1.7, Spark 0.7.2, Scala 2.9.3</p>
+
+<p>折腾了几天，终于把Spark 集群安装成功了，其实比hadoop要简单很多，由于网上搜索到的博客大部分都还停留在需要依赖mesos的版本，走了不少弯路。</p>
+
+<h1 id="jdk-17">1. 安装 JDK 1.7.</h1>
+<pre><code>yum search openjdk-devel
+sudo yum install java-1.7.0-openjdk-devel.x86_64
+/usr/sbin/alternatives --config java
+/usr/sbin/alternatives --config javac
+sudo vim /etc/profile
+# add the following lines at the end
+export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.19.x86_64
+export JRE_HOME=$JAVA_HOME/jre
+export PATH=$PATH:$JAVA_HOME/bin
+export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+# save and exit vim
+# make environment variables take effect immediately
+$ source /etc/profile
+# test
+$ java -version
+</code></pre>
+
+<p>参考我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20120423/">安装和配置CentOS服务器的详细步骤</a>。</p>
+
+<h1 id="scala-293">2. 安装 Scala 2.9.3</h1>
+<p>Spark 0.7.2 依赖 Scala 2.9.3, 我们必须要安装Scala 2.9.3.</p>
+
+<p>下载 <a href="http://www.scala-lang.org/downloads/distrib/files/scala-2.9.3.tgz">scala-2.9.3.tgz</a> 并 保存到home目录.</p>
+
+<pre><code>$ tar -zxf scala-2.9.3.tgz
+$ sudo mv scala-2.9.3 /usr/lib
+$ sudo vim /etc/profile
+# add the following lines at the end
+export SCALA_HOME=/usr/lib/scala-2.9.3
+export PATH=$PATH:$SCALA_HOME/bin
+# save and exit vim
+# make environment variables take effect immediately
+source /etc/profile
+# test
+$ scala -version
+</code></pre>
+
+<h1 id="spark">3. 下载预编译好的Spark</h1>
+<p>下载预编译好的Spark, <a href="http://www.spark-project.org/download-spark-0.7.2-prebuilt-hadoop1">spark-0.7.2-prebuilt-hadoop1.tgz</a>. </p>
+
+<p>如果你想从零开始编译，则下载源码包，但是我不建议你这么做，因为有一个Maven仓库，twitter4j.org, 被墙了，导致编译时需要翻墙，非常麻烦。如果你有DIY精神，并能顺利翻墙，则可以试试这种方式。</p>
+
+<h1 id="section">4. 本地模式</h1>
+
+<h2 id="sparkhome">4.1 解压，设置 SPARK_HOME环境变量</h2>
+
+<pre><code>$ tar -zxf spark-0.7.2-prebuilt-hadoop1.tgz
+$ vim ~/.bash_profile
+# add the following lines at the end
+export SPARK_HOME=$HOME/spark-0.7.2
+export PATH=$PATH:$SPARK_HOME/bin
+# save and exit vim
+# make environment variables take effect immediately
+$ source /etc/profile
+</code></pre>
+
+<h2 id="sparkexamplesjar-">4.2 设置SPARK_EXAMPLES_JAR 环境变量</h2>
+<pre><code>$ vim ~/.bash_profile
+# add the following lines at the end
+export SPARK_EXAMPLES_JAR=$SPARK_HOME/examples/target/scala-2.9.3/spark-examples_2.9.3-0.7.2.jar
+# save and exit vim
+# make environment variables take effect immediately
+$ source /etc/profile
+</code></pre>
+
+<p>这一步其实最关键，很不幸的是，官方文档和网上的博客，都没有提及这一点。我是偶然看到了这两篇帖子，<a href="https://groups.google.com/forum/?fromgroups#!topic/spark-users/nQ6wB2lcFN8">Running SparkPi</a>, <a href="https://groups.google.com/forum/#!msg/spark-users/x5UczgI-Xm8/wzMm3Mb77-oJ">Null pointer exception when running ./run spark.examples.SparkPi local</a>，才补上了这一步，之前死活都无法运行SparkPi。</p>
+
+<h2 id="sparkpi">4.3 现在可以运行SparkPi了</h2>
+
+<pre><code>$ cd ~/spark-0.7.2
+$ ./run spark.examples.SparkPi local 
+</code></pre>
+
+<h1 id="section-1">5. 集群模式</h1>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20130617">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20130614">Installing Spark on CentOS</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-14T19:06:00+08:00" pubdate data-updated="true">Jun 14<span>th</span>, 2013</time>
+        
+		
+         | <a href="/blog/20130614#duoshuo_thread">Comments</a>
         
       </p>
     
@@ -187,7 +309,7 @@ $ scala -version
 
 <h1 id="local-mode">4. Local Mode</h1>
 
-<h2 id="untar-the-tarball-and-set-sparkhome">4.1 Untar the tarball and set <code>SPARK_HOME</code></h2>
+<h2 id="untar-the-tarball-and-set-sparkhome">4.1 Untar the tarball and set SPARK_HOME</h2>
 
 <pre><code>$ tar -zxf spark-0.7.2-prebuilt-hadoop1.tgz
 $ vim ~/.bash_profile
@@ -199,7 +321,7 @@ export PATH=$PATH:$SPARK_HOME/bin
 $ source /etc/profile
 </code></pre>
 
-<h2 id="set-the-sparkexamplesjar-environment-variable">4.2 Set the <code>SPARK_EXAMPLES_JAR</code> environment variable</h2>
+<h2 id="set-the-sparkexamplesjar-environment-variable">4.2 Set the SPARK_EXAMPLES_JAR environment variable</h2>
 <pre><code>$ vim ~/.bash_profile
 # add the following lines at the end
 export SPARK_EXAMPLES_JAR=$SPARK_HOME/examples/target/scala-2.9.3/spark-examples_2.9.3-0.7.2.jar
@@ -222,7 +344,7 @@ $ ./run spark.examples.SparkPi local
   
   
     <footer>
-      <a rel="full-article" href="/blog/20130617">继续阅读 &rarr;</a>
+      <a rel="full-article" href="/blog/20130614">继续阅读 &rarr;</a>
     </footer>
   
 
@@ -1230,63 +1352,6 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
 
     </article>
   
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20130225">KNN与K-Means的区别</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-02-25T23:41:00+08:00" pubdate data-updated="true">Feb 25<span>th</span>, 2013</time>
-        
-		
-         | <a href="/blog/20130225#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2 id="knnk-nearest-neighbor">KNN(K-Nearest Neighbor)介绍</h2>
-<p>Wikipedia上的<a href="http://en.wikipedia.org/wiki/K-nearest_neighbor_algorithm">KNN词条</a>中有一个比较经典的图如下：</p>
-
-<p><img src="http://yanjiuyanjiu-wordpress.stor.sinaapp.com/uploads/2013/02/022513_0955_KNNKMeans1.png" /></p>
-
-<p>KNN的算法过程是是这样的：</p>
-
-<p>从上图中我们可以看到，图中的数据集是良好的数据，即都打好了label，一类是蓝色的正方形，一类是红色的三角形，那个绿色的圆形是我们待分类的数据。</p>
-
-<p>如果K=3，那么离绿色点最近的有2个红色三角形和1个蓝色的正方形，这3个点投票，于是绿色的这个待分类点属于红色的三角形。</p>
-
-<p>如果K=5，那么离绿色点最近的有2个红色三角形和3个蓝色的正方形，这5个点投票，于是绿色的这个待分类点属于蓝色的正方形。（参考 <a href="http://coolshell.cn/articles/8052.html">酷壳的 K Nearest Neighbor 算法</a>）</p>
-
-<p>我们可以看到，KNN本质是基于一种数据统计的方法！其实很多机器学习算法也是基于数据统计的。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/20130225">继续阅读 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <ul class="pager">
     
     <li class="previous"><a href="/blog/page/2/">&larr; Older</a></li>
@@ -1304,7 +1369,7 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
 </section>
 <section>
   <h2>分类目录</h2>
-    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (2)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/spark/'>spark (2)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (2)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/spark/'>spark (3)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
 </section>
 <section>
   <h2>友情链接</h2>
@@ -1344,7 +1409,11 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/20130617">Installing Spark on CentOS</a>
+        <a href="/blog/20130617">安装Spark集群(在CentOS上)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20130614">Installing Spark on CentOS</a>
       </li>
     
       <li class="post">
@@ -1357,10 +1426,6 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
     
       <li class="post">
         <a href="/blog/20130412">LaTeX的各种发行版和编辑器的比较</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20130402">我的Octopress配置</a>
       </li>
     
   </ul>
