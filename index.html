@@ -114,6 +114,126 @@
       
   <header class="page-header">
     
+      <h1 class="entry-title"><a href="/blog/20130617">Installing Spark on CentOS</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-17T19:06:00+08:00" pubdate data-updated="true">Jun 17<span>th</span>, 2013</time>
+        
+		
+         | <a href="/blog/20130617#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><strong>Environment</strong>:CentOS 6.4, Hadoop 1.1.2, JDK 1.7, Spark 0.7.2, Scala 2.9.3</p>
+
+<p>After a few days hacking , I have found that installing a Spark cluster is exteremely easy :)</p>
+
+<h1 id="install-jdk-17">1. Install JDK 1.7.</h1>
+<pre><code>yum search openjdk-devel
+sudo yum install java-1.7.0-openjdk-devel.x86_64
+/usr/sbin/alternatives --config java
+/usr/sbin/alternatives --config javac
+sudo vim /etc/profile
+# add the following lines at the end
+export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.19.x86_64
+export JRE_HOME=$JAVA_HOME/jre
+export PATH=$PATH:$JAVA_HOME/bin
+export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+# save and exit vim
+# make environment variables take effect immediately
+$ source /etc/profile
+# test
+$ java -version
+</code></pre>
+
+<h1 id="install-scala-293">2. Install Scala 2.9.3</h1>
+<p>Spark 0.7.2 depends on Scala 2.9.3, So we must install Scala of version 2.9.3.</p>
+
+<p>Download <a href="http://www.scala-lang.org/downloads/distrib/files/scala-2.9.3.tgz">scala-2.9.3.tgz</a> and save it to home directory.</p>
+
+<pre><code>$ tar -zxf scala-2.9.3.tgz
+$ sudo mv scala-2.9.3 /usr/lib
+$ sudo vim /etc/profile
+# add the following lines at the end
+export SCALA_HOME=/usr/lib/scala-2.9.3
+export PATH=$PATH:$SCALA_HOME/bin
+# save and exit vim
+# make environment variables take effect immediately
+source /etc/profile
+# test
+$ scala -version
+</code></pre>
+
+<h1 id="download-prebuilt-packages">3. Download prebuilt packages</h1>
+<p>Download prebuilt packages, <a href="http://www.spark-project.org/download-spark-0.7.2-prebuilt-hadoop1">spark-0.7.2-prebuilt-hadoop1.tgz</a>. </p>
+
+<p>If you want to compile it from scratch, download the source package, but I don’t recommend this way, because in Chinese Mainland the GFW has blocked one of maven repositories, twitter4j.org, which makes the compilation an impossible mission unless you can conquer GFW.</p>
+
+<h1 id="local-mode">4. Local Mode</h1>
+
+<h2 id="untar-the-tarball-and-set-sparkhome">4.1 Untar the tarball and set <code>SPARK_HOME</code></h2>
+
+<pre><code>$ tar -zxf spark-0.7.2-prebuilt-hadoop1.tgz
+$ vim ~/.bash_profile
+# add the following lines at the end
+export SPARK_HOME=$HOME/spark-0.7.2
+export PATH=$PATH:$SPARK_HOME/bin
+# save and exit vim
+# make environment variables take effect immediately
+$ source /etc/profile
+</code></pre>
+
+<h2 id="set-the-sparkexamplesjar-environment-variable">4.2 Set the <code>SPARK_EXAMPLES_JAR</code> environment variable</h2>
+<pre><code>$ vim ~/.bash_profile
+# add the following lines at the end
+export SPARK_EXAMPLES_JAR=$SPARK_HOME/examples/target/scala-2.9.3/spark-examples_2.9.3-0.7.2.jar
+# save and exit vim
+# make environment variables take effect immediately
+$ source /etc/profile
+</code></pre>
+
+<p>This is the most important step that must be done , but unfortunately the official docs and most web blogs haven’t mentioned this. I found this step when I bumped into these posts, <a href="https://groups.google.com/forum/?fromgroups#!topic/spark-users/nQ6wB2lcFN8">Running SparkPi</a>, <a href="https://groups.google.com/forum/#!msg/spark-users/x5UczgI-Xm8/wzMm3Mb77-oJ">Null pointer exception when running ./run spark.examples.SparkPi local</a>.</p>
+
+<h2 id="now-you-can-run-sparkpi">4.3 Now you can run SparkPi.</h2>
+
+<pre><code>$ cd ~/spark-0.7.2
+$ ./run spark.examples.SparkPi local 
+</code></pre>
+
+<h1 id="cluster-mode">5. Cluster Mode</h1>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20130617">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
       <h1 class="entry-title"><a href="/blog/20130612">在CentOS上安装Hadoop</a></h1>
     
     
@@ -147,7 +267,18 @@
 <h2 id="vmware-workstation-">1. 用vmware workstation 创建三台虚拟机</h2>
 <p>首先用vmware workstation 新建一台CentOS 6.4，装好操作系统，选择 Basic Server，安装JDK，参考我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20120423/">安装和配置CentOS服务器的详细步骤</a>。安装好后然后用浅拷贝<code>Create a linked clone</code> 克隆出两台作为slave，这样有了三台虚拟机。启动三台机器，假设IP分别为<code>192.168.1.131, 192.168.1.132, 192.168.1.133</code>, 131做为master 和 SecondaryNameNode, 身兼两职， 132和133为 slaves。</p>
 
-<h2 id="hostname">2. 修改hostname</h2>
+<h2 id="section">2 关闭防火墙</h2>
+<p>临时关闭防火墙</p>
+
+<pre><code>$ sudo service iptables stop 下次开机后，防火墙还是会启动。
+</code></pre>
+
+<p>永久关闭防火墙</p>
+
+<pre><code>$ sudo chkconfig iptables off 由于这几台虚拟机是开发机，不是生产环境，因此不必考虑安全性，可以永久关闭防火墙，还能给开发阶段带来很多便利。
+</code></pre>
+
+<h2 id="hostname">3. 修改hostname</h2>
 <p>这一步看起来貌似不必要，其实是必须的，否则最后运行wordcount等例子时，会出现“Too many fetch-failures”。因为HDFS用hostname而不是IP，来相互之间进行通信（见后面的注意1）。</p>
 
 <p>在CentOS上修改hostname，包含两个步骤(假设将hostname1改为hostname2，参考<a href="http://www.ichiayi.com/wiki/tech/linux_hostname">这里</a>，但不需要第一步)：</p>
@@ -168,13 +299,13 @@
 192.168.1.133 slave02
 </code></pre>
 
-<h2 id="section">2. 本地模式和伪分布式模式</h2>
+<h2 id="section-1">4. 本地模式和伪分布式模式</h2>
 
 <p>为了能顺利安装成功，我们先练习在单台机器上安装Hadoop。在单台机器上，可以配置成本地模式(local mode)和伪分布式模式(Pseudo-Distributed Mode)，参考官方文档<a href="http://hadoop.apache.org/docs/r1.1.2/single_node_setup.html">Single Node Setup</a>。</p>
 
 <p>将 hadoop-1.1.2-bin.tar.gz 上传到三台机器的 home目录下，然后解压。</p>
 
-<h3 id="confhadoop-envsh-javahome">2.1 编辑 conf/hadoop-env.sh，设置 JAVA_HOME</h3>
+<h3 id="confhadoop-envsh-javahome">4.1 编辑 conf/hadoop-env.sh，设置 JAVA_HOME</h3>
 
 <pre><code>cd hadoop-1.1.2
 vim conf/hadoop-env.sh
@@ -185,7 +316,7 @@ vim conf/hadoop-env.sh
 <pre><code>export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.19.x86_64
 </code></pre>
 
-<h3 id="section-1">2.2 测试本地模式是否正常</h3>
+<h3 id="section-2">4.2 测试本地模式是否正常</h3>
 <p>默认情况下，Hadoop就被配置为本地模式，现在就可以开始测试一下。</p>
 
 <pre><code>$ mkdir input 
@@ -1156,54 +1287,6 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
 
     </article>
   
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20120811">用VisualVM连接 Tomcat 服务器时，如何配置tomcat启动JMX</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-08-11T21:37:00+08:00" pubdate data-updated="true">Aug 11<span>th</span>, 2012</time>
-        
-		
-         | <a href="/blog/20120811#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>用VisualVM连接 tomcat 服务器时，需要让tomcat启动JMX，在catalina.sh 中添加一行代码即可：</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">JAVA_OPTS</span><span class="o">=</span>”<span class="nv">$JAVA_OPTS</span> -Djava.rmi.server.hostname<span class="o">=</span>192.168.0.123 -Dcom.sun.management.jmxremote<span class="o">=</span><span class="nb">true</span> -Dcom.sun.management.jmxremote.port<span class="o">=</span>8086 -Dcom.sun.management.jmxremote.ssl<span class="o">=</span><span class="nb">false</span> -Dcom.sun.management.jmxremote.authenticate<span class="o">=</span><span class="nb">false</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-<p>注意，用hostname -i 查看是否为127.0.01，这步非常重要,否则会连接失败，如果是，必须要配置-Djava.rmi.server.hostname。</p>
-
-<p>参考： <br />
-<a href="http://blog.tty.nl/2010/09/03/using-visualvm-to-fix-live-tomcat-and-jvm-problems/">Using VisualVM to fix live Tomcat and JVM problems</a><br />
-<a href="http://blog.csdn.net/linghunhong/article/details/6438572">JVM内存监控:visualVM jconsole jstatd jmap</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
   <ul class="pager">
     
     <li class="previous"><a href="/blog/page/2/">&larr; Older</a></li>
@@ -1221,7 +1304,7 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
 </section>
 <section>
   <h2>分类目录</h2>
-    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (2)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/spark/'>spark (1)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (2)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/spark/'>spark (2)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
 </section>
 <section>
   <h2>友情链接</h2>
@@ -1261,6 +1344,10 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/20130617">Installing Spark on CentOS</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/20130612">在CentOS上安装Hadoop</a>
       </li>
     
@@ -1274,10 +1361,6 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
     
       <li class="post">
         <a href="/blog/20130402">我的Octopress配置</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20130401">使用github + Octopress 搭建免费博客</a>
       </li>
     
   </ul>
