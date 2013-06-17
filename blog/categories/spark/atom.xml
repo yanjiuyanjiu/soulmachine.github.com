@@ -4,7 +4,7 @@
   <title><![CDATA[Category: spark | 研究研究]]></title>
   <link href="http://www.yanjiuyanjiu.com/blog/categories/spark/atom.xml" rel="self"/>
   <link href="http://www.yanjiuyanjiu.com/"/>
-  <updated>2013-06-17T23:53:05+08:00</updated>
+  <updated>2013-06-17T23:56:50+08:00</updated>
   <id>http://www.yanjiuyanjiu.com/</id>
   <author>
     <name><![CDATA[soulmachine]]></name>
@@ -17,7 +17,7 @@
     <title type="html"><![CDATA[安装Spark集群(在CentOS上)]]></title>
     <link href="http://www.yanjiuyanjiu.com/blog/20130617"/>
     <updated>2013-06-17T22:16:00+08:00</updated>
-    <id>http://www.yanjiuyanjiu.com/blog/installing-spark-on-centos</id>
+    <id>http://www.yanjiuyanjiu.com/blog/installing-spark-on-centos-cn</id>
     <content type="html"><![CDATA[<p><strong>环境</strong>:CentOS 6.4, Hadoop 1.1.2, JDK 1.7, Spark 0.7.2, Scala 2.9.3</p>
 
 <p>折腾了几天，终于把Spark 集群安装成功了，其实比hadoop要简单很多，由于网上搜索到的博客大部分都还停留在需要依赖mesos的版本，走了不少弯路。</p>
