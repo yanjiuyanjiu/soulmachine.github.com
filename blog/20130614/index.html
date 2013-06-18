@@ -142,7 +142,7 @@
 
 <p>After a few days hacking , I have found that installing a Spark cluster is exteremely easy :)</p>
 
-<h1 id="install-jdk-17">1. Install JDK 1.7.</h1>
+<h1 id="install-jdk-17">1. Install JDK 1.7</h1>
 <pre><code>yum search openjdk-devel
 sudo yum install java-1.7.0-openjdk-devel.x86_64
 /usr/sbin/alternatives --config java
@@ -185,16 +185,9 @@ $ scala -version
 
 <h1 id="local-mode">4. Local Mode</h1>
 
-<h2 id="untar-the-tarball-and-set-sparkhome">4.1 Untar the tarball and set SPARK_HOME</h2>
+<h2 id="untar-the-tarball">4.1 Untar the tarball</h2>
 
 <pre><code>$ tar -zxf spark-0.7.2-prebuilt-hadoop1.tgz
-$ vim ~/.bash_profile
-# add the following lines at the end
-export SPARK_HOME=$HOME/spark-0.7.2
-export PATH=$PATH:$SPARK_HOME/bin
-# save and exit vim
-# make environment variables take effect immediately
-$ source /etc/profile
 </code></pre>
 
 <h2 id="set-the-sparkexamplesjar-environment-variable">4.2 Set the SPARK_EXAMPLES_JAR environment variable</h2>
@@ -208,7 +201,18 @@ $ source /etc/profile
 
 <p>This is the most important step that must be done , but unfortunately the official docs and most web blogs haven’t mentioned this. I found this step when I bumped into these posts, <a href="https://groups.google.com/forum/?fromgroups#!topic/spark-users/nQ6wB2lcFN8">Running SparkPi</a>, <a href="https://groups.google.com/forum/#!msg/spark-users/x5UczgI-Xm8/wzMm3Mb77-oJ">Null pointer exception when running ./run spark.examples.SparkPi local</a>.</p>
 
-<h2 id="now-you-can-run-sparkpi">4.3 Now you can run SparkPi.</h2>
+<h2 id="optionalset-sparkhome-and-add-sparkhomebin-to-path">4.3 (Optional)Set SPARK_HOME and add SPARK_HOME/bin to PATH</h2>
+
+<pre><code>$ vim ~/.bash_profile
+# add the following lines at the end
+export SPARK_HOME=$HOME/spark-0.7.2
+export PATH=$PATH:$SPARK_HOME/bin
+# save and exit vim
+# make environment variables take effect immediately
+$ source /etc/profile
+</code></pre>
+
+<h2 id="now-you-can-run-sparkpi">4.4 Now you can run SparkPi.</h2>
 
 <pre><code>$ cd ~/spark-0.7.2
 $ ./run spark.examples.SparkPi local 
@@ -225,11 +229,15 @@ $ ./run spark.examples.SparkPi local
 <p>Install JDK 1.7 and Scala 2.9.3 on the three machines, according to section 1 and section 2.</p>
 
 <h2 id="install-and-configure-spark-on-master">5.3 Install and configure Spark on master</h2>
+<p>Untar</p>
+
 <pre><code>$ tar -zxf spark-0.7.2-prebuilt-hadoop1.tgz
-$ vim ~/.bash_profile
+</code></pre>
+
+<p>Set the SPARK_EXAMPLES_JAR environment variable</p>
+
+<pre><code>$ vim ~/.bash_profile
 # add the following lines at the end
-export SPARK_HOME=$HOME/spark-0.7.2
-export PATH=$PATH:$SPARK_HOME/bin
 export SPARK_EXAMPLES_JAR=$SPARK_HOME/examples/target/scala-2.9.3/spark-examples_2.9.3-0.7.2.jar
 # save and exit vim
 # make environment variables take effect immediately
@@ -253,8 +261,19 @@ slave02
 # save and exit
 </code></pre>
 
+<p>(Optional)Set SPARK_HOME and add SPARK_HOME/bin to PATH</p>
+
+<pre><code>$ vim ~/.bash_profile
+# add the following lines at the end
+export SPARK_HOME=$HOME/spark-0.7.2
+export PATH=$PATH:$SPARK_HOME/bin
+# save and exit vim
+# make environment variables take effect immediately
+$ source /etc/profile
+</code></pre>
+
 <h2 id="install-and-configure-spark-on-workers">5.4 Install and configure Spark on workers</h2>
-<p>Copy the spark directory to all slaves</p>
+<p>Copy the spark directory to all slaves. <strong>Remark，the spark directories must locat at the the same path on all machines，because the master will login to work to execute spark commands, it assumes that workers have the same path as itself</strong></p>
 
 <pre><code>scp -r spark-0.7.2 dev@slave01:~
 scp -r spark-0.7.2 dev@slave02:~
@@ -265,7 +284,7 @@ scp -r spark-0.7.2 dev@slave02:~
 <h2 id="start-spark-cluster">5.5 Start Spark cluster</h2>
 <p>On master</p>
 
-<pre><code>$ cd $SPARK_HONE
+<pre><code>$ cd ~/spark-0.7.2
 $ bin/start-all.sh
 </code></pre>
 
@@ -283,13 +302,13 @@ $ bin/start-all.sh
 
 <h2 id="run-the-sparkpi-example-in-cluster-mode">5.6 run the SparkPi example in cluster mode</h2>
 
-<pre><code>$ cd $SPARK_HONE
+<pre><code>$ cd ~/spark-0.7.2
 $ ./run spark.examples.SparkPi spark://master:7077
 </code></pre>
 
 <h2 id="read-files-from-hdfs-and-run-wordcount">5.7 read files from HDFS and run WordCount</h2>
 
-<pre><code>$ cd $SPARK_HOME
+<pre><code>$ cd ~/spark-0.7.2
 $ hadoop fs -put README.md .
 $ ./spark-shell
 scala&gt; val file = sc.textFile("hdfs://master:9000/user/dev/README.md")
@@ -299,7 +318,7 @@ scala&gt; count.collect()
 
 <h2 id="stop-spark-cluster">5.8 Stop Spark cluster</h2>
 
-<pre><code>$ cd $SPARK_HONE
+<pre><code>$ cd ~/spark-0.7.2
 $ bin/stop-all.sh
 </code></pre>
 

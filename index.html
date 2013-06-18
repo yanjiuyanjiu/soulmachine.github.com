@@ -144,7 +144,7 @@
 
 <p>折腾了几天，终于把Spark 集群安装成功了，其实比hadoop要简单很多，由于网上搜索到的博客大部分都还停留在需要依赖mesos的版本，走了不少弯路。</p>
 
-<h1 id="jdk-17">1. 安装 JDK 1.7.</h1>
+<h1 id="jdk-17">1. 安装 JDK 1.7</h1>
 <pre><code>yum search openjdk-devel
 sudo yum install java-1.7.0-openjdk-devel.x86_64
 /usr/sbin/alternatives --config java
@@ -189,19 +189,13 @@ $ scala -version
 
 <h1 id="section">4. 本地模式</h1>
 
-<h2 id="sparkhome">4.1 解压，设置 SPARK_HOME环境变量</h2>
+<h2 id="section-1">4.1 解压</h2>
 
 <pre><code>$ tar -zxf spark-0.7.2-prebuilt-hadoop1.tgz
-$ vim ~/.bash_profile
-# add the following lines at the end
-export SPARK_HOME=$HOME/spark-0.7.2
-export PATH=$PATH:$SPARK_HOME/bin
-# save and exit vim
-# make environment variables take effect immediately
-$ source /etc/profile
 </code></pre>
 
 <h2 id="sparkexamplesjar-">4.2 设置SPARK_EXAMPLES_JAR 环境变量</h2>
+
 <pre><code>$ vim ~/.bash_profile
 # add the following lines at the end
 export SPARK_EXAMPLES_JAR=$SPARK_HOME/examples/target/scala-2.9.3/spark-examples_2.9.3-0.7.2.jar
@@ -212,13 +206,23 @@ $ source /etc/profile
 
 <p>这一步其实最关键，很不幸的是，官方文档和网上的博客，都没有提及这一点。我是偶然看到了这两篇帖子，<a href="https://groups.google.com/forum/?fromgroups#!topic/spark-users/nQ6wB2lcFN8">Running SparkPi</a>, <a href="https://groups.google.com/forum/#!msg/spark-users/x5UczgI-Xm8/wzMm3Mb77-oJ">Null pointer exception when running ./run spark.examples.SparkPi local</a>，才补上了这一步，之前死活都无法运行SparkPi。</p>
 
-<h2 id="sparkpi">4.3 现在可以运行SparkPi了</h2>
+<h2 id="sparkhomesparkhomebinpath">4.3 （可选）设置 SPARK_HOME环境变量，并将SPARK_HOME/bin加入PATH</h2>
+<pre><code>$ vim ~/.bash_profile
+# add the following lines at the end
+export SPARK_HOME=$HOME/spark-0.7.2
+export PATH=$PATH:$SPARK_HOME/bin
+# save and exit vim
+# make environment variables take effect immediately
+$ source /etc/profile
+</code></pre>
+
+<h2 id="sparkpi">4.4 现在可以运行SparkPi了</h2>
 
 <pre><code>$ cd ~/spark-0.7.2
 $ ./run spark.examples.SparkPi local 
 </code></pre>
 
-<h1 id="section-1">5. 集群模式</h1>
+<h1 id="section-2">5. 集群模式</h1>
 
 </div>
   
@@ -266,7 +270,7 @@ $ ./run spark.examples.SparkPi local
 
 <p>After a few days hacking , I have found that installing a Spark cluster is exteremely easy :)</p>
 
-<h1 id="install-jdk-17">1. Install JDK 1.7.</h1>
+<h1 id="install-jdk-17">1. Install JDK 1.7</h1>
 <pre><code>yum search openjdk-devel
 sudo yum install java-1.7.0-openjdk-devel.x86_64
 /usr/sbin/alternatives --config java
@@ -309,16 +313,9 @@ $ scala -version
 
 <h1 id="local-mode">4. Local Mode</h1>
 
-<h2 id="untar-the-tarball-and-set-sparkhome">4.1 Untar the tarball and set SPARK_HOME</h2>
+<h2 id="untar-the-tarball">4.1 Untar the tarball</h2>
 
 <pre><code>$ tar -zxf spark-0.7.2-prebuilt-hadoop1.tgz
-$ vim ~/.bash_profile
-# add the following lines at the end
-export SPARK_HOME=$HOME/spark-0.7.2
-export PATH=$PATH:$SPARK_HOME/bin
-# save and exit vim
-# make environment variables take effect immediately
-$ source /etc/profile
 </code></pre>
 
 <h2 id="set-the-sparkexamplesjar-environment-variable">4.2 Set the SPARK_EXAMPLES_JAR environment variable</h2>
@@ -332,7 +329,18 @@ $ source /etc/profile
 
 <p>This is the most important step that must be done , but unfortunately the official docs and most web blogs haven’t mentioned this. I found this step when I bumped into these posts, <a href="https://groups.google.com/forum/?fromgroups#!topic/spark-users/nQ6wB2lcFN8">Running SparkPi</a>, <a href="https://groups.google.com/forum/#!msg/spark-users/x5UczgI-Xm8/wzMm3Mb77-oJ">Null pointer exception when running ./run spark.examples.SparkPi local</a>.</p>
 
-<h2 id="now-you-can-run-sparkpi">4.3 Now you can run SparkPi.</h2>
+<h2 id="optionalset-sparkhome-and-add-sparkhomebin-to-path">4.3 (Optional)Set SPARK_HOME and add SPARK_HOME/bin to PATH</h2>
+
+<pre><code>$ vim ~/.bash_profile
+# add the following lines at the end
+export SPARK_HOME=$HOME/spark-0.7.2
+export PATH=$PATH:$SPARK_HOME/bin
+# save and exit vim
+# make environment variables take effect immediately
+$ source /etc/profile
+</code></pre>
+
+<h2 id="now-you-can-run-sparkpi">4.4 Now you can run SparkPi.</h2>
 
 <pre><code>$ cd ~/spark-0.7.2
 $ ./run spark.examples.SparkPi local 
@@ -425,7 +433,7 @@ $ ./run spark.examples.SparkPi local
 
 <p>为了能顺利安装成功，我们先练习在单台机器上安装Hadoop。在单台机器上，可以配置成本地模式(local mode)和伪分布式模式(Pseudo-Distributed Mode)，参考官方文档<a href="http://hadoop.apache.org/docs/r1.1.2/single_node_setup.html">Single Node Setup</a>。</p>
 
-<p>将 hadoop-1.1.2-bin.tar.gz 上传到三台机器的 home目录下，然后解压。</p>
+<p>将 hadoop-1.1.2-bin.tar.gz 上传到三台机器的 home目录下，然后解压。<strong>注意，三台机器hadoop所在目录必须一致，因为master会登陆到slave上执行命令，master认为slave的hadoop路径与自己一样。</strong></p>
 
 <h3 id="confhadoop-envsh-javahome">4.1 编辑 conf/hadoop-env.sh，设置 JAVA_HOME</h3>
 

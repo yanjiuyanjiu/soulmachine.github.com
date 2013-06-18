@@ -142,7 +142,7 @@
 
 <p>折腾了几天，终于把Spark 集群安装成功了，其实比hadoop要简单很多，由于网上搜索到的博客大部分都还停留在需要依赖mesos的版本，走了不少弯路。</p>
 
-<h1 id="jdk-17">1. 安装 JDK 1.7.</h1>
+<h1 id="jdk-17">1. 安装 JDK 1.7</h1>
 <pre><code>yum search openjdk-devel
 sudo yum install java-1.7.0-openjdk-devel.x86_64
 /usr/sbin/alternatives --config java
@@ -187,19 +187,13 @@ $ scala -version
 
 <h1 id="section">4. 本地模式</h1>
 
-<h2 id="sparkhome">4.1 解压，设置 SPARK_HOME环境变量</h2>
+<h2 id="section-1">4.1 解压</h2>
 
 <pre><code>$ tar -zxf spark-0.7.2-prebuilt-hadoop1.tgz
-$ vim ~/.bash_profile
-# add the following lines at the end
-export SPARK_HOME=$HOME/spark-0.7.2
-export PATH=$PATH:$SPARK_HOME/bin
-# save and exit vim
-# make environment variables take effect immediately
-$ source /etc/profile
 </code></pre>
 
 <h2 id="sparkexamplesjar-">4.2 设置SPARK_EXAMPLES_JAR 环境变量</h2>
+
 <pre><code>$ vim ~/.bash_profile
 # add the following lines at the end
 export SPARK_EXAMPLES_JAR=$SPARK_HOME/examples/target/scala-2.9.3/spark-examples_2.9.3-0.7.2.jar
@@ -210,13 +204,23 @@ $ source /etc/profile
 
 <p>这一步其实最关键，很不幸的是，官方文档和网上的博客，都没有提及这一点。我是偶然看到了这两篇帖子，<a href="https://groups.google.com/forum/?fromgroups#!topic/spark-users/nQ6wB2lcFN8">Running SparkPi</a>, <a href="https://groups.google.com/forum/#!msg/spark-users/x5UczgI-Xm8/wzMm3Mb77-oJ">Null pointer exception when running ./run spark.examples.SparkPi local</a>，才补上了这一步，之前死活都无法运行SparkPi。</p>
 
-<h2 id="sparkpi">4.3 现在可以运行SparkPi了</h2>
+<h2 id="sparkhomesparkhomebinpath">4.3 （可选）设置 SPARK_HOME环境变量，并将SPARK_HOME/bin加入PATH</h2>
+<pre><code>$ vim ~/.bash_profile
+# add the following lines at the end
+export SPARK_HOME=$HOME/spark-0.7.2
+export PATH=$PATH:$SPARK_HOME/bin
+# save and exit vim
+# make environment variables take effect immediately
+$ source /etc/profile
+</code></pre>
+
+<h2 id="sparkpi">4.4 现在可以运行SparkPi了</h2>
 
 <pre><code>$ cd ~/spark-0.7.2
 $ ./run spark.examples.SparkPi local 
 </code></pre>
 
-<h1 id="section-1">5. 集群模式</h1>
+<h1 id="section-2">5. 集群模式</h1>
 
 <!-- more -->
 
@@ -227,11 +231,15 @@ $ ./run spark.examples.SparkPi local
 <p>在三台机器上都要安装 Scala 2.9.3 , 按照第2节的步骤。JDK在安装Hadoop时已经安装了。</p>
 
 <h2 id="masterspark">5.3 在master上安装并配置Spark</h2>
+<p>解压</p>
+
 <pre><code>$ tar -zxf spark-0.7.2-prebuilt-hadoop1.tgz
-$ vim ~/.bash_profile
+</code></pre>
+
+<p>设置SPARK_EXAMPLES_JAR 环境变量</p>
+
+<pre><code>$ vim ~/.bash_profile
 # add the following lines at the end
-export SPARK_HOME=$HOME/spark-0.7.2
-export PATH=$PATH:$SPARK_HOME/bin
 export SPARK_EXAMPLES_JAR=$SPARK_HOME/examples/target/scala-2.9.3/spark-examples_2.9.3-0.7.2.jar
 # save and exit vim
 # make environment variables take effect immediately
@@ -255,19 +263,30 @@ slave02
 # save and exit
 </code></pre>
 
+<p>（可选）设置 SPARK_HOME环境变量，并将SPARK_HOME/bin加入PATH</p>
+
+<pre><code>$ vim ~/.bash_profile
+# add the following lines at the end
+export SPARK_HOME=$HOME/spark-0.7.2
+export PATH=$PATH:$SPARK_HOME/bin
+# save and exit vim
+# make environment variables take effect immediately
+$ source /etc/profile
+</code></pre>
+
 <h2 id="workerspark">5.4 在所有worker上安装并配置Spark</h2>
-<p>既然master上的这个文件件已经配置好了，把它拷贝到所有的worker。</p>
+<p>既然master上的这个文件件已经配置好了，把它拷贝到所有的worker。<strong>注意，三台机器spark所在目录必须一致，因为master会登陆到worker上执行命令，master认为worker的spark路径与自己一样。</strong></p>
 
 <pre><code>scp -r spark-0.7.2 dev@slave01:~
 scp -r spark-0.7.2 dev@slave02:~
 </code></pre>
 
-<p>按照第5.3节设置环境变量。</p>
+<p>按照第5.3节设置环境变量和配置文件。</p>
 
 <h2 id="spark-">5.5 启动 Spark 集群</h2>
 <p>在master上执行</p>
 
-<pre><code>$ cd $SPARK_HONE
+<pre><code>$ cd ~/spark-0.7.2
 $ bin/start-all.sh
 </code></pre>
 
@@ -284,13 +303,13 @@ $ bin/start-all.sh
 <p>浏览master的web UI(默认<a href="http://localhost:8080">http://localhost:8080</a>). 这是你应该可以看到所有的word节点，以及他们的CPU个数和内存等信息。
 ##5.6 运行SparkPi例子</p>
 
-<pre><code>$ cd $SPARK_HONE
+<pre><code>$ cd ~/spark-0.7.2
 $ ./run spark.examples.SparkPi spark://master:7077
 </code></pre>
 
 <h2 id="hdfswordcount">5.7 从HDFS读取文件并运行WordCount</h2>
 
-<pre><code>$ cd $SPARK_HOME
+<pre><code>$ cd ~/spark-0.7.2
 $ hadoop fs -put README.md .
 $ ./spark-shell
 scala&gt; val file = sc.textFile("hdfs://master:9000/user/dev/README.md")
@@ -300,11 +319,11 @@ scala&gt; count.collect()
 
 <h2 id="spark--1">5.8 停止 Spark 集群</h2>
 
-<pre><code>$ cd $SPARK_HONE
+<pre><code>$ cd ~/spark-0.7.2
 $ bin/stop-all.sh
 </code></pre>
 
-<h1 id="section-2">参考资料</h1>
+<h1 id="section-3">参考资料</h1>
 <ol>
   <li><a href="http://spark-project.org/docs/latest/spark-standalone.html">Spark Standalone Mode</a></li>
   <li><a href="https://github.com/mesos/spark/wiki/Running-A-Spark-Standalone-Cluster">Running A Spark Standalone Cluster</a></li>

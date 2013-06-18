@@ -4,7 +4,7 @@
   <title><![CDATA[Category: hadoop | 研究研究]]></title>
   <link href="http://www.yanjiuyanjiu.com/blog/categories/hadoop/atom.xml" rel="self"/>
   <link href="http://www.yanjiuyanjiu.com/"/>
-  <updated>2013-06-17T23:56:50+08:00</updated>
+  <updated>2013-06-18T21:08:17+08:00</updated>
   <id>http://www.yanjiuyanjiu.com/</id>
   <author>
     <name><![CDATA[soulmachine]]></name>
@@ -61,7 +61,7 @@
 
 <p>为了能顺利安装成功，我们先练习在单台机器上安装Hadoop。在单台机器上，可以配置成本地模式(local mode)和伪分布式模式(Pseudo-Distributed Mode)，参考官方文档<a href="http://hadoop.apache.org/docs/r1.1.2/single_node_setup.html">Single Node Setup</a>。</p>
 
-<p>将 hadoop-1.1.2-bin.tar.gz 上传到三台机器的 home目录下，然后解压。</p>
+<p>将 hadoop-1.1.2-bin.tar.gz 上传到三台机器的 home目录下，然后解压。<strong>注意，三台机器hadoop所在目录必须一致，因为master会登陆到slave上执行命令，master认为slave的hadoop路径与自己一样。</strong></p>
 
 <h3 id="confhadoop-envsh-javahome">4.1 编辑 conf/hadoop-env.sh，设置 JAVA_HOME</h3>
 
@@ -307,7 +307,7 @@ $ scp hadoop-env.sh core-site.xml hdfs-site.xml mapred-site.xml masters slaves d
 $ scp hadoop-env.sh core-site.xml hdfs-site.xml mapred-site.xml masters slaves dev@192.168.1.133:~/hadoop-1.1.2/conf/
 </code></pre>
 
-<h3 id="hadoophomehadoophomebinpath">5.4 设置环境变量HADOOP_HOME，并将<code>$HADOOP_HOME/bin</code>加入PATH</h3>
+<h3 id="hadoophomehadoophomebinpath">5.4 （可选）设置环境变量HADOOP_HOME，并将<code>$HADOOP_HOME/bin</code>加入PATH</h3>
 <p>所有机器都要设置环境变量HADOOP_HOME，并将<code>$HADOOP_HOME/bin</code>加入PATH，因为master登陆到slave后，要执行<code>$HADOOP_HOME/bin</code> 下的一些命令。</p>
 
 <pre><code>$ vim ~/.bash_profile
@@ -328,9 +328,10 @@ export CLASSPATH=$CLASSPATH:$HADOOP_HOME/hadoop-core-1.1.2.jar
 <h3 id="hadoop-1">5.5 运行 hadoop</h3>
 <p>在master上执行以下命令，启动hadoop</p>
 
-<pre><code>#只需一次，下次启动不再需要格式化，只需 start-all.sh
-$ hadoop  namenode -format
-$ start-all.sh
+<pre><code>$ cd ~/hadoop-1.1.2/
+#只需一次，下次启动不再需要格式化，只需 start-all.sh
+$ bin/hadoop  namenode -format
+$ bin/start-all.sh
 </code></pre>
 
 <h3 id="section-6">5.6 检查是否启动成功</h3>
@@ -368,19 +369,19 @@ $ start-all.sh
 <h3 id="wordcount">5.7 运行wordcount例子，进一步测试是否安装成功</h3>
 <p>将输入数据拷贝到分布式文件系统中:</p>
 
-<pre><code>$ cd $HADOOP_HOME
-$ hadoop fs -put conf input
+<pre><code>$ cd ~/hadoop-1.1.2/
+$ bin/hadoop fs -put conf input
 </code></pre>
 
 <p>运行 Hadoop 自带的例子:</p>
 
-<pre><code>$ hadoop jar hadoop-examples-*.jar wordcount input output
+<pre><code>$ bin/hadoop jar hadoop-examples-*.jar wordcount input output
 </code></pre>
 
 <p>查看输出文件:</p>
 
-<pre><code>$ hadoop s -ls output
-$ hadoop fs -cat output/part-r-00000
+<pre><code>$ bin/hadoop s -ls output
+$ bin/hadoop fs -cat output/part-r-00000
 </code></pre>
 
 <p>如果能看到结果，说明这个例子运行成功。</p>
@@ -388,7 +389,7 @@ $ hadoop fs -cat output/part-r-00000
 <h3 id="hadoop-2">5.8 停止 hadoop集群</h3>
 <p>在master上执行：</p>
 
-<pre><code>$ stop-all.sh
+<pre><code>$ bin/stop-all.sh
 </code></pre>
 
 <h2 id="section-7">6. 排除错误</h2>

@@ -4,7 +4,7 @@
   <title><![CDATA[研究研究]]></title>
   <link href="http://www.yanjiuyanjiu.com/atom.xml" rel="self"/>
   <link href="http://www.yanjiuyanjiu.com/"/>
-  <updated>2013-06-17T23:56:50+08:00</updated>
+  <updated>2013-06-18T21:08:17+08:00</updated>
   <id>http://www.yanjiuyanjiu.com/</id>
   <author>
     <name><![CDATA[soulmachine]]></name>
@@ -22,7 +22,7 @@
 
 <p>折腾了几天，终于把Spark 集群安装成功了，其实比hadoop要简单很多，由于网上搜索到的博客大部分都还停留在需要依赖mesos的版本，走了不少弯路。</p>
 
-<h1 id="jdk-17">1. 安装 JDK 1.7.</h1>
+<h1 id="jdk-17">1. 安装 JDK 1.7</h1>
 <pre><code>yum search openjdk-devel
 sudo yum install java-1.7.0-openjdk-devel.x86_64
 /usr/sbin/alternatives --config java
@@ -67,19 +67,13 @@ $ scala -version
 
 <h1 id="section">4. 本地模式</h1>
 
-<h2 id="sparkhome">4.1 解压，设置 SPARK_HOME环境变量</h2>
+<h2 id="section-1">4.1 解压</h2>
 
 <pre><code>$ tar -zxf spark-0.7.2-prebuilt-hadoop1.tgz
-$ vim ~/.bash_profile
-# add the following lines at the end
-export SPARK_HOME=$HOME/spark-0.7.2
-export PATH=$PATH:$SPARK_HOME/bin
-# save and exit vim
-# make environment variables take effect immediately
-$ source /etc/profile
 </code></pre>
 
 <h2 id="sparkexamplesjar-">4.2 设置SPARK_EXAMPLES_JAR 环境变量</h2>
+
 <pre><code>$ vim ~/.bash_profile
 # add the following lines at the end
 export SPARK_EXAMPLES_JAR=$SPARK_HOME/examples/target/scala-2.9.3/spark-examples_2.9.3-0.7.2.jar
@@ -90,13 +84,23 @@ $ source /etc/profile
 
 <p>这一步其实最关键，很不幸的是，官方文档和网上的博客，都没有提及这一点。我是偶然看到了这两篇帖子，<a href="https://groups.google.com/forum/?fromgroups#!topic/spark-users/nQ6wB2lcFN8">Running SparkPi</a>, <a href="https://groups.google.com/forum/#!msg/spark-users/x5UczgI-Xm8/wzMm3Mb77-oJ">Null pointer exception when running ./run spark.examples.SparkPi local</a>，才补上了这一步，之前死活都无法运行SparkPi。</p>
 
-<h2 id="sparkpi">4.3 现在可以运行SparkPi了</h2>
+<h2 id="sparkhomesparkhomebinpath">4.3 （可选）设置 SPARK_HOME环境变量，并将SPARK_HOME/bin加入PATH</h2>
+<pre><code>$ vim ~/.bash_profile
+# add the following lines at the end
+export SPARK_HOME=$HOME/spark-0.7.2
+export PATH=$PATH:$SPARK_HOME/bin
+# save and exit vim
+# make environment variables take effect immediately
+$ source /etc/profile
+</code></pre>
+
+<h2 id="sparkpi">4.4 现在可以运行SparkPi了</h2>
 
 <pre><code>$ cd ~/spark-0.7.2
 $ ./run spark.examples.SparkPi local 
 </code></pre>
 
-<h1 id="section-1">5. 集群模式</h1>
+<h1 id="section-2">5. 集群模式</h1>
 
 <!-- more -->
 
@@ -107,11 +111,15 @@ $ ./run spark.examples.SparkPi local
 <p>在三台机器上都要安装 Scala 2.9.3 , 按照第2节的步骤。JDK在安装Hadoop时已经安装了。</p>
 
 <h2 id="masterspark">5.3 在master上安装并配置Spark</h2>
+<p>解压</p>
+
 <pre><code>$ tar -zxf spark-0.7.2-prebuilt-hadoop1.tgz
-$ vim ~/.bash_profile
+</code></pre>
+
+<p>设置SPARK_EXAMPLES_JAR 环境变量</p>
+
+<pre><code>$ vim ~/.bash_profile
 # add the following lines at the end
-export SPARK_HOME=$HOME/spark-0.7.2
-export PATH=$PATH:$SPARK_HOME/bin
 export SPARK_EXAMPLES_JAR=$SPARK_HOME/examples/target/scala-2.9.3/spark-examples_2.9.3-0.7.2.jar
 # save and exit vim
 # make environment variables take effect immediately
@@ -135,19 +143,30 @@ slave02
 # save and exit
 </code></pre>
 
+<p>（可选）设置 SPARK_HOME环境变量，并将SPARK_HOME/bin加入PATH</p>
+
+<pre><code>$ vim ~/.bash_profile
+# add the following lines at the end
+export SPARK_HOME=$HOME/spark-0.7.2
+export PATH=$PATH:$SPARK_HOME/bin
+# save and exit vim
+# make environment variables take effect immediately
+$ source /etc/profile
+</code></pre>
+
 <h2 id="workerspark">5.4 在所有worker上安装并配置Spark</h2>
-<p>既然master上的这个文件件已经配置好了，把它拷贝到所有的worker。</p>
+<p>既然master上的这个文件件已经配置好了，把它拷贝到所有的worker。<strong>注意，三台机器spark所在目录必须一致，因为master会登陆到worker上执行命令，master认为worker的spark路径与自己一样。</strong></p>
 
 <pre><code>scp -r spark-0.7.2 dev@slave01:~
 scp -r spark-0.7.2 dev@slave02:~
 </code></pre>
 
-<p>按照第5.3节设置环境变量。</p>
+<p>按照第5.3节设置环境变量和配置文件。</p>
 
 <h2 id="spark-">5.5 启动 Spark 集群</h2>
 <p>在master上执行</p>
 
-<pre><code>$ cd $SPARK_HONE
+<pre><code>$ cd ~/spark-0.7.2
 $ bin/start-all.sh
 </code></pre>
 
@@ -164,13 +183,13 @@ $ bin/start-all.sh
 <p>浏览master的web UI(默认<a href="http://localhost:8080">http://localhost:8080</a>). 这是你应该可以看到所有的word节点，以及他们的CPU个数和内存等信息。
 ##5.6 运行SparkPi例子</p>
 
-<pre><code>$ cd $SPARK_HONE
+<pre><code>$ cd ~/spark-0.7.2
 $ ./run spark.examples.SparkPi spark://master:7077
 </code></pre>
 
 <h2 id="hdfswordcount">5.7 从HDFS读取文件并运行WordCount</h2>
 
-<pre><code>$ cd $SPARK_HOME
+<pre><code>$ cd ~/spark-0.7.2
 $ hadoop fs -put README.md .
 $ ./spark-shell
 scala&gt; val file = sc.textFile("hdfs://master:9000/user/dev/README.md")
@@ -180,11 +199,11 @@ scala&gt; count.collect()
 
 <h2 id="spark--1">5.8 停止 Spark 集群</h2>
 
-<pre><code>$ cd $SPARK_HONE
+<pre><code>$ cd ~/spark-0.7.2
 $ bin/stop-all.sh
 </code></pre>
 
-<h1 id="section-2">参考资料</h1>
+<h1 id="section-3">参考资料</h1>
 <ol>
   <li><a href="http://spark-project.org/docs/latest/spark-standalone.html">Spark Standalone Mode</a></li>
   <li><a href="https://github.com/mesos/spark/wiki/Running-A-Spark-Standalone-Cluster">Running A Spark Standalone Cluster</a></li>
@@ -210,7 +229,7 @@ $ bin/stop-all.sh
 
 <p>After a few days hacking , I have found that installing a Spark cluster is exteremely easy :)</p>
 
-<h1 id="install-jdk-17">1. Install JDK 1.7.</h1>
+<h1 id="install-jdk-17">1. Install JDK 1.7</h1>
 <pre><code>yum search openjdk-devel
 sudo yum install java-1.7.0-openjdk-devel.x86_64
 /usr/sbin/alternatives --config java
@@ -253,16 +272,9 @@ $ scala -version
 
 <h1 id="local-mode">4. Local Mode</h1>
 
-<h2 id="untar-the-tarball-and-set-sparkhome">4.1 Untar the tarball and set SPARK_HOME</h2>
+<h2 id="untar-the-tarball">4.1 Untar the tarball</h2>
 
 <pre><code>$ tar -zxf spark-0.7.2-prebuilt-hadoop1.tgz
-$ vim ~/.bash_profile
-# add the following lines at the end
-export SPARK_HOME=$HOME/spark-0.7.2
-export PATH=$PATH:$SPARK_HOME/bin
-# save and exit vim
-# make environment variables take effect immediately
-$ source /etc/profile
 </code></pre>
 
 <h2 id="set-the-sparkexamplesjar-environment-variable">4.2 Set the SPARK_EXAMPLES_JAR environment variable</h2>
@@ -276,7 +288,18 @@ $ source /etc/profile
 
 <p>This is the most important step that must be done , but unfortunately the official docs and most web blogs haven’t mentioned this. I found this step when I bumped into these posts, <a href="https://groups.google.com/forum/?fromgroups#!topic/spark-users/nQ6wB2lcFN8">Running SparkPi</a>, <a href="https://groups.google.com/forum/#!msg/spark-users/x5UczgI-Xm8/wzMm3Mb77-oJ">Null pointer exception when running ./run spark.examples.SparkPi local</a>.</p>
 
-<h2 id="now-you-can-run-sparkpi">4.3 Now you can run SparkPi.</h2>
+<h2 id="optionalset-sparkhome-and-add-sparkhomebin-to-path">4.3 (Optional)Set SPARK_HOME and add SPARK_HOME/bin to PATH</h2>
+
+<pre><code>$ vim ~/.bash_profile
+# add the following lines at the end
+export SPARK_HOME=$HOME/spark-0.7.2
+export PATH=$PATH:$SPARK_HOME/bin
+# save and exit vim
+# make environment variables take effect immediately
+$ source /etc/profile
+</code></pre>
+
+<h2 id="now-you-can-run-sparkpi">4.4 Now you can run SparkPi.</h2>
 
 <pre><code>$ cd ~/spark-0.7.2
 $ ./run spark.examples.SparkPi local 
@@ -293,11 +316,15 @@ $ ./run spark.examples.SparkPi local
 <p>Install JDK 1.7 and Scala 2.9.3 on the three machines, according to section 1 and section 2.</p>
 
 <h2 id="install-and-configure-spark-on-master">5.3 Install and configure Spark on master</h2>
+<p>Untar</p>
+
 <pre><code>$ tar -zxf spark-0.7.2-prebuilt-hadoop1.tgz
-$ vim ~/.bash_profile
+</code></pre>
+
+<p>Set the SPARK_EXAMPLES_JAR environment variable</p>
+
+<pre><code>$ vim ~/.bash_profile
 # add the following lines at the end
-export SPARK_HOME=$HOME/spark-0.7.2
-export PATH=$PATH:$SPARK_HOME/bin
 export SPARK_EXAMPLES_JAR=$SPARK_HOME/examples/target/scala-2.9.3/spark-examples_2.9.3-0.7.2.jar
 # save and exit vim
 # make environment variables take effect immediately
@@ -321,8 +348,19 @@ slave02
 # save and exit
 </code></pre>
 
+<p>(Optional)Set SPARK_HOME and add SPARK_HOME/bin to PATH</p>
+
+<pre><code>$ vim ~/.bash_profile
+# add the following lines at the end
+export SPARK_HOME=$HOME/spark-0.7.2
+export PATH=$PATH:$SPARK_HOME/bin
+# save and exit vim
+# make environment variables take effect immediately
+$ source /etc/profile
+</code></pre>
+
 <h2 id="install-and-configure-spark-on-workers">5.4 Install and configure Spark on workers</h2>
-<p>Copy the spark directory to all slaves</p>
+<p>Copy the spark directory to all slaves. <strong>Remark，the spark directories must locat at the the same path on all machines，because the master will login to work to execute spark commands, it assumes that workers have the same path as itself</strong></p>
 
 <pre><code>scp -r spark-0.7.2 dev@slave01:~
 scp -r spark-0.7.2 dev@slave02:~
@@ -333,7 +371,7 @@ scp -r spark-0.7.2 dev@slave02:~
 <h2 id="start-spark-cluster">5.5 Start Spark cluster</h2>
 <p>On master</p>
 
-<pre><code>$ cd $SPARK_HONE
+<pre><code>$ cd ~/spark-0.7.2
 $ bin/start-all.sh
 </code></pre>
 
@@ -351,13 +389,13 @@ $ bin/start-all.sh
 
 <h2 id="run-the-sparkpi-example-in-cluster-mode">5.6 run the SparkPi example in cluster mode</h2>
 
-<pre><code>$ cd $SPARK_HONE
+<pre><code>$ cd ~/spark-0.7.2
 $ ./run spark.examples.SparkPi spark://master:7077
 </code></pre>
 
 <h2 id="read-files-from-hdfs-and-run-wordcount">5.7 read files from HDFS and run WordCount</h2>
 
-<pre><code>$ cd $SPARK_HOME
+<pre><code>$ cd ~/spark-0.7.2
 $ hadoop fs -put README.md .
 $ ./spark-shell
 scala&gt; val file = sc.textFile("hdfs://master:9000/user/dev/README.md")
@@ -367,7 +405,7 @@ scala&gt; count.collect()
 
 <h2 id="stop-spark-cluster">5.8 Stop Spark cluster</h2>
 
-<pre><code>$ cd $SPARK_HONE
+<pre><code>$ cd ~/spark-0.7.2
 $ bin/stop-all.sh
 </code></pre>
 
@@ -436,7 +474,7 @@ $ bin/stop-all.sh
 
 <p>为了能顺利安装成功，我们先练习在单台机器上安装Hadoop。在单台机器上，可以配置成本地模式(local mode)和伪分布式模式(Pseudo-Distributed Mode)，参考官方文档<a href="http://hadoop.apache.org/docs/r1.1.2/single_node_setup.html">Single Node Setup</a>。</p>
 
-<p>将 hadoop-1.1.2-bin.tar.gz 上传到三台机器的 home目录下，然后解压。</p>
+<p>将 hadoop-1.1.2-bin.tar.gz 上传到三台机器的 home目录下，然后解压。<strong>注意，三台机器hadoop所在目录必须一致，因为master会登陆到slave上执行命令，master认为slave的hadoop路径与自己一样。</strong></p>
 
 <h3 id="confhadoop-envsh-javahome">4.1 编辑 conf/hadoop-env.sh，设置 JAVA_HOME</h3>
 
@@ -682,7 +720,7 @@ $ scp hadoop-env.sh core-site.xml hdfs-site.xml mapred-site.xml masters slaves d
 $ scp hadoop-env.sh core-site.xml hdfs-site.xml mapred-site.xml masters slaves dev@192.168.1.133:~/hadoop-1.1.2/conf/
 </code></pre>
 
-<h3 id="hadoophomehadoophomebinpath">5.4 设置环境变量HADOOP_HOME，并将<code>$HADOOP_HOME/bin</code>加入PATH</h3>
+<h3 id="hadoophomehadoophomebinpath">5.4 （可选）设置环境变量HADOOP_HOME，并将<code>$HADOOP_HOME/bin</code>加入PATH</h3>
 <p>所有机器都要设置环境变量HADOOP_HOME，并将<code>$HADOOP_HOME/bin</code>加入PATH，因为master登陆到slave后，要执行<code>$HADOOP_HOME/bin</code> 下的一些命令。</p>
 
 <pre><code>$ vim ~/.bash_profile
@@ -703,9 +741,10 @@ export CLASSPATH=$CLASSPATH:$HADOOP_HOME/hadoop-core-1.1.2.jar
 <h3 id="hadoop-1">5.5 运行 hadoop</h3>
 <p>在master上执行以下命令，启动hadoop</p>
 
-<pre><code>#只需一次，下次启动不再需要格式化，只需 start-all.sh
-$ hadoop  namenode -format
-$ start-all.sh
+<pre><code>$ cd ~/hadoop-1.1.2/
+#只需一次，下次启动不再需要格式化，只需 start-all.sh
+$ bin/hadoop  namenode -format
+$ bin/start-all.sh
 </code></pre>
 
 <h3 id="section-6">5.6 检查是否启动成功</h3>
@@ -743,19 +782,19 @@ $ start-all.sh
 <h3 id="wordcount">5.7 运行wordcount例子，进一步测试是否安装成功</h3>
 <p>将输入数据拷贝到分布式文件系统中:</p>
 
-<pre><code>$ cd $HADOOP_HOME
-$ hadoop fs -put conf input
+<pre><code>$ cd ~/hadoop-1.1.2/
+$ bin/hadoop fs -put conf input
 </code></pre>
 
 <p>运行 Hadoop 自带的例子:</p>
 
-<pre><code>$ hadoop jar hadoop-examples-*.jar wordcount input output
+<pre><code>$ bin/hadoop jar hadoop-examples-*.jar wordcount input output
 </code></pre>
 
 <p>查看输出文件:</p>
 
-<pre><code>$ hadoop s -ls output
-$ hadoop fs -cat output/part-r-00000
+<pre><code>$ bin/hadoop s -ls output
+$ bin/hadoop fs -cat output/part-r-00000
 </code></pre>
 
 <p>如果能看到结果，说明这个例子运行成功。</p>
@@ -763,7 +802,7 @@ $ hadoop fs -cat output/part-r-00000
 <h3 id="hadoop-2">5.8 停止 hadoop集群</h3>
 <p>在master上执行：</p>
 
-<pre><code>$ stop-all.sh
+<pre><code>$ bin/stop-all.sh
 </code></pre>
 
 <h2 id="section-7">6. 排除错误</h2>
@@ -861,6 +900,10 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
 <p>翻@_@墙成功后，再输入 eclipse，当到达 twitter4j.org 时，会发现 SUCCESS了。耐心等待，最后会成功生成.project文件。</p>
 
 <p>用Scala IDE 导入项目，就可以开始阅读spark 源码了 :)</p>
+
+<p>如果不想折腾，可以下载我已经生成好的项目, <a href="http://pan.baidu.com/share/link?shareid=534521368&amp;uk=2466605404">spark-0.7.2.zip</a>。解压，启动Scala IDE，选择菜单<code>File-&gt;Import-&gt;General-&gt;Existing projects into workspace</code>，浏览到 spark-0.7.2目录，批量导入5个项目。导入后项目图标有红色感叹号，这是因为你的电脑上路径和我的路径不一样，找不到引用的jar了。右击项目，选择<code>Build Path-&gt;Configure Build Path</code>，选择<code>Libraries</code>标签，这时可以看到所有jar都有红叉叉，全选，删除，然后点击<code>Add External Jars</code>，浏览到<code>spark-0.7.2\lib_managed\jars</code>，把所有jar都导入，导入后红色感叹号就消失了。对每个项目都执行上述操作。</p>
+
+<p><strong>TODO</strong>: 虽然红色感叹号消失了，不过项目还是有红色小叉叉图标，这是因为IDE找不到某些类的定义，暂时不知道如何解决。</p>
 ]]></content>
   </entry>
   
