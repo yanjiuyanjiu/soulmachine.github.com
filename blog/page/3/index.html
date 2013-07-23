@@ -114,173 +114,6 @@
       
   <header class="page-header">
     
-      <h1 class="entry-title"><a href="/blog/20100401">Java使用imageio 读写图像</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2010-04-01T16:53:00+08:00" pubdate data-updated="true">Apr 1<span>st</span>, 2010</time>
-        
-		
-         | <a href="/blog/20100401#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Java中进行图像I/O（即读图片和写图片，不涉及到复杂图像处理）有三个方法：</p>
-
-<ol>
-  <li>Java Image I/O API，支持常见图片，从Java 2 version 1.4.0开始就内置了。
-主页：<a href="http://java.sun.com/javase/6/docs/technotes/guides/imageio/index.html">http://java.sun.com/javase/6/docs/technotes/guides/imageio/index.html</a></li>
-  <li>JAI 中的 Image I/O Tools，支持更多图片类型，例如JPEG-LS, JPEG2000, 和 TIFF。
-主页：<a href="https://jai-imageio.dev.java.net/">https://jai-imageio.dev.java.net/</a>。JAI 是一个关于图像处理的框架，很庞大，
-其中仅仅jai-imageio是关于图像I/O的，其他的可以不看。</li>
-  <li>JAI的com.sun.media.jai.codec 也有一定的图像解码能力</li>
-</ol>
-
-<p>当然，还有众多的java开源工具包可以读写图像，例如JIMI, JMagic等，但JDK目前本身能
-够读写图片，就用JDK的，开发和部署方便，不需要额外下载jar包。</p>
-
-<p>由于JAI是Java新加入的，很多组件不是正式规范，JDK不自带，因此开发和部署需要额外
-安装，安装文件在官网<a href="https://jai.dev.java.net/">https://jai.dev.java.net/</a>下载得到。</p>
-
-<p>如果你仅仅想读取常见格式的图片，不需要用JAI这么高级这么庞大的东西，
-用Java Image I/O API即可。</p>
-
-<p>下面重点介绍 Java Image I/O API。</p>
-
-<p>Java Image I/O API 主要在 javax.imageio 下面。JDK已经内置了常见图片格式的插件，
-但它提供了插件体系结构，第三方也可以开发插件支持其他图片格式。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/20100401">继续阅读 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20100331">Java质量检测评估工具</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2010-03-31T16:45:00+08:00" pubdate data-updated="true">Mar 31<span>st</span>, 2010</time>
-        
-		
-         | <a href="/blog/20100331#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Java代码质量检测评估工具
-“五大” 代码分析领域：</p>
-
-<ul>
-  <li>编码风格</li>
-  <li>冗余代码</li>
-  <li>代码覆盖率</li>
-  <li>依赖项分析</li>
-  <li>复杂度监控</li>
-</ul>
-
-<p>一下列举了一些目前比较流行的工具。网址后面列出了其PR值，可以反映此工具的流行度。</p>
-
-<h2 id="section">1. 编码风格</h2>
-<p>CheckStyle
-Home page: <a href="http://checkstyle.sourceforge.net/">http://checkstyle.sourceforge.net/</a> (6)<br />
-对应的eclipse插件有多个，其中eclipsecs最常用<br />
-Home page: <a href="http://eclipse-cs.sourceforge.net/">http://eclipse-cs.sourceforge.net/</a> (6)<br />
-eclipse插件URL：<a href="http://eclipse-cs.sf.net/update/">http://eclipse-cs.sf.net/update/</a></p>
-
-<h2 id="section-1">2. 冗余代码</h2>
-<p>Simian <a href="http://www.redhillconsulting.com.au/products/simian/">http://www.redhillconsulting.com.au/products/simian/</a> (5)<br />
-PMD 的 CPD <a href="http://pmd.sourceforge.net/cpd.html">http://pmd.sourceforge.net/cpd.html</a> (5)</p>
-
-<h2 id="section-2">3. 代码覆盖率</h2>
-<p>EMMA  <a href="http://emma.sourceforge.net/">http://emma.sourceforge.net/</a> (6)<br />
-Cobertura  <a href="http://cobertura.sourceforge.net/">http://cobertura.sourceforge.net/</a> (6)<br />
-EclEmma <a href="http://update.eclemma.org/">http://update.eclemma.org/</a> (5)<br />
-Coverlipse <a href="http://coverlipse.sourceforge.net/">http://coverlipse.sourceforge.net/</a> (3)</p>
-
-<h2 id="section-3">4. 依赖项分析</h2>
-<p>JDepend <a href="http://clarkware.com/software/JDepend.html">http://clarkware.com/software/JDepend.html</a> (6)</p>
-
-<h2 id="section-4">5. 复杂度监控</h2>
-<p>Metrics <a href="http://metrics.sourceforge.net/">http://metrics.sourceforge.net/</a> (4)</p>
-
-<h2 id="section-5">6. 静态分析工具</h2>
-<p>具有以上两项或两项以上的综合工具（也称为静态分析工具）： </p>
-
-<h3 id="pmd">6.1 PMD</h3>
-<p>Home page: <a href="http://pmd.sourceforge.net/">http://pmd.sourceforge.net/</a> (6)<br />
-eclipse插件URL：<a href="http://sourceforge.net/projects/pmd/files/pmd-eclipse/update-site/">http://sourceforge.net/projects/pmd/files/pmd-eclipse/update-site/</a></p>
-
-<h3 id="findbugs-httpfindbugssourceforgenet-6">6.2 FindBugs <a href="http://findbugs.sourceforge.net/">http://findbugs.sourceforge.net/</a> (6)</h3>
-<p>eclipse插件URL：<a href="http://findbugs.cs.umd.edu/eclipse">http://findbugs.cs.umd.edu/eclipse</a></p>
-
-<p>FindBugs 检查程序生成的class文件，即分析字节码
-PMD 检查源码，分析源代码</p>
-
-<h3 id="jtest">6.3 Jtest</h3>
-<p><a href="http://www.parasoft.com/jtest">http://www.parasoft.com/jtest</a></p>
-
-<h3 id="jlint">6.4 Jlint</h3>
-<p><a href="http://artho.com/jlint/">http://artho.com/jlint/</a> (5)</p>
-
-<h3 id="lint4j">6.5 Lint4j</h3>
-<p><a href="http://www.jutils.com/">http://www.jutils.com/</a> (4)</p>
-
-<p>我个人平时最常用的是Checkstyle，其次是PMD，大家可以参考一下。</p>
-
-<h2 id="section-6">参考资料</h2>
-<p><a href="http://blog.csdn.net/cb_121/archive/2009/05/22/4208792.aspx">http://blog.csdn.net/cb_121/archive/2009/05/22/4208792.aspx</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header class="page-header">
-    
       <h1 class="entry-title"><a href="/blog/20100328">使用pdfbox 抽取PDF文件中的文本</a></h1>
     
     
@@ -491,7 +324,7 @@ PMD 检查源码，分析源代码</p>
 </section>
 <section>
   <h2>分类目录</h2>
-    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (2)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/mahout/'>mahout (2)</a></li><li><a href='/blog/categories/spark/'>spark (3)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (2)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/spark/'>spark (3)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
 </section>
 <section>
   <h2>友情链接</h2>
@@ -531,14 +364,6 @@ PMD 检查源码，分析源代码</p>
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/20130707">Mhout KMeans 结果分析</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20130704">安装 mahout</a>
-      </li>
-    
-      <li class="post">
         <a href="/blog/20130617">安装Spark集群(在CentOS上)</a>
       </li>
     
@@ -548,6 +373,14 @@ PMD 检查源码，分析源代码</p>
     
       <li class="post">
         <a href="/blog/20130612">在CentOS上安装Hadoop</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20130611">使用Scala IDE 阅读spark源码 &#8211; 将sbt项目转化为eclipse项目</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20130412">LaTeX的各种发行版和编辑器的比较</a>
       </li>
     
   </ul>
