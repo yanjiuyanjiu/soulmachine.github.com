@@ -4,7 +4,7 @@
   <title><![CDATA[研究研究]]></title>
   <link href="http://www.yanjiuyanjiu.com/atom.xml" rel="self"/>
   <link href="http://www.yanjiuyanjiu.com/"/>
-  <updated>2013-06-21T00:48:47+08:00</updated>
+  <updated>2013-07-23T22:56:19+08:00</updated>
   <id>http://www.yanjiuyanjiu.com/</id>
   <author>
     <name><![CDATA[soulmachine]]></name>
@@ -12,6 +12,155 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Mhout KMeans 结果分析]]></title>
+    <link href="http://www.yanjiuyanjiu.com/blog/20130707"/>
+    <updated>2013-07-07T17:04:00+08:00</updated>
+    <id>http://www.yanjiuyanjiu.com/blog/mahout-kmeans-results-analysis</id>
+    <content type="html"><![CDATA[<h1 id="kmeans">运行KMeans示例</h1>
+<p>运行KMeans示例有三种方法，参考前篇一篇博客，<a href="">安装mahout</a>。</p>
+
+<p>通过阅读<code>examples\src\main\java\org\apache\mahout\clustering\syntheticcontrol\kmeans\Job.java</code>和<code>integration\src\main\java\org\apache\mahout\clustering\conversion\InputDriver.java</code>的代码，运行KMeans示例还有第4种方法</p>
+
+<p>利用<code>InputDriver</code>将文本格式的向量转化为Mahout能识别的向量，</p>
+
+<pre><code>$ hadoop jar ~/mahout-distribution-0.7/mahout-examples-0.7-job.jar org.apache.mahout.clustering.conversion.InputDriver -i testdata -o vector
+</code></pre>
+
+<p>利用 mahout 自带的命令行工具，</p>
+
+<pre><code>$ mahout kmeans -i vector -o output -dm org.apache.mahout.common.distance.EuclideanDistanceMeasure -c centroids -k 6 -cd 0.5 -x 10 -ow 
+</code></pre>
+
+<h1 id="section">分析聚类结果</h1>
+
+<h2 id="section-1">查看结果</h2>
+
+<pre><code>$ hadoop fs -lsr output
+$ mahout seqdumper -i output/clusteredPoints -o clusteredPoints
+$ vim clusteredPoints
+$ mahout clusterdump -i output/clusters-9-final -o clusters --pointsDir output/clusteredPoints
+$ vim clusters
+</code></pre>
+
+<h2 id="section-2">分析结果</h2>
+
+<h1 id="section-3">参考资料</h1>
+<ol>
+  <li><a href="https://cwiki.apache.org/confluence/display/MAHOUT/Clustering+of+synthetic+control+data">Clustering of synthetic control data</a></li>
+  <li><a href="http://blog.csdn.net/aidayei/article/details/6665530">mahout中的kmeans结果分析</a></li>
+</ol>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[安装 mahout]]></title>
+    <link href="http://www.yanjiuyanjiu.com/blog/20130704"/>
+    <updated>2013-07-04T15:47:00+08:00</updated>
+    <id>http://www.yanjiuyanjiu.com/blog/installing-mahout</id>
+    <content type="html"><![CDATA[<p><strong>前提条件</strong>：已经安装好Hadoop集群，并启动。参考我的博客，<a href="http://www.yanjiuyanjiu.com/blog/20130612">在CentOS上安装Hadoop</a>，<a href="http://www.yanjiuyanjiu.com/blog/20120103">在Ubuntu上安装Hadoop</a>。</p>
+
+<h2 id="section">编译源码进行安装</h2>
+
+<p>见官网文档， <a href="https://cwiki.apache.org/confluence/display/MAHOUT/Mahout+Wiki#MahoutWiki-Installation%2FSetup">Installation/Setup</a></p>
+
+<p>不推荐这个方式，太繁琐。</p>
+
+<h2 id="section-1">下载预编译好的压缩包进行安装</h2>
+
+<p>这种方法最简单。</p>
+
+<h3 id="section-2">下载</h3>
+
+<p>在首页点击右侧的”Download Mahout”按钮，下载预编译好的二进制包。我下载的是mahout-distribution-0.7.tar.gz。</p>
+
+<h3 id="section-3">解压</h3>
+
+<p>解压到$HOME目录</p>
+
+<pre><code>$ tar -zxf mahout-distribution-0.7.tar.gz
+$ cd mahout-distribution-0.7
+</code></pre>
+
+<h3 id="section-4">配置</h3>
+
+<p>只需要在Master这台机器上配置即可。</p>
+
+<p>设置 HADOOP_PREFIX 环境变量，把Hadoop的安装位置告诉Mahout。或者设置HADOOP_HOME环境变量，不过HADOOP_HOME已经是derecated了，不建议使用。</p>
+
+<p>设置 HADOOP_CONF_DIR，把Hadoop配置文件的位置告诉Mahout。</p>
+
+<p>[可选]为了方便，将mahout命令加入PATH。</p>
+
+<p>将Mahout的jar加入CLASSPATH，在编译代码时需要。</p>
+
+<pre><code>$ vim ~/.bash_profile
+export HADOOP_PREFIX=$HOME/hadoop-1.1.2
+export HADOOP_CONF_DIR=$HADOOP_PREFIX/conf
+export PATH=$PATH:$HOME/mahout-distribution-0.7/bin
+export CLASSPATH=$CLASSPATH:$HOME/mahout-distribution-0.7/mahout-core-0.7.jar
+$ source  ~/.bash_profile
+</code></pre>
+
+<p>以上配置都是通过阅读 mahout这个脚本才知道的。</p>
+
+<pre><code>$ vim mahout-distribution-0.7/bin/mahout
+</code></pre>
+
+<p>打开这个脚本，可以看到所有配置，一目了然。</p>
+
+<h2 id="kmeans-">运行自带的 KMeans 例子</h2>
+
+<p>主要参考官网文档，<a href="https://cwiki.apache.org/confluence/display/MAHOUT/Clustering+of+synthetic+control+data">Clustering of synthetic control data</a>。</p>
+
+<h3 id="section-5">下载数据</h3>
+
+<p>下载地址：<a href="http://archive.ics.uci.edu/ml/databases/synthetic_control/synthetic_control.data">synthetic_control.data</a><br />
+<a href="http://archive.ics.uci.edu/ml/databases/synthetic_control/synthetic_control.data.html">数据格式说明</a></p>
+
+<h3 id="hdfs">上传到HDFS</h3>
+
+<pre><code>$ hadoop fs -mkdir testdata
+$ hadoop fs -put ./synthetic_control.data testdata
+</code></pre>
+
+<p>Mahout自带的mahout-examples-0.7-job.jar 默认从 testdata目录读取数据，所以目录必须命名为testdata</p>
+
+<h3 id="kmeans">运行自带的kmeans算法</h3>
+
+<pre><code>$ mahout org.apache.mahout.clustering.syntheticcontrol.kmeans.Job
+</code></pre>
+
+<p>或者</p>
+
+<pre><code>$ hadoop jar ~/mahout-distribution-0.7/mahout-examples-0.7-job.jar org.apache.mahout.clustering.syntheticcontrol.kmeans.Job
+</code></pre>
+
+<p>或者</p>
+
+<pre><code>$ mahout jar ~/mahout-distribution-0.7/mahout-examples-0.7-job.jar org.apache.mahout.clustering.syntheticcontrol.kmeans.Job
+</code></pre>
+
+<p>三者是等价的。感兴趣的话去阅读 <code>bin/mahout</code> 这个脚本，看看最后几行，包含 <code>exec</code> 的那几行代码。</p>
+
+<h3 id="section-6">查看结果</h3>
+
+<pre><code>$ hadoop fs -lsr output
+</code></pre>
+
+<p>如果看到以下结果，说明算法运行成功，Mahout的安装也就成功了。</p>
+
+<pre><code>clusteredPoints  clusters-0  clusters-1  clusters-10  clusters-2  clusters-3  clusters-4 clusters-5  clusters-6  clusters-7  clusters-8  clusters-9  data
+</code></pre>
+
+<h2 id="section-7">参考资料</h2>
+<ol>
+  <li><a href="https://cwiki.apache.org/confluence/display/MAHOUT/Mahout+Wiki#MahoutWiki-Installation%2FSetup">Installation/Setup</a></li>
+  <li><a href="http://www.cnblogs.com/linjiqin/archive/2013/03/15/2961649.html">Mahout安装与配置</a></li>
+</ol>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[安装Spark集群(在CentOS上)]]></title>
@@ -461,13 +610,17 @@ $ bin/stop-all.sh
 <h2 id="section">2 关闭防火墙</h2>
 <p>临时关闭防火墙</p>
 
-<pre><code>$ sudo service iptables stop 下次开机后，防火墙还是会启动。
+<pre><code>$ sudo service iptables stop
 </code></pre>
+
+<p>下次开机后，防火墙还是会启动。</p>
 
 <p>永久关闭防火墙</p>
 
-<pre><code>$ sudo chkconfig iptables off 由于这几台虚拟机是开发机，不是生产环境，因此不必考虑安全性，可以永久关闭防火墙，还能给开发阶段带来很多便利。
+<pre><code>$ sudo chkconfig iptables off
 </code></pre>
+
+<p>由于这几台虚拟机是开发机，不是生产环境，因此不必考虑安全性，可以永久关闭防火墙，还能给开发阶段带来很多便利。</p>
 
 <h2 id="hostname">3. 修改hostname</h2>
 <p>这一步看起来貌似不必要，其实是必须的，否则最后运行wordcount等例子时，会出现“Too many fetch-failures”。因为HDFS用hostname而不是IP，来相互之间进行通信（见后面的注意1）。</p>
@@ -669,8 +822,10 @@ $ chmod 700 ~/.ssh
 $ ssh 192.168.1.132
 $ exit
 $ ssh 192.168.1.133
-$ exit 如果不需要密码，则说明配置成功了。
+$ exit
 </code></pre>
+
+<p>如果不需要密码，则说明配置成功了。</p>
 
 <p>如果登陆不上，试试先关闭两台slaves的防火墙</p>
 
@@ -2737,6 +2892,12 @@ Windows预设是Big5编码,所以要想’rake generate’的时候不报编码�
 <p>这个页面<a href="http://math.nist.gov/javanumerics/">JavaNumerics page</a>专门收集了关于Java数值计算的库。</p>
 
 <p><a href="https://code.google.com/p/java-matrix-benchmark/">java-matrix-benchmark</a>这个开源项目，比较了各类Java线性代数库的性能。</p>
+
+<p>Java的数值计算库主要分为两类：Pure Java和Natie Wrapper。Pure Java是指用纯Java编写的，Native Wrapper是指该库底层调用了C++或Fortan编写的第三方库，上面封装了一层，提供了更有好的接口。</p>
+
+<p>Pure Java的有：<a href="http://dsd.lbl.gov/~hoschek/colt/">Colt</a>, <a href="http://commons.apache.org/proper/commons-math/">Commons Math</a>, <a href="https://code.google.com/p/efficient-java-matrix-library/">EJML</a>, <a href="http://math.nist.gov/javanumerics/jama/">JAMA</a>, </p>
+
+<p>Native Wrapper有：<a href="http://jblas.org">jblas</a>，<a href="https://github.com/fommil/matrix-toolkits-java">Matrix Toolkit Java</a></p>
 
 <p>下面介绍一些影响力较大的java数值计算/科学计算库。</p>
 
@@ -5199,354 +5360,6 @@ $$
     </li>
   </ol>
 </div>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Java使用imageio 读写图像]]></title>
-    <link href="http://www.yanjiuyanjiu.com/blog/20100401"/>
-    <updated>2010-04-01T16:53:00+08:00</updated>
-    <id>http://www.yanjiuyanjiu.com/blog/read-and-write-images-using-java-imageio</id>
-    <content type="html"><![CDATA[<p>Java中进行图像I/O（即读图片和写图片，不涉及到复杂图像处理）有三个方法：</p>
-
-<ol>
-  <li>Java Image I/O API，支持常见图片，从Java 2 version 1.4.0开始就内置了。
-主页：<a href="http://java.sun.com/javase/6/docs/technotes/guides/imageio/index.html">http://java.sun.com/javase/6/docs/technotes/guides/imageio/index.html</a></li>
-  <li>JAI 中的 Image I/O Tools，支持更多图片类型，例如JPEG-LS, JPEG2000, 和 TIFF。
-主页：<a href="https://jai-imageio.dev.java.net/">https://jai-imageio.dev.java.net/</a>。JAI 是一个关于图像处理的框架，很庞大，
-其中仅仅jai-imageio是关于图像I/O的，其他的可以不看。</li>
-  <li>JAI的com.sun.media.jai.codec 也有一定的图像解码能力</li>
-</ol>
-
-<p>当然，还有众多的java开源工具包可以读写图像，例如JIMI, JMagic等，但JDK目前本身能
-够读写图片，就用JDK的，开发和部署方便，不需要额外下载jar包。</p>
-
-<p>由于JAI是Java新加入的，很多组件不是正式规范，JDK不自带，因此开发和部署需要额外
-安装，安装文件在官网<a href="https://jai.dev.java.net/">https://jai.dev.java.net/</a>下载得到。</p>
-
-<p>如果你仅仅想读取常见格式的图片，不需要用JAI这么高级这么庞大的东西，
-用Java Image I/O API即可。</p>
-
-<p>下面重点介绍 Java Image I/O API。</p>
-
-<p>Java Image I/O API 主要在 javax.imageio 下面。JDK已经内置了常见图片格式的插件，
-但它提供了插件体系结构，第三方也可以开发插件支持其他图片格式。</p>
-
-<!--more-->
-
-<p>下面这段代码可以展示，JDK内置支持的图片格式。</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="kn">import</span> <span class="nn">javax.imageio.*</span><span class="o">;</span>
-</span><span class="line"><span class="kn">import</span> <span class="nn">java.util.Arrays</span><span class="o">;</span>
-</span><span class="line">
-</span><span class="line"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloWorld</span> <span class="o">{</span>
-</span><span class="line"><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span> <span class="n">args</span><span class="o">[])</span> <span class="o">{</span>
-</span><span class="line"><span class="n">String</span> <span class="n">readFormats</span><span class="o">[]</span> <span class="o">=</span> <span class="n">ImageIO</span><span class="o">.</span><span class="na">getReaderFormatNames</span><span class="o">();</span>
-</span><span class="line"><span class="n">String</span> <span class="n">writeFormats</span><span class="o">[]</span> <span class="o">=</span> <span class="n">ImageIO</span><span class="o">.</span><span class="na">getWriterFormatNames</span><span class="o">();</span>
-</span><span class="line"><span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="err">“</span><span class="nl">Readers:</span>  <span class="err">”</span> <span class="o">+</span> <span class="n">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="n">readFormats</span><span class="o">));</span>
-</span><span class="line"><span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="err">“</span><span class="nl">Writers:</span>  <span class="err">”</span> <span class="o">+</span> <span class="n">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="n">writeFormats</span><span class="o">));</span>
-</span><span class="line"><span class="o">}</span>
-</span><span class="line"><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>主页上有一个文档，Java Image I/O API Guide，很通俗易懂，可以让你快速上手。以下
-内容主要来自这个文档的第3章。</p>
-
-<h1 id="io">第3章 编写图像I/O程序</h1>
-<p>##3.1 读写图片
-javax.imageio.ImageIO类提供了一组静态方法进行最简单的图像I/O操作。
-读取一个标准格式(GIF, PNG, or JPEG)的图片很简单：</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="n">File</span> <span class="n">f</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="err">“</span><span class="nl">c:</span><span class="n">imagesmyimage</span><span class="o">.</span><span class="na">gif</span><span class="err">”</span><span class="o">);</span>
-</span><span class="line"><span class="n">BufferedImage</span> <span class="n">bi</span> <span class="o">=</span> <span class="n">ImageIO</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">f</span><span class="o">);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>Java Image I/O API 会自动探测图片的格式并调用对应的插件进行解码，当安装了一个新
-插件，新的格式会被自动理解，程序代码不需要改变。</p>
-
-<p>写图片同样简单：</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="n">BufferedImage</span> <span class="n">bi</span><span class="o">;</span>
-</span><span class="line"><span class="n">File</span> <span class="n">f</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="err">“</span><span class="nl">c:</span><span class="n">imagesmyimage</span><span class="o">.</span><span class="na">png</span><span class="err">”</span><span class="o">);</span>
-</span><span class="line"><span class="n">ImageIO</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">im</span><span class="o">,</span> <span class="err">“</span><span class="n">png</span><span class="err">”</span><span class="o">,</span> <span class="n">f</span><span class="o">);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<h2 id="section">3.2 更进一步</h2>
-<p>上一节谈到的方法对于简单程序已经足够了。不过，Java Image I/O API 提供了为编写复
-杂程序的能力。为了利用API的高级特性，应用程序应当直接使用类ImageReader 和
-ImageWriter。</p>
-
-<h2 id="imagereader-">3.3 ImageReader 类</h2>
-<p>与其用ImageIO类来进行所有的解码操作，不如用ImageIO类去得到一个ImageReader对象，
-再用这个对象去进行读操作：</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="n">Iterator</span> <span class="n">readers</span> <span class="o">=</span> <span class="n">ImageIO</span><span class="o">.</span><span class="na">getImageReadersByFormatName</span><span class="o">(</span><span class="err">“</span><span class="n">gif</span><span class="err">”</span><span class="o">);</span>
-</span><span class="line"><span class="n">ImageReader</span> <span class="n">reader</span> <span class="o">=</span> <span class="o">(</span><span class="n">ImageReader</span><span class="o">)</span><span class="n">readers</span><span class="o">.</span><span class="na">next</span><span class="o">();</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>ImageReader对象也可以基于文件内容、文件后缀或MIME类型获得。这个用于查找和初始
-化ImageReader对象的机制用到了javax.imageio.spi.ImageReaderSpi类，它可以在不用初
-始化插件的情况下获得插件的信息。”service provider interfaces” (SPIs)将会在下一
-章详细讨论。一旦获得了一个ImageReader对象，必须给它是指一个输入源。大部分
-ImageReader对象可以从ImageInputStream类输入源读取数据，ImageInputStream是Image
-I/O API定义的专用输入源。</p>
-
-<p>获得一个ImageInputStream 是简单的。给定一个File或InputStream，一个
-ImageInputStream对象可以通过调用如下函数产生：</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="n">Object</span> <span class="n">source</span><span class="o">;</span> <span class="c1">// File or InputStream</span>
-</span><span class="line"><span class="n">ImageInputStream</span> <span class="n">iis</span> <span class="o">=</span> <span class="n">ImageIO</span><span class="o">.</span><span class="na">createImageInputStream</span><span class="o">(</span><span class="n">source</span><span class="o">);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-<p>一旦有了输入源，可以把它与一个ImageReader对象关联起来：
-reader.setInput(iis, true);</p>
-
-<p>如果输入源文件包含多张图片，而程序不保证按顺序读取时，第二个参数应该设置为
-false。对于那些只允许存储一张图片的文件格式，永远传递true是合理的。</p>
-
-<p>当ImageReader对象有了输入源后，我们就可以获取图片信息而不用把整张图片数据都读入
-内存。例如，调用reader.getImageWidth(0)可以让我们获得文件中第一张图片的宽度。一
-个好的插件会试图解码文件的必要部分，去获得图片的宽度，而不用读取任何一个像素。</p>
-
-<p>为读取图片，可以调用reader.read(imageIndex), imageIndex是文件（当包含多张图片时）
-中图片的索引。这与上一节调用ImageIO.read()产生的结果相同。</p>
-
-<h3 id="imagereadparam">3.3.1 ImageReadParam</h3>
-<p>如果需要更多的控制，可以向read()方法传递一个ImageReadParam类型的参数。一个
-ImageReadParam对象可以让程序更好的利用内存。它不仅允许指定一个感兴趣的区域，还
-可以指定一个抽样因子，用于向下采样。</p>
-
-<p>例如，为了只解码图片的左上角的1/4，程序可以先获取一个合适的ImageReadParam对象：</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="n">ImageReadParam</span> <span class="n">param</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="na">getDefaultReadParam</span><span class="o">();</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>接下来，指定图片区域：</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="kn">import</span> <span class="nn">java.awt.Rectangle</span><span class="o">;</span>
-</span><span class="line"><span class="kt">int</span> <span class="n">imageIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
-</span><span class="line"><span class="kt">int</span> <span class="n">half_width</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="na">getImageWidth</span><span class="o">(</span><span class="n">imageIndex</span><span class="o">)/</span><span class="mi">2</span><span class="o">;</span>
-</span><span class="line"><span class="kt">int</span> <span class="n">half_height</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="na">getImageHeight</span><span class="o">(</span><span class="n">imageIndex</span><span class="o">)/</span><span class="mi">2</span><span class="o">;</span>
-</span><span class="line"><span class="n">Rectangle</span> <span class="n">rect</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Rectangle</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">half_width</span><span class="o">,</span> <span class="n">half_height</span><span class="o">);</span>
-</span><span class="line"><span class="n">param</span><span class="o">.</span><span class="na">setSourceRegion</span><span class="o">(</span><span class="n">rect</span><span class="o">);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>最后，读取图片：</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="n">BufferedImage</span> <span class="n">bi</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">imageIndex</span><span class="o">,</span> <span class="n">param</span><span class="o">);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>结果是一张新图片，宽和高都只有原图片的一半。</p>
-
-<p>另一个例子，为了读取每三个像素中的一个，产生一个原图片1/9大小的图片，可以用
-ImageReadParam指定抽样因子：</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="n">param</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="na">getDefaultImageParam</span><span class="o">();</span>
-</span><span class="line"><span class="n">param</span><span class="o">.</span><span class="na">setSourceSubsampling</span><span class="o">(</span><span class="mi">3</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
-</span><span class="line"><span class="n">BufferedImage</span> <span class="n">bi3</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="n">param</span><span class="o">);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<h3 id="iioparamcontroller">3.3.2 IIOParamController</h3>
-<p>插件有时会提供一个IIOParamController类，这是可选的。略。</p>
-
-<h3 id="section-1">3.3.3 读多图片文件</h3>
-<p>ImageReader 中所有与图片打交道的方法都有一个imageIndex 参数，这个参数用于读取多
-图片文件中的一张。</p>
-
-<p>ImageReader.getNumImages()返回多图片文件中的图片个数。这个方法有一个boolean参数，
-allowSearch。有的图片格式，典型的GIF，没有提供任何获取文件中的图片个数方法，除
-非读取整个进行解析。这样代价很高，因此设置allowSearch为false可以让方法直接返回
--1，而不是实际的图片个数。如果此参数是true，则该方法总会返回文件中实际的图片个
-数。</p>
-
-<p>即使在不知道文件中图片个数的情况下，仍可以调用read(imageIndex); 如果索引值过大，
-该方法会抛出IndexOutOfBoundsException异常。因此，程序可以递增索引去获取图片，
-直到异常。</p>
-
-<h3 id="section-2">3.3.4 读缩略图</h3>
-<p>有的图片格式允许一个（或多个）小的预览图，与主图片一起存储在文件中。这些
-“缩略图”对于快速识别图片很有用，不用解码整个图片。</p>
-
-<p>程序可以调用如下代码，探测一张图片有多少张缩略图：
-reader.getNumThumbnails(imageIndex);</p>
-
-<p>如果存在缩略图，可以调用如下代码获取：</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="kt">int</span> <span class="n">thumbailIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
-</span><span class="line"><span class="n">BufferedImage</span> <span class="n">bi</span><span class="o">;</span>
-</span><span class="line"><span class="n">bi</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="na">readThumbnail</span><span class="o">(</span><span class="n">imageIndex</span><span class="o">,</span> <span class="n">thumbnailIndex</span><span class="o">);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<h2 id="imagewriter-">3.4 ImageWriter 类</h2>
-<p>就像我们可以用ImageIO 的一个方法获取某种图片格式的ImageReader对象一样，我们也可
-以获取ImageWriter对象：</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="n">Iterator</span> <span class="n">writers</span> <span class="o">=</span> <span class="n">ImageIO</span><span class="o">.</span><span class="na">getImageWritersByFormatName</span><span class="o">(</span><span class="err">“</span><span class="n">png</span><span class="err">”</span><span class="o">);</span>
-</span><span class="line"><span class="n">ImageWriter</span> <span class="n">writer</span> <span class="o">=</span> <span class="o">(</span><span class="n">ImageWriter</span><span class="o">)</span><span class="n">writers</span><span class="o">.</span><span class="na">next</span><span class="o">();</span>
-</span><span class="line">
-</span><span class="line"><span class="err">一旦获取了一个</span><span class="n">ImageWriter</span><span class="err">对象，必须给它设置一个输出源</span><span class="n">ImageOutputStream</span><span class="err">。</span>
-</span><span class="line"><span class="n">File</span> <span class="n">f</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="err">“</span><span class="nl">c:</span><span class="n">imagesmyimage</span><span class="o">.</span><span class="na">png</span><span class="err">”</span><span class="o">);</span>
-</span><span class="line"><span class="n">ImageOutputStream</span> <span class="n">ios</span> <span class="o">=</span> <span class="n">ImageIO</span><span class="o">.</span><span class="na">createImageOutputStream</span><span class="o">(</span><span class="n">f</span><span class="o">);</span>
-</span><span class="line"><span class="n">writer</span><span class="o">.</span><span class="na">setOutput</span><span class="o">(</span><span class="n">ios</span><span class="o">);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>最后，可以把图片写入到输出源：</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="n">BufferedImage</span> <span class="n">bi</span><span class="o">;</span>
-</span><span class="line"><span class="n">writer</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">bi</span><span class="o">);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<h3 id="section-3">3.4.1 写多图片文件</h3>
-<p>IIOImage类用于存储图片，缩略图或元信息的引用。下一节将讨论Metadata，目前，我们
-简单地给Metadata相关参数传递null。
-ImageWriter 类有一个方法write()，用于从IIOImage创建一个新文件，还有一个方法
-writeInsert()，用于向一个已存在文件添加一个IIOImage对象。通过调用这两者，可以创
-建一个多图片文件：</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="n">BufferedImage</span> <span class="n">first_bi</span><span class="o">,</span> <span class="n">second_bi</span><span class="o">;</span>
-</span><span class="line"><span class="n">IIOImage</span> <span class="n">first_IIOImage</span> <span class="o">=</span> <span class="k">new</span> <span class="n">IIOImage</span><span class="o">(</span><span class="n">first_bi</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
-</span><span class="line"><span class="n">IIOImage</span> <span class="n">second_IIOImage</span> <span class="o">=</span> <span class="k">new</span> <span class="n">IIOImage</span><span class="o">(</span><span class="n">second_bi</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
-</span><span class="line"><span class="n">writer</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="kc">null</span><span class="o">,</span> <span class="n">first_IIOImage</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
-</span><span class="line"><span class="k">if</span> <span class="o">(</span><span class="n">writer</span><span class="o">.</span><span class="na">canInsertImage</span><span class="o">(</span><span class="mi">1</span><span class="o">))</span> <span class="o">{</span>
-</span><span class="line"><span class="n">writer</span><span class="o">.</span><span class="na">writeInsert</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="n">second_IIOImage</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
-</span><span class="line"><span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
-</span><span class="line"><span class="n">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="err">“</span><span class="n">Writer</span> <span class="n">can</span><span class="err">’</span><span class="n">t</span> <span class="n">append</span> <span class="n">a</span> <span class="n">second</span> <span class="n">image</span><span class="o">!</span><span class="err">”</span><span class="o">);</span>
-</span><span class="line"><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<h2 id="metadata">3.5  处理 Metadata</h2>
-<p>所有与像素无关的信息，都属于在Metadata。javax.imageio.metadata 包含了用于访问
-Metadata的类和接口。</p>
-
-<p>Image I/O API 将stream metadata 和image metadata区别对待。stream metadata与一个
-文件中存储了多张图片有关，image metadata只与单个图片有关。如果一个文件只包含一张
-图片，那么就只存在image metadata。</p>
-
-<p>可以通过调用ImageReader.getStreamMetadata 和 getImageMetadata(int imageIndex)来
-获取metadata。这些方法会返回一个实现了IIOMetadata接口的对象，该对象会被向上转化
-为ImageReader类型，</p>
-
-<h2 id="section-4">3.6 编码转换</h2>
-<p>略</p>
-
-<h2 id="section-5">3.7 事件监听</h2>
-<p>略</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Java质量检测评估工具]]></title>
-    <link href="http://www.yanjiuyanjiu.com/blog/20100331"/>
-    <updated>2010-03-31T16:45:00+08:00</updated>
-    <id>http://www.yanjiuyanjiu.com/blog/java-qa-tools</id>
-    <content type="html"><![CDATA[<p>Java代码质量检测评估工具
-“五大” 代码分析领域：</p>
-
-<ul>
-  <li>编码风格</li>
-  <li>冗余代码</li>
-  <li>代码覆盖率</li>
-  <li>依赖项分析</li>
-  <li>复杂度监控</li>
-</ul>
-
-<p>一下列举了一些目前比较流行的工具。网址后面列出了其PR值，可以反映此工具的流行度。</p>
-
-<p>1、编码风格
-CheckStyle
-Home page: <a href="http://checkstyle.sourceforge.net/">http://checkstyle.sourceforge.net/</a> (6)<br />
-对应的eclipse插件有多个，其中eclipsecs最常用<br />
-Home page: <a href="http://eclipse-cs.sourceforge.net/">http://eclipse-cs.sourceforge.net/</a> (6)<br />
-eclipse插件URL：<a href="http://eclipse-cs.sf.net/update/">http://eclipse-cs.sf.net/update/</a></p>
-
-<p>2、冗余代码
-Simian <a href="http://www.redhillconsulting.com.au/products/simian/">http://www.redhillconsulting.com.au/products/simian/</a> (5)<br />
-PMD 的 CPD <a href="http://pmd.sourceforge.net/cpd.html">http://pmd.sourceforge.net/cpd.html</a> (5)
-<!--more-->
-3、代码覆盖率
-EMMA  <a href="http://emma.sourceforge.net/">http://emma.sourceforge.net/</a> (6)<br />
-Cobertura  <a href="http://cobertura.sourceforge.net/">http://cobertura.sourceforge.net/</a> (6)<br />
-EclEmma <a href="http://update.eclemma.org/">http://update.eclemma.org/</a> (5)<br />
-Coverlipse <a href="http://coverlipse.sourceforge.net/">http://coverlipse.sourceforge.net/</a> (3)</p>
-
-<p>4、依赖项分析
-JDepend <a href="http://clarkware.com/software/JDepend.html">http://clarkware.com/software/JDepend.html</a> (6)</p>
-
-<p>5、复杂度监控
-Metrics <a href="http://metrics.sourceforge.net/">http://metrics.sourceforge.net/</a> (4)</p>
-
-<p>具有以上两项或两项以上的综合工具（也称为静态分析工具）：
-1、PMD
-Home page: <a href="http://pmd.sourceforge.net/">http://pmd.sourceforge.net/</a> (6)<br />
-eclipse插件URL：<a href="http://sourceforge.net/projects/pmd/files/pmd-eclipse/update-site/">http://sourceforge.net/projects/pmd/files/pmd-eclipse/update-site/</a></p>
-
-<p>2、FindBugs <a href="http://findbugs.sourceforge.net/">http://findbugs.sourceforge.net/</a> (6)<br />
-eclipse插件URL：<a href="http://findbugs.cs.umd.edu/eclipse">http://findbugs.cs.umd.edu/eclipse</a></p>
-
-<p>FindBugs 检查程序生成的class文件，即分析字节码
-PMD 检查源码，分析源代码</p>
-
-<p>3、Jtest <a href="http://www.parasoft.com/jtest">http://www.parasoft.com/jtest</a></p>
-
-<p>4、Jlint <a href="http://artho.com/jlint/">http://artho.com/jlint/</a> (5)</p>
-
-<p>5、Lint4j <a href="http://www.jutils.com/">http://www.jutils.com/</a> (4)</p>
-
-<p>我个人平时最常用的是Checkstyle，其次是PMD，大家可以参考一下。</p>
-
-<h2 id="section">参考资料</h2>
-<p><a href="http://blog.csdn.net/cb_121/archive/2009/05/22/4208792.aspx">http://blog.csdn.net/cb_121/archive/2009/05/22/4208792.aspx</a></p>
 ]]></content>
   </entry>
   

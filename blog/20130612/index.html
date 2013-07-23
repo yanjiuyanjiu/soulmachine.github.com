@@ -148,13 +148,17 @@
 <h2 id="section">2 关闭防火墙</h2>
 <p>临时关闭防火墙</p>
 
-<pre><code>$ sudo service iptables stop 下次开机后，防火墙还是会启动。
+<pre><code>$ sudo service iptables stop
 </code></pre>
+
+<p>下次开机后，防火墙还是会启动。</p>
 
 <p>永久关闭防火墙</p>
 
-<pre><code>$ sudo chkconfig iptables off 由于这几台虚拟机是开发机，不是生产环境，因此不必考虑安全性，可以永久关闭防火墙，还能给开发阶段带来很多便利。
+<pre><code>$ sudo chkconfig iptables off
 </code></pre>
+
+<p>由于这几台虚拟机是开发机，不是生产环境，因此不必考虑安全性，可以永久关闭防火墙，还能给开发阶段带来很多便利。</p>
 
 <h2 id="hostname">3. 修改hostname</h2>
 <p>这一步看起来貌似不必要，其实是必须的，否则最后运行wordcount等例子时，会出现“Too many fetch-failures”。因为HDFS用hostname而不是IP，来相互之间进行通信（见后面的注意1）。</p>
@@ -356,8 +360,10 @@ $ chmod 700 ~/.ssh
 $ ssh 192.168.1.132
 $ exit
 $ ssh 192.168.1.133
-$ exit 如果不需要密码，则说明配置成功了。
+$ exit
 </code></pre>
+
+<p>如果不需要密码，则说明配置成功了。</p>
 
 <p>如果登陆不上，试试先关闭两台slaves的防火墙</p>
 
@@ -629,7 +635,7 @@ var duoshuoQuery = {short_name:"yanjiuyanjiu"};
 </section>
 <section>
   <h2>分类目录</h2>
-    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (2)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/spark/'>spark (3)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (2)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/mahout/'>mahout (2)</a></li><li><a href='/blog/categories/spark/'>spark (3)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
 </section>
 <section>
   <h2>友情链接</h2>
@@ -669,6 +675,14 @@ var duoshuoQuery = {short_name:"yanjiuyanjiu"};
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/20130707">Mhout KMeans 结果分析</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20130704">安装 mahout</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/20130617">安装Spark集群(在CentOS上)</a>
       </li>
     
@@ -678,14 +692,6 @@ var duoshuoQuery = {short_name:"yanjiuyanjiu"};
     
       <li class="post">
         <a href="/blog/20130612">在CentOS上安装Hadoop</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20130611">使用Scala IDE 阅读spark源码 -- 将sbt项目转化为eclipse项目</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20130412">LaTeX的各种发行版和编辑器的比较</a>
       </li>
     
   </ul>

@@ -114,6 +114,215 @@
       
   <header class="page-header">
     
+      <h1 class="entry-title"><a href="/blog/20130707">Mhout KMeans 结果分析</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-07-07T17:04:00+08:00" pubdate data-updated="true">Jul 7<span>th</span>, 2013</time>
+        
+		
+         | <a href="/blog/20130707#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1 id="kmeans">运行KMeans示例</h1>
+<p>运行KMeans示例有三种方法，参考前篇一篇博客，<a href="">安装mahout</a>。</p>
+
+<p>通过阅读<code>examples\src\main\java\org\apache\mahout\clustering\syntheticcontrol\kmeans\Job.java</code>和<code>integration\src\main\java\org\apache\mahout\clustering\conversion\InputDriver.java</code>的代码，运行KMeans示例还有第4种方法</p>
+
+<p>利用<code>InputDriver</code>将文本格式的向量转化为Mahout能识别的向量，</p>
+
+<pre><code>$ hadoop jar ~/mahout-distribution-0.7/mahout-examples-0.7-job.jar org.apache.mahout.clustering.conversion.InputDriver -i testdata -o vector
+</code></pre>
+
+<p>利用 mahout 自带的命令行工具，</p>
+
+<pre><code>$ mahout kmeans -i vector -o output -dm org.apache.mahout.common.distance.EuclideanDistanceMeasure -c centroids -k 6 -cd 0.5 -x 10 -ow 
+</code></pre>
+
+<h1 id="section">分析聚类结果</h1>
+
+<h2 id="section-1">查看结果</h2>
+
+<pre><code>$ hadoop fs -lsr output
+$ mahout seqdumper -i output/clusteredPoints -o clusteredPoints
+$ vim clusteredPoints
+$ mahout clusterdump -i output/clusters-9-final -o clusters --pointsDir output/clusteredPoints
+$ vim clusters
+</code></pre>
+
+<h2 id="section-2">分析结果</h2>
+
+<h1 id="section-3">参考资料</h1>
+<ol>
+  <li><a href="https://cwiki.apache.org/confluence/display/MAHOUT/Clustering+of+synthetic+control+data">Clustering of synthetic control data</a></li>
+  <li><a href="http://blog.csdn.net/aidayei/article/details/6665530">mahout中的kmeans结果分析</a></li>
+</ol>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20130704">安装 Mahout</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-07-04T15:47:00+08:00" pubdate data-updated="true">Jul 4<span>th</span>, 2013</time>
+        
+		
+         | <a href="/blog/20130704#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><strong>前提条件</strong>：已经安装好Hadoop集群，并启动。参考我的博客，<a href="http://www.yanjiuyanjiu.com/blog/20130612">在CentOS上安装Hadoop</a>，<a href="http://www.yanjiuyanjiu.com/blog/20120103">在Ubuntu上安装Hadoop</a>。</p>
+
+<h2 id="section">编译源码进行安装</h2>
+
+<p>见官网文档， <a href="https://cwiki.apache.org/confluence/display/MAHOUT/Mahout+Wiki#MahoutWiki-Installation%2FSetup">Installation/Setup</a></p>
+
+<p>不推荐这个方式，太繁琐。</p>
+
+<h2 id="section-1">下载预编译好的压缩包进行安装</h2>
+
+<p>这种方法最简单。</p>
+
+<h3 id="section-2">下载</h3>
+
+<p>在首页点击右侧的”Download Mahout”按钮，下载预编译好的二进制包。我下载的是mahout-distribution-0.7.tar.gz。</p>
+
+<h3 id="section-3">解压</h3>
+
+<p>解压到$HOME目录</p>
+
+<pre><code>$ tar -zxf mahout-distribution-0.7.tar.gz
+$ cd mahout-distribution-0.7
+</code></pre>
+
+<h3 id="section-4">配置</h3>
+
+<p>只需要在Master这台机器上配置即可。</p>
+
+<p>设置 HADOOP_PREFIX 环境变量，把Hadoop的安装位置告诉Mahout。或者设置HADOOP_HOME环境变量，不过HADOOP_HOME已经是derecated了，不建议使用。</p>
+
+<p>设置 HADOOP_CONF_DIR，把Hadoop配置文件的位置告诉Mahout。</p>
+
+<p>[可选]为了方便，将mahout命令加入PATH。</p>
+
+<p>将Mahout的jar加入CLASSPATH，在编译代码时需要。</p>
+
+<pre><code>$ vim ~/.bash_profile
+export HADOOP_PREFIX=$HOME/hadoop-1.1.2
+export HADOOP_CONF_DIR=$HADOOP_PREFIX/conf
+export PATH=$PATH:$HOME/mahout-distribution-0.7/bin
+export CLASSPATH=$CLASSPATH:$HOME/mahout-distribution-0.7/mahout-core-0.7.jar
+$ source  ~/.bash_profile
+</code></pre>
+
+<p>以上配置都是通过阅读 mahout这个脚本才知道的。</p>
+
+<pre><code>$ vim mahout-distribution-0.7/bin/mahout
+</code></pre>
+
+<p>打开这个脚本，可以看到所有配置，一目了然。</p>
+
+<h2 id="kmeans-">运行自带的 KMeans 例子</h2>
+
+<p>主要参考官网文档，<a href="https://cwiki.apache.org/confluence/display/MAHOUT/Clustering+of+synthetic+control+data">Clustering of synthetic control data</a>。</p>
+
+<h3 id="section-5">下载数据</h3>
+
+<p>下载地址：<a href="http://archive.ics.uci.edu/ml/databases/synthetic_control/synthetic_control.data">synthetic_control.data</a><br />
+<a href="http://archive.ics.uci.edu/ml/databases/synthetic_control/synthetic_control.data.html">数据格式说明</a></p>
+
+<h3 id="hdfs">上传到HDFS</h3>
+
+<pre><code>$ hadoop fs -mkdir testdata
+$ hadoop fs -put ./synthetic_control.data testdata
+</code></pre>
+
+<p>Mahout自带的mahout-examples-0.7-job.jar 默认从 testdata目录读取数据，所以目录必须命名为testdata</p>
+
+<h3 id="kmeans">运行自带的kmeans算法</h3>
+
+<pre><code>$ mahout org.apache.mahout.clustering.syntheticcontrol.kmeans.Job
+</code></pre>
+
+<p>或者</p>
+
+<pre><code>$ hadoop jar ~/mahout-distribution-0.7/mahout-examples-0.7-job.jar org.apache.mahout.clustering.syntheticcontrol.kmeans.Job
+</code></pre>
+
+<p>或者</p>
+
+<pre><code>$ mahout jar ~/mahout-distribution-0.7/mahout-examples-0.7-job.jar org.apache.mahout.clustering.syntheticcontrol.kmeans.Job
+</code></pre>
+
+<p>三者是等价的。感兴趣的话去阅读 <code>bin/mahout</code> 这个脚本，看看最后几行，包含 <code>exec</code> 的那几行代码。</p>
+
+<h3 id="section-6">查看结果</h3>
+
+<pre><code>$ hadoop fs -lsr output
+</code></pre>
+
+<p>如果看到以下结果，说明算法运行成功，Mahout的安装也就成功了。</p>
+
+<pre><code>clusteredPoints  clusters-0  clusters-1  clusters-10  clusters-2  clusters-3  clusters-4 clusters-5  clusters-6  clusters-7  clusters-8  clusters-9  data
+</code></pre>
+
+<h2 id="section-7">参考资料</h2>
+<ol>
+  <li><a href="https://cwiki.apache.org/confluence/display/MAHOUT/Mahout+Wiki#MahoutWiki-Installation%2FSetup">Installation/Setup</a></li>
+  <li><a href="http://www.cnblogs.com/linjiqin/archive/2013/03/15/2961649.html">Mahout安装与配置</a></li>
+</ol>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
       <h1 class="entry-title"><a href="/blog/20130617">安装Spark集群(在CentOS上)</a></h1>
     
     
@@ -400,13 +609,17 @@ $ ./run spark.examples.SparkPi local
 <h2 id="section">2 关闭防火墙</h2>
 <p>临时关闭防火墙</p>
 
-<pre><code>$ sudo service iptables stop 下次开机后，防火墙还是会启动。
+<pre><code>$ sudo service iptables stop
 </code></pre>
+
+<p>下次开机后，防火墙还是会启动。</p>
 
 <p>永久关闭防火墙</p>
 
-<pre><code>$ sudo chkconfig iptables off 由于这几台虚拟机是开发机，不是生产环境，因此不必考虑安全性，可以永久关闭防火墙，还能给开发阶段带来很多便利。
+<pre><code>$ sudo chkconfig iptables off
 </code></pre>
+
+<p>由于这几台虚拟机是开发机，不是生产环境，因此不必考虑安全性，可以永久关闭防火墙，还能给开发阶段带来很多便利。</p>
 
 <h2 id="hostname">3. 修改hostname</h2>
 <p>这一步看起来貌似不必要，其实是必须的，否则最后运行wordcount等例子时，会出现“Too many fetch-failures”。因为HDFS用hostname而不是IP，来相互之间进行通信（见后面的注意1）。</p>
@@ -978,388 +1191,6 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
 
     </article>
   
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20130322">一些主流的编程竞赛网站</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-03-22T21:57:00+08:00" pubdate data-updated="true">Mar 22<span>nd</span>, 2013</time>
-        
-		
-         | <a href="/blog/20130322#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>今天把各个主流的编程网站仔细对比了一下，下面从各个角度对比一下这些编程竞赛网站。</p>
-
-<h2 id="section">分类和排名</h2>
-<table border="1" cellspacing="0" cellpadding="0">
-<tbody>
-<tr>
-<td valign="top" width="94">
-<p><a name="OLE_LINK30"></a><a name="OLE_LINK1"><b>网站地址</b></a></p>
-</td>
-<td valign="top" width="57">
-<p><b>类别</b></p>
-</td>
-<td valign="top" width="38">
-<p><b>PR</b></p>
-</td>
-<td valign="top" width="60">
-<p><b>ATR</b></p>
-</td>
-<td valign="top" width="44">
-<p><b>QF</b></p>
-</td>
-<td valign="top" width="151">
-<p><b>主办方</b></p>
-</td>
-<td valign="top" width="47">
-<p><b>备注</b></p>
-</td>
-</tr>
-<tr>
-<td valign="top" width="94">
-<p><a name="_Hlk352791085"></a><a href="http://www.topcoder.com/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://www.topcoder.com']);">TopCoder </a></p>
-</td>
-<td valign="top" width="57">
-<p>综合</p>
-</td>
-<td valign="top" width="38">
-<p>6</p>
-</td>
-<td valign="top" width="60">
-<p>33,586</p>
-</td>
-<td valign="top" width="44">
-<p>4167</p>
-</td>
-<td valign="top" width="151">
-<p>TopCoder公司</p>
-</td>
-<td valign="top" width="47">&nbsp;</td>
-</tr>
-<tr>
-<td valign="top" width="94">
-<p><a href="http://www.codechef.com/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://www.codechef.com']);">CodeChef </a></p>
-</td>
-<td valign="top" width="57">
-<p>综合</p>
-</td>
-<td valign="top" width="38">
-<p>6</p>
-</td>
-<td valign="top" width="60">
-<p>41,217</p>
-</td>
-<td valign="top" width="44">
-<p>5758</p>
-</td>
-<td valign="top" width="151">
-<p>Directi公司</p>
-</td>
-<td valign="top" width="47">&nbsp;</td>
-</tr>
-<tr>
-<td valign="top" width="94">
-<p><a href="http://codeforces.com/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://codeforces.com']);">CodeForces </a></p>
-</td>
-<td valign="top" width="57">
-<p>综合</p>
-</td>
-<td valign="top" width="38">
-<p>5</p>
-</td>
-<td valign="top" width="60">
-<p>73,012</p>
-</td>
-<td valign="top" width="44">
-<p>599</p>
-</td>
-<td valign="top" width="151">
-<p>CodeForces公司</p>
-</td>
-<td valign="top" width="47">&nbsp;</td>
-</tr>
-<tr>
-<td valign="top" width="94">
-<p><a href="http://www.spoj.com/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://www.spoj.com']);">SPOJ</a></p>
-</td>
-<td valign="top" width="57">
-<p>ACM</p>
-</td>
-<td valign="top" width="38">
-<p>3</p>
-</td>
-<td valign="top" width="60">
-<p>75,653</p>
-</td>
-<td valign="top" width="44">
-<p>1520</p>
-</td>
-<td valign="top" width="151">
-<p>Sphere Research Labs</p>
-</td>
-<td valign="top" width="47">&nbsp;</td>
-</tr>
-<tr>
-<td valign="top" width="94">
-<p><a href="http://poj.org/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://poj.org']);">POJ</a></p>
-</td>
-<td valign="top" width="57">
-<p>ACM</p>
-</td>
-<td valign="top" width="38">
-<p>7</p>
-</td>
-<td valign="top" width="60">
-<p>364,925</p>
-</td>
-<td valign="top" width="44">
-<p>N/A</p>
-</td>
-<td valign="top" width="151">
-<p>北京大学</p>
-</td>
-<td valign="top" width="47">&nbsp;</td>
-</tr>
-<tr>
-<td valign="top" width="94">
-<p><a href="http://acm.zju.edu.cn" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://acm.zju.edu.cn']);">ZOJ</a></p>
-</td>
-<td valign="top" width="57">
-<p>ACM</p>
-</td>
-<td valign="top" width="38">
-<p>6</p>
-</td>
-<td valign="top" width="60">
-<p>N/A</p>
-</td>
-<td valign="top" width="44">
-<p>N/A</p>
-</td>
-<td valign="top" width="151">
-<p>浙江大学</p>
-</td>
-<td valign="top" width="47">&nbsp;</td>
-</tr>
-<tr>
-<td valign="top" width="94">
-<p><a href="http://uva.onlinejudge.org/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://uva.onlinejudge.org']);">UVA OJ</a></p>
-</td>
-<td valign="top" width="57">
-<p>ACM</p>
-</td>
-<td valign="top" width="38">
-<p>6</p>
-</td>
-<td valign="top" width="60">
-<p>166,991</p>
-</td>
-<td valign="top" width="44">
-<p>N/A</p>
-</td>
-<td valign="top" width="151">
-<p>University of Virginia</p>
-</td>
-<td valign="top" width="47">&nbsp;</td>
-</tr>
-<tr>
-<td valign="top" width="94">
-<p><a href="http://acm.sgu.ru/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://acm.sgu.ru']);">SGU OJ</a></p>
-</td>
-<td valign="top" width="57">
-<p>ACM</p>
-</td>
-<td valign="top" width="38">
-<p>5</p>
-</td>
-<td valign="top" width="60">
-<p>194,881</p>
-</td>
-<td valign="top" width="44">
-<p>N/A</p>
-</td>
-<td valign="top" width="151">
-<p>Saratov State University</p>
-</td>
-<td valign="top" width="47">&nbsp;</td>
-</tr>
-<tr>
-<td valign="top" width="94">
-<p><a href="https://www.hackerrank.com/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://www.hackerrank.com']);">HackerRank</a></p>
-</td>
-<td valign="top" width="57">
-<p>综合</p>
-</td>
-<td valign="top" width="38">
-<p>5</p>
-</td>
-<td valign="top" width="60">
-<p>126,192</p>
-</td>
-<td valign="top" width="44">
-<p>56</p>
-</td>
-<td valign="top" width="151">
-<p>InterviewStreet公司</p>
-</td>
-<td valign="top" width="47">&nbsp;</td>
-</tr>
-<tr>
-<td valign="top" width="94">
-<p><a href="http://projecteuler.net/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://projecteuler.net']);">Project Euler</a></p>
-</td>
-<td valign="top" width="57">
-<p>数学</p>
-</td>
-<td valign="top" width="38">
-<p>6</p>
-</td>
-<td valign="top" width="60">
-<p>53,854</p>
-</td>
-<td valign="top" width="44">
-<p>428</p>
-</td>
-<td valign="top" width="151">
-<p>Project Euler公司</p>
-</td>
-<td valign="top" width="47">&nbsp;</td>
-</tr>
-<tr>
-<td valign="top" width="94">
-<p><a href="http://www.careercup.com/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://www.careercup.com']);">CareerUp</a></p>
-</td>
-<td valign="top" width="57">
-<p>面试</p>
-</td>
-<td valign="top" width="38">
-<p>4</p>
-</td>
-<td valign="top" width="60">
-<p>51,089</p>
-</td>
-<td valign="top" width="44">
-<p>654</p>
-</td>
-<td valign="top" width="151">
-<p>CareerUp公司</p>
-</td>
-<td valign="top" width="47">&nbsp;</td>
-</tr>
-<tr>
-<td valign="top" width="94">
-<p><a href="http://leetcode.com/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://leetcode.com']);">LeetCode</a></p>
-</td>
-<td valign="top" width="57">
-<p>面试</p>
-</td>
-<td valign="top" width="38">
-<p>4</p>
-</td>
-<td valign="top" width="60">
-<p>188,196</p>
-</td>
-<td valign="top" width="44">
-<p>N/A</p>
-</td>
-<td valign="top" width="151">
-<p>LeetCode公司</p>
-</td>
-<td valign="top" width="47">&nbsp;</td>
-</tr>
-</tbody>
-</table>
-
-<p>说明：PR是Google PageRank的缩写；ATR是Alexa Trafic Rank的缩写，即Alexa排名；QF是Quora Followers的缩写，具体含义是在Quora上关于某Topic的follower数量，例如<a href="http://www.quora.com/CodeChef">CodeChef的topic</a> 有5758个followers。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/20130322">继续阅读 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20130226">数值计算库与科学计算库</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-02-26T23:15:00+08:00" pubdate data-updated="true">Feb 26<span>th</span>, 2013</time>
-        
-		
-         | <a href="/blog/20130226#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2 id="blas-">BLAS 接口</h2>
-<p><a href="http://www.netlib.org/blas/">BLAS</a>, <a href="http://www.netlib.org/lapack/">LAPACK</a>, <a href="http://math-atlas.sourceforge.net/">ATLAS</a> 这些数值计算库的名字很类似，他们之间有什么关系呢？BLAS是一组线性代数运算接口，目前是事实上的标准，很多数值计算/科学计算都实现了这套接口。</p>
-
-<p>BLAS定义了那些函数呢？可以查看<a href="http://www.netlib.org/blas/">官方文档</a>。</p>
-
-<p>LAPACK是BLAS的第一个实现，是最老牌的数值计算库，用FORTRAN 77语言写的。LAPACK实现了BLAS接口，并扩充了一些功能。很多数值计算库/科学计算库底层调用了LAPACK。</p>
-
-<p>很多硬件厂商都实现BLAS接口，例如<a href="http://software.intel.com/en-us/intel-mkl">Intel MKL</a>(Math Kernel Library), <a href="http://developer.amd.com/tools/cpu-development/amd-core-math-library-acml/">AMCL</a>(AMD Math Core Library)等。很多开源库也支持，例如ATLAS。</p>
-
-<p>还有非常多的库实现了BLAS接口，见<a href="http://en.wikipedia.org/wiki/Basic_Linear_Algebra_Subprograms">Wikipedia BLAS</a> 的Implementations小节。</p>
-
-<p>下面介绍一些各种语言常用的数值计算/科学计算库。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/20130226">继续阅读 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <ul class="pager">
     
     <li class="previous"><a href="/blog/page/2/">&larr; Older</a></li>
@@ -1377,7 +1208,7 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
 </section>
 <section>
   <h2>分类目录</h2>
-    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (2)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/spark/'>spark (3)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (2)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/mahout/'>mahout (2)</a></li><li><a href='/blog/categories/spark/'>spark (3)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
 </section>
 <section>
   <h2>友情链接</h2>
@@ -1417,6 +1248,14 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/20130707">Mhout KMeans 结果分析</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20130704">安装 mahout</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/20130617">安装Spark集群(在CentOS上)</a>
       </li>
     
@@ -1426,14 +1265,6 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
     
       <li class="post">
         <a href="/blog/20130612">在CentOS上安装Hadoop</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20130611">使用Scala IDE 阅读spark源码 &#8211; 将sbt项目转化为eclipse项目</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20130412">LaTeX的各种发行版和编辑器的比较</a>
       </li>
     
   </ul>
