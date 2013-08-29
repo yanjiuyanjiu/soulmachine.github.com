@@ -4,7 +4,7 @@
   <title><![CDATA[研究研究]]></title>
   <link href="http://www.yanjiuyanjiu.com/atom.xml" rel="self"/>
   <link href="http://www.yanjiuyanjiu.com/"/>
-  <updated>2013-08-29T22:33:14+08:00</updated>
+  <updated>2013-08-29T22:37:37+08:00</updated>
   <id>http://www.yanjiuyanjiu.com/</id>
   <author>
     <name><![CDATA[soulmachine]]></name>
@@ -22,9 +22,9 @@
 
 <p>Scala的看上去很复杂，但是它在概念上是非常一致的。弄清了几个概念后，也就不觉得复杂了，反倒是比Java的简单。</p>
 
-<h1 id="oo--fp">OO + FP</h1>
+<h1 id="oo--fp">1. OO + FP</h1>
 
-<h2 id="section">一切都是对象</h2>
+<h2 id="section">1.1 一切都是对象</h2>
 
 <p>更精确地说，应该是“一切值都是对象”。</p>
 
@@ -55,7 +55,7 @@
   </li>
 </ul>
 
-<h2 id="section-1">函数是值</h2>
+<h2 id="section-1">1.2 函数是值</h2>
 
 <p>函数是一等公民，跟普通的值没区别</p>
 
@@ -87,7 +87,7 @@
   </li>
 </ul>
 
-<h2 id="section-2">一切操作都是函数调用</h2>
+<h2 id="section-2">1.3 一切操作都是函数调用</h2>
 <!-- more -->
 
 <ul>
@@ -151,7 +151,7 @@
   </li>
 </ul>
 
-<h2 id="section-3">一切操作都有返回值</h2>
+<h2 id="section-3">1.4 一切操作都有返回值</h2>
 
 <ul>
   <li>
@@ -190,27 +190,27 @@
   <p><strong>Statement Versus Expression</strong> A statement is something that execute; an expression is something that evaluates to a value.</p>
 </blockquote>
 
-<h2 id="oo--fp-1">一切都是对象+数据即操作，操作即数据 = OO + FP</h2>
+<h2 id="oo--fp-1">1.5 总结：一切都是对象+数据即操作，操作即数据 = OO + FP</h2>
 
-<h1 id="type-system">一致的类型系统(type system)</h1>
+<h1 id="type-system">2. 一致的类型系统(type system)</h1>
 
-<h2 id="scala-class-hierarchy">scala class hierarchy</h2>
+<h2 id="scala-class-hierarchy">2.1 scala class hierarchy</h2>
 
 <p><img src="http://www.scala-lang.org/old/sites/default/files/images/classhierarchy.png" /></p>
 
-<h2 id="any">根类 Any</h2>
+<h2 id="any">2.2 根类 Any</h2>
 
 <p>Scala 上有一个共同的根类<strong>Any</strong>。Any统一了基本类型和引用类型。</p>
 
-<h2 id="nullnothing">两个尾类Null和Nothing。</h2>
+<h2 id="nullnothing">2.3 两个尾类Null和Nothing。</h2>
 
 <p>JVM上的null是Null类，它是所有AnyRef的子类。</p>
 
 <p>Nothing是所有类型（包括AnyVal和AnyRef）的子类。它没有值（实例），用于处理一些特殊情况，例如出错时返回该类型。</p>
 
-<h2 id="invariant-covariant-contravariant">Invariant, Covariant, Contravariant</h2>
+<h2 id="invariant-covariant-contravariant">2.4 Invariant, Covariant, Contravariant</h2>
 
-<h2 id="type-parameter-vs-abstract-type-member">类型参数(type parameter) VS. 抽象类型成员(abstract type member)</h2>
+<h2 id="type-parameter-vs-abstract-type-member">2.5 类型参数(type parameter) VS. 抽象类型成员(abstract type member)</h2>
 
 <pre><code>trait Pair[K, V] {
   def get(key: K): V
@@ -240,7 +240,7 @@ class PairImpl extends Pair{
 
 <p>抽象类型成员，改变类型名字时，只需要修改一处地方</p>
 
-<h1 id="section-4">一些牛人的讨论</h1>
+<h1 id="section-4">4. 一些牛人的讨论</h1>
 
 <p><a href="http://dcaoyuan.iteye.com/blog/502730">2 楼 dcaoyuan 2009-10-25</a>  </p>
 
