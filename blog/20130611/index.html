@@ -219,7 +219,9 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
 
 <p>如果不想折腾，可以下载我已经生成好的项目, <a href="http://pan.baidu.com/share/link?shareid=534521368&amp;uk=2466605404">spark-0.7.2.zip</a>。解压，启动Scala IDE，选择菜单<code>File-&gt;Import-&gt;General-&gt;Existing projects into workspace</code>，浏览到 spark-0.7.2目录，批量导入5个项目。导入后项目图标有红色感叹号，这是因为你的电脑上路径和我的路径不一样，找不到引用的jar了。右击项目，选择<code>Build Path-&gt;Configure Build Path</code>，选择<code>Libraries</code>标签，这时可以看到所有jar都有红叉叉，全选，删除，然后点击<code>Add External Jars</code>，浏览到<code>spark-0.7.2\lib_managed\jars</code>，把所有jar都导入，导入后红色感叹号就消失了。对每个项目都执行上述操作。</p>
 
-<p><strong>TODO</strong>: 虽然红色感叹号消失了，不过项目还是有红色小叉叉图标，这是因为IDE找不到某些类的定义，暂时不知道如何解决。</p>
+<p><strong>2013-07-27 更新</strong>：eclipse项目上有红色小叉叉图标，之前一直没解决，今天解决了，主要原因是，<strong>Scala IDE 版本不对！</strong> scala-ide.org 官网最新的的3.0.1只支持scala 2.10，不再支持2.9.3。由于Spark目前使用scala 2.9.3写的，所以我们要下载支持 scala 2.9.3 版，scala ide 3.0.0是支持 2.9.3的，不过首选要下载 eclipse JUNO，不要使用新版的eclipse，例如eclipse Indigo, Kepler都不行。</p>
+
+<p>因此，正确的做法是，先下载 eclipse juno，然后下载 3.0.0 的zip包，解压，然后启动eclipse，点击菜单”help-&gt;Install New Software”，浏览到刚刚解压的<code>site</code>文件夹，就可以安装scala ide插件了。</p>
 </div>
 
 
@@ -318,7 +320,7 @@ var duoshuoQuery = {short_name:"yanjiuyanjiu"};
 </section>
 <section>
   <h2>分类目录</h2>
-    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (2)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/spark/'>spark (3)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/spark/'>spark (3)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
 </section>
 <section>
   <h2>友情链接</h2>
@@ -358,6 +360,10 @@ var duoshuoQuery = {short_name:"yanjiuyanjiu"};
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/20130829">简洁的Scala</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/20130617">安装Spark集群(在CentOS上)</a>
       </li>
     
@@ -371,10 +377,6 @@ var duoshuoQuery = {short_name:"yanjiuyanjiu"};
     
       <li class="post">
         <a href="/blog/20130611">使用Scala IDE 阅读spark源码 -- 将sbt项目转化为eclipse项目</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20130412">LaTeX的各种发行版和编辑器的比较</a>
       </li>
     
   </ul>

@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>使用pdfbox 抽取PDF文件中的文本 - 研究研究</title>
+  <title>简洁的Scala - 研究研究</title>
   <meta name="author" content="soulmachine">
 
   
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://www.yanjiuyanjiu.com/blog/20100328">
+  <link rel="canonical" href="http://www.yanjiuyanjiu.com/blog/20130829">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/bootstrap/bootstrap.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/stylesheets/bootstrap/responsive.css" media="screen, projection" rel="stylesheet" type="text/css">
@@ -112,7 +112,7 @@
   
   <header class="page-header">
     
-      <h1 class="entry-title">使用pdfbox 抽取PDF文件中的文本</h1>
+      <h1 class="entry-title">简洁的Scala</h1>
     
     
       <p class="meta">
@@ -128,7 +128,7 @@
   
 
 
-<time datetime="2010-03-28T16:41:00+08:00" pubdate data-updated="true">Mar 28<span>th</span>, 2010</time>
+<time datetime="2013-08-29T21:38:00+08:00" pubdate data-updated="true">Aug 29<span>th</span>, 2013</time>
         
 		
          | <a href="#duoshuo_thread">Comments</a>
@@ -138,103 +138,247 @@
   </header>
 
 
-<div class="entry-content"><div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-<span class="line-number">23</span>
-<span class="line-number">24</span>
-<span class="line-number">25</span>
-<span class="line-number">26</span>
-<span class="line-number">27</span>
-<span class="line-number">28</span>
-<span class="line-number">29</span>
-<span class="line-number">30</span>
-<span class="line-number">31</span>
-<span class="line-number">32</span>
-<span class="line-number">33</span>
-<span class="line-number">34</span>
-<span class="line-number">35</span>
-<span class="line-number">36</span>
-<span class="line-number">37</span>
-<span class="line-number">38</span>
-<span class="line-number">39</span>
-<span class="line-number">40</span>
-<span class="line-number">41</span>
-<span class="line-number">42</span>
-<span class="line-number">43</span>
-<span class="line-number">44</span>
-<span class="line-number">45</span>
-<span class="line-number">46</span>
-<span class="line-number">47</span>
-<span class="line-number">48</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">yanjiuyanjiu</span><span class="o">.</span><span class="na">search</span><span class="o">;</span>
-</span><span class="line">
-</span><span class="line"><span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
-</span><span class="line"><span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
-</span><span class="line">
-</span><span class="line"><span class="kn">import</span> <span class="nn">org.apache.pdfbox.pdmodel.PDDocument</span><span class="o">;</span>
-</span><span class="line"><span class="kn">import</span> <span class="nn">org.apache.pdfbox.util.PDFTextStripper</span><span class="o">;</span>
-</span><span class="line">
-</span><span class="line"><span class="cm">/**</span>
-</span><span class="line"><span class="cm"> * 抽去PDF文件中的文本.</span>
-</span><span class="line"><span class="cm"> * @author soulmachine</span>
-</span><span class="line"><span class="cm"> *</span>
-</span><span class="line"><span class="cm"> */</span>
-</span><span class="line"><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">PDFboxTest</span> <span class="o">{</span>
-</span><span class="line"> <span class="cm">/** 禁止创建对象. */</span>
-</span><span class="line"> <span class="kd">private</span> <span class="nf">PDFboxTest</span><span class="o">()</span> <span class="o">{</span>
-</span><span class="line"> <span class="o">}</span>
-</span><span class="line"> <span class="cm">/**</span>
-</span><span class="line"><span class="cm"> * 抽取PDF中的文本.</span>
-</span><span class="line"><span class="cm"> * @param f PDF文件</span>
-</span><span class="line"><span class="cm"> * @return PDF对应的文本字符串</span>
-</span><span class="line"><span class="cm"> */</span>
-</span><span class="line"> <span class="kd">public</span> <span class="kd">static</span> <span class="n">String</span> <span class="nf">getText</span><span class="o">(</span><span class="kd">final</span> <span class="n">File</span> <span class="n">f</span><span class="o">)</span> <span class="o">{</span>
-</span><span class="line"> <span class="n">String</span> <span class="n">text</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="o">;</span>
-</span><span class="line"> <span class="k">try</span> <span class="o">{</span>
-</span><span class="line"> <span class="n">PDDocument</span> <span class="n">pdfdocument</span> <span class="o">=</span> <span class="n">PDDocument</span><span class="o">.</span><span class="na">load</span><span class="o">(</span><span class="n">f</span><span class="o">);</span>
-</span><span class="line"> <span class="n">PDFTextStripper</span> <span class="n">stripper</span> <span class="o">=</span> <span class="k">new</span> <span class="n">PDFTextStripper</span><span class="o">();</span>
-</span><span class="line"> <span class="n">stripper</span><span class="o">.</span><span class="na">setStartPage</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span> <span class="c1">// 只抽取第1页和第2页</span>
-</span><span class="line"> <span class="n">stripper</span><span class="o">.</span><span class="na">setEndPage</span><span class="o">(</span><span class="mi">2</span><span class="o">);</span>
-</span><span class="line"> <span class="n">text</span> <span class="o">=</span> <span class="n">stripper</span><span class="o">.</span><span class="na">getText</span><span class="o">(</span><span class="n">pdfdocument</span><span class="o">);</span>
-</span><span class="line"> <span class="n">pdfdocument</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
-</span><span class="line">
-</span><span class="line"> <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
-</span><span class="line"> <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
-</span><span class="line"> <span class="o">}</span>
-</span><span class="line">
-</span><span class="line"> <span class="k">return</span> <span class="n">text</span><span class="o">;</span>
-</span><span class="line"> <span class="o">}</span>
-</span><span class="line">
-</span><span class="line"> <span class="cm">/** 测试.</span>
-</span><span class="line"><span class="cm"> *</span>
-</span><span class="line"><span class="cm"> * @param args PDF文件路径</span>
-</span><span class="line"><span class="cm"> */</span>
-</span><span class="line"> <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="kd">final</span> <span class="n">String</span><span class="o">[]</span>  <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
-</span><span class="line"> <span class="n">File</span> <span class="n">file</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">args</span><span class="o">[</span><span class="mi">0</span><span class="o">]);</span>
-</span><span class="line"> <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">PDFboxTest</span><span class="o">.</span><span class="na">getText</span><span class="o">(</span><span class="n">file</span><span class="o">));</span>
-</span><span class="line"> <span class="o">}</span>
-</span><span class="line"><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+<div class="entry-content"><p>Scala语言是很注重一致性(consistency)的，Scala的简洁性(concision)都是由其一致性带来的。</p>
+
+<p>Scala的看上去很复杂，但是它在概念上是非常一致的。弄清了几个概念后，也就不觉得复杂了，反倒是比Java的简单。</p>
+
+<h1 id="oo--fp">OO + FP</h1>
+
+<h2 id="section">一切都是对象</h2>
+
+<p>更精确地说，应该是“一切值都是对象”。</p>
+
+<ul>
+  <li>
+    <p>整数, 浮点数等基本类型(primitive type)是对象  </p>
+
+    <pre><code>  123.toByte
+  3.14.toInt
+</code></pre>
+
+    <p>在Java中，primitive type不是对象，打破了一致性。</p>
+  </li>
+  <li>
+    <p>函数是对象</p>
+
+    <pre><code>  val compare = (x: Int, y: Int) =&gt; x &gt; y
+  compare(1, 2)
+</code></pre>
+  </li>
+  <li>
+    <p>不再有静态方法(static method)和静态属性(static field)。Java中的静态方法(static method)和静态属性(static field)，有点打破了面向对象，因为它们不属于一个实例，而是属于类。在Scala中，静态方法和静态属性也属于对象，具体来说，属于Scala中的单例object。这样，静态成员和普通成员统一了起来，都附属于某个实例(instance)。</p>
+
+    <pre><code>  object Dog {
+    val sound = "wang wang" //static field
+  }
+</code></pre>
+  </li>
+</ul>
+
+<h2 id="section-1">函数是值</h2>
+
+<p>函数是一等公民，跟普通的值没区别</p>
+
+<ul>
+  <li>
+    <p>可以当作参数传递</p>
+
+    <pre><code>  val  compare = (x: Int , y: Int ) =&gt; x &gt;  y
+  list sortWith compare
+</code></pre>
+  </li>
+  <li>
+    <p>不管它是实例的方法</p>
+
+    <pre><code>  class AComparator  {
+    def  compare(x: Int , y: Int ) = x &gt;  y
+  }
+  list sortWith ( new  AComparator ).compare
+</code></pre>
+  </li>
+  <li>
+    <p>还是匿名子句</p>
+
+    <pre><code>  object  annonymous extends scala.Function2[Int , Int , Boolean] {
+    override  def  apply(x: Int , y: Int ) = x &gt;  y
+  }
+  list sortWith annonymous 
+</code></pre>
+  </li>
+</ul>
+
+<h2 id="section-2">一切操作都是函数调用</h2>
+<!-- more -->
+
+<ul>
+  <li>
+    <p>运算符是函数调用</p>
+
+    <pre><code>  1 +  1
+  1.+(1)
+  1.&gt;(0)
+  1 &gt;  0
+  (1 &gt;  0).&amp;(2 &gt;  1)
+  (1 &gt;  0) &amp; 2 &gt;  1
+  stack.push(10)
+  stack push  10
+  stack.pop
+  stack pop
+</code></pre>
+
+    <p>注意，上述代码中，只有一个参数或零个参数的方法在调用时可以省略”.” 和”()”。</p>
+  </li>
+  <li>
+    <p>更多的符号需要用作方法名</p>
+
+    <pre><code>  def  !@#%^&amp;*\-&lt;=&gt;?|~:/ = println("noop" )
+  def  √(x: Double ) = Math.sqrt( x)
+  val  Π =  Math.Pi
+  val  r =  √( 9*Π)
+</code></pre>
+  </li>
+  <li>
+    <p>‘&lt;’, ‘&gt;’ 更适合作方法名，所以用’[’ 和‘]’ 来表示类型参数</p>
+  </li>
+  <li>
+    <p>for语句是函数调用</p>
+
+    <pre><code>  for  (i &lt;- List(1, 2)) {
+    println(i)
+  }
+  List(1, 2) foreach { i =&gt; println(i)}
+  for  (i &lt;- List(1, 2))  yield {
+    i +  10
+  }
+  List(1, 2) map {i =&gt; i +  10}
+</code></pre>
+  </li>
+  <li>
+    <p>更多的例子</p>
+
+    <pre><code>  // synchronized is function call instead of keyword
+  def  check = synchronized {
+    // isInstanceOf is function call instead of keyword
+    100.isInstanceOf[ String ] 
+  }
+</code></pre>
+  </li>
+  <li>
+    <p>额外的好处：自左向右顺序书写语句</p>
+
+    <pre><code>  stack.pop.asInstanceOf[ Int ] // (Integer) stack.pop() in Java
+</code></pre>
+  </li>
+</ul>
+
+<h2 id="section-3">一切操作都有返回值</h2>
+
+<ul>
+  <li>
+    <p>默认返回最后一条语句的值，也可以用return 显式返回</p>
+
+    <pre><code>  val  r1 = { // return 3
+    val  a =  1
+    val  b =  2
+    a +  b
+  }
+  val  r2 =  if (true) 1 else 2
+  val  r3 =  // return (): Unit
+    for  (i &lt;- List(1, 2)) {
+      println(i)
+    }
+  val  r4 =  // return List(11, 12)
+    for  (i &lt;- List(1, 2))  yield {
+       i +  10
+    }
+  val  r5 =  // return java.io.File
+  try  {
+     val  f =  new  File("afile")
+     f
+  }  catch {
+     case ex: IOException  =&gt; null
+  }
+</code></pre>
+  </li>
+</ul>
+
+<p>Scala里不再像C/C++, Java，区分语句(statement)和表达式(expression)。Scala里没有statement，只有expression，因此一切操作都是表达式，都有返回值。Scala可以说是<strong>expression-oriented</strong>。</p>
+
+<p>关于语句和表达式的区别，可以看”Scala in depth”一书中的比较:</p>
+
+<blockquote>
+  <p><strong>Statement Versus Expression</strong> A statement is something that execute; an expression is something that evaluates to a value.</p>
+</blockquote>
+
+<h2 id="oo--fp-1">一切都是对象+数据即操作，操作即数据 = OO + FP</h2>
+
+<h1 id="type-system">一致的类型系统(type system)</h1>
+
+<h2 id="scala-class-hierarchy">scala class hierarchy</h2>
+
+<p><img src="http://www.scala-lang.org/old/sites/default/files/images/classhierarchy.png" /></p>
+
+<h2 id="any">根类 Any</h2>
+
+<p>Scala 上有一个共同的根类<strong>Any</strong>。Any统一了基本类型和引用类型。</p>
+
+<h2 id="nullnothing">两个尾类Null和Nothing。</h2>
+
+<p>JVM上的null是Null类，它是所有AnyRef的子类。</p>
+
+<p>Nothing是所有类型（包括AnyVal和AnyRef）的子类。它没有值（实例），用于处理一些特殊情况，例如出错时返回该类型。</p>
+
+<h2 id="invariant-covariant-contravariant">Invariant, Covariant, Contravariant</h2>
+
+<h2 id="type-parameter-vs-abstract-type-member">类型参数(type parameter) VS. 抽象类型成员(abstract type member)</h2>
+
+<pre><code>trait Pair[K, V] {
+  def get(key: K): V
+  def set(key: K, value: V)
+}
+class PairImpl extends Pair[Dog, Fox] {
+  def get(key: Dog): Fox
+  def put(key: Dog, value: Fox)
+}
+</code></pre>
+
+<p>类型参数的名字会发散到所有子类和引用的类，因此改变类型名字时需要修改很多地方</p>
+
+<pre><code>trait Pair{
+  type K // deferred type
+  type V // deferred type
+  defget(key: K): V
+  defset(key: K, value: V)
+}
+class PairImpl extends Pair{
+  type K= Dog
+  type V= Fox
+  defget(key: K): V
+  defset(key: K, value: V)
+}
+</code></pre>
+
+<p>抽象类型成员，改变类型名字时，只需要修改一处地方</p>
+
+<h1 id="section-4">一些牛人的讨论</h1>
+
+<p><a href="http://dcaoyuan.iteye.com/blog/502730">2 楼 dcaoyuan 2009-10-25</a>  </p>
+
+<blockquote>
+  <p>这次会上讲PPT时间有点不够，但这个PPT中提到的每句话都是仔细想过的，强调的是Scala中一些概念的一致性，比如，有关Scala的文章中常提到“值都是对象”，准确地说，应该是“值都是对象的实例”，还有，“操作、函数、参数可以互相转化，都是值，都是实例的对象”，这其实是Scala可以扩展的关键，也是OO+FP能够比较好地在Scala中结合的关键。 </p>
+
+  <p>还有就是Scala的类型体系，看上去复杂，其实是为了修正Java中类型体系的一些问题，并且带了了一个JVM上的完整一致的类型体系。弄清了几个概念后，也就不觉得复杂了，反倒是比Java的简单。 </p>
+
+  <p>总之，我看到的Scala的简单性都是由其一致性带来的，虽然设计者为了开发人员的习惯作了一点点妥协，但还是非常坚持他的设计理念。 </p>
+
+  <p>Martin不是一个简单的人，为了在JVM上实现他的设计理念，其后台的具体实现其实是相当复杂和困难的，但他坚持并不断实践，有时候甚至不惜把原来的实现推倒重来，终于在2.6以后有了我们现在看到的相当理想的结果。</p>
+</blockquote>
+
+<h1 id="section-5">参考资料</h1>
+
+<ol>
+  <li><a href="http://www.slideshare.net/dcaoyuan/scalajava">2009. 邓草原. 对Java的修正和超越</a></li>
+</ol>
 </div>
 
 
@@ -257,12 +401,12 @@
   
 
 
-<time datetime="2010-03-28T16:41:00+08:00" pubdate data-updated="true">Mar 28<span>th</span>, 2010</time>
+<time datetime="2013-08-29T21:38:00+08:00" pubdate data-updated="true">Aug 29<span>th</span>, 2013</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/tools/'>tools</a>
+    <a class='category' href='/blog/categories/language/'>language</a>
   
 </span>
 
@@ -293,7 +437,7 @@
 	
     <section>
       <div id="duoshuo_thread" aria-live="polite"><!-- Duoshuo Comment BEGIN -->
-<div class="ds-thread" data-thread-key="/blog/20100328" data-title="使用pdfbox 抽取PDF文件中的文本"></div>
+<div class="ds-thread" data-thread-key="/blog/20130829" data-title="简洁的Scala"></div>
 <script type="text/javascript">
 var duoshuoQuery = {short_name:"yanjiuyanjiu"};
 	(function() {
@@ -311,14 +455,10 @@ var duoshuoQuery = {short_name:"yanjiuyanjiu"};
     <ul class="pager">
       
       <li class="previous"><a class="basic-alignment left"
-        href="/blog/20100215" title="Previous Post:
-        java命令行下运行class文件">&laquo; java命令行下运行class文件</a></li>
+        href="/blog/20130617" title="Previous Post:
+        安装Spark集群(在CentOS上)">&laquo; 安装Spark集群(在CentOS上)</a></li>
       
       <li><a href="/blog/archives">Blog Archives</a></li>
-      
-      <li class="next"><a class="basic-alignment right" href="/blog/20100331"
-        title="Next Post: Java质量检测评估工具">Java质量检测评估工具
-        &raquo;</a></li>
       
     </ul>
   </footer>

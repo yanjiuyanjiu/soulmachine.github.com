@@ -114,6 +114,118 @@
       
   <header class="page-header">
     
+      <h1 class="entry-title"><a href="/blog/20130829">简洁的Scala</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-29T21:38:00+08:00" pubdate data-updated="true">Aug 29<span>th</span>, 2013</time>
+        
+		
+         | <a href="/blog/20130829#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Scala语言是很注重一致性(consistency)的，Scala的简洁性(concision)都是由其一致性带来的。</p>
+
+<p>Scala的看上去很复杂，但是它在概念上是非常一致的。弄清了几个概念后，也就不觉得复杂了，反倒是比Java的简单。</p>
+
+<h1 id="oo--fp">OO + FP</h1>
+
+<h2 id="section">一切都是对象</h2>
+
+<p>更精确地说，应该是“一切值都是对象”。</p>
+
+<ul>
+  <li>
+    <p>整数, 浮点数等基本类型(primitive type)是对象  </p>
+
+    <pre><code>  123.toByte
+  3.14.toInt
+</code></pre>
+
+    <p>在Java中，primitive type不是对象，打破了一致性。</p>
+  </li>
+  <li>
+    <p>函数是对象</p>
+
+    <pre><code>  val compare = (x: Int, y: Int) =&gt; x &gt; y
+  compare(1, 2)
+</code></pre>
+  </li>
+  <li>
+    <p>不再有静态方法(static method)和静态属性(static field)。Java中的静态方法(static method)和静态属性(static field)，有点打破了面向对象，因为它们不属于一个实例，而是属于类。在Scala中，静态方法和静态属性也属于对象，具体来说，属于Scala中的单例object。这样，静态成员和普通成员统一了起来，都附属于某个实例(instance)。</p>
+
+    <pre><code>  object Dog {
+    val sound = "wang wang" //static field
+  }
+</code></pre>
+  </li>
+</ul>
+
+<h2 id="section-1">函数是值</h2>
+
+<p>函数是一等公民，跟普通的值没区别</p>
+
+<ul>
+  <li>
+    <p>可以当作参数传递</p>
+
+    <pre><code>  val  compare = (x: Int , y: Int ) =&gt; x &gt;  y
+  list sortWith compare
+</code></pre>
+  </li>
+  <li>
+    <p>不管它是实例的方法</p>
+
+    <pre><code>  class AComparator  {
+    def  compare(x: Int , y: Int ) = x &gt;  y
+  }
+  list sortWith ( new  AComparator ).compare
+</code></pre>
+  </li>
+  <li>
+    <p>还是匿名子句</p>
+
+    <pre><code>  object  annonymous extends scala.Function2[Int , Int , Boolean] {
+    override  def  apply(x: Int , y: Int ) = x &gt;  y
+  }
+  list sortWith annonymous 
+</code></pre>
+  </li>
+</ul>
+
+<h2 id="section-2">一切操作都是函数调用</h2>
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20130829">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
       <h1 class="entry-title"><a href="/blog/20130617">安装Spark集群(在CentOS上)</a></h1>
     
     
@@ -1309,61 +1421,6 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
 
     </article>
   
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20130226">数值计算库与科学计算库</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-02-26T23:15:00+08:00" pubdate data-updated="true">Feb 26<span>th</span>, 2013</time>
-        
-		
-         | <a href="/blog/20130226#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2 id="blas-">BLAS 接口</h2>
-<p><a href="http://www.netlib.org/blas/">BLAS</a>, <a href="http://www.netlib.org/lapack/">LAPACK</a>, <a href="http://math-atlas.sourceforge.net/">ATLAS</a> 这些数值计算库的名字很类似，他们之间有什么关系呢？BLAS是一组线性代数运算接口，目前是事实上的标准，很多数值计算/科学计算都实现了这套接口。</p>
-
-<p>BLAS定义了那些函数呢？可以查看<a href="http://www.netlib.org/blas/">官方文档</a>。</p>
-
-<p>LAPACK是BLAS的第一个实现，是最老牌的数值计算库，用FORTRAN 77语言写的。LAPACK实现了BLAS接口，并扩充了一些功能。很多数值计算库/科学计算库底层调用了LAPACK。</p>
-
-<p>很多硬件厂商都实现BLAS接口，例如<a href="http://software.intel.com/en-us/intel-mkl">Intel MKL</a>(Math Kernel Library), <a href="http://developer.amd.com/tools/cpu-development/amd-core-math-library-acml/">AMCL</a>(AMD Math Core Library)等。很多开源库也支持，例如ATLAS。</p>
-
-<p>还有非常多的库实现了BLAS接口，见<a href="http://en.wikipedia.org/wiki/Basic_Linear_Algebra_Subprograms">Wikipedia BLAS</a> 的Implementations小节。</p>
-
-<p>下面介绍一些各种语言常用的数值计算/科学计算库。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/20130226">继续阅读 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <ul class="pager">
     
     <li class="previous"><a href="/blog/page/2/">&larr; Older</a></li>
@@ -1381,7 +1438,7 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
 </section>
 <section>
   <h2>分类目录</h2>
-    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (2)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/spark/'>spark (3)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/spark/'>spark (3)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
 </section>
 <section>
   <h2>友情链接</h2>
@@ -1421,6 +1478,10 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/20130829">简洁的Scala</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/20130617">安装Spark集群(在CentOS上)</a>
       </li>
     
@@ -1434,10 +1495,6 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
     
       <li class="post">
         <a href="/blog/20130611">使用Scala IDE 阅读spark源码 &#8211; 将sbt项目转化为eclipse项目</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20130412">LaTeX的各种发行版和编辑器的比较</a>
       </li>
     
   </ul>

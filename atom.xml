@@ -4,7 +4,7 @@
   <title><![CDATA[研究研究]]></title>
   <link href="http://www.yanjiuyanjiu.com/atom.xml" rel="self"/>
   <link href="http://www.yanjiuyanjiu.com/"/>
-  <updated>2013-07-23T23:00:58+08:00</updated>
+  <updated>2013-08-29T22:33:14+08:00</updated>
   <id>http://www.yanjiuyanjiu.com/</id>
   <author>
     <name><![CDATA[soulmachine]]></name>
@@ -12,6 +12,255 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[简洁的Scala]]></title>
+    <link href="http://www.yanjiuyanjiu.com/blog/20130829"/>
+    <updated>2013-08-29T21:38:00+08:00</updated>
+    <id>http://www.yanjiuyanjiu.com/blog/concise-scala</id>
+    <content type="html"><![CDATA[<p>Scala语言是很注重一致性(consistency)的，Scala的简洁性(concision)都是由其一致性带来的。</p>
+
+<p>Scala的看上去很复杂，但是它在概念上是非常一致的。弄清了几个概念后，也就不觉得复杂了，反倒是比Java的简单。</p>
+
+<h1 id="oo--fp">OO + FP</h1>
+
+<h2 id="section">一切都是对象</h2>
+
+<p>更精确地说，应该是“一切值都是对象”。</p>
+
+<ul>
+  <li>
+    <p>整数, 浮点数等基本类型(primitive type)是对象  </p>
+
+    <pre><code>  123.toByte
+  3.14.toInt
+</code></pre>
+
+    <p>在Java中，primitive type不是对象，打破了一致性。</p>
+  </li>
+  <li>
+    <p>函数是对象</p>
+
+    <pre><code>  val compare = (x: Int, y: Int) =&gt; x &gt; y
+  compare(1, 2)
+</code></pre>
+  </li>
+  <li>
+    <p>不再有静态方法(static method)和静态属性(static field)。Java中的静态方法(static method)和静态属性(static field)，有点打破了面向对象，因为它们不属于一个实例，而是属于类。在Scala中，静态方法和静态属性也属于对象，具体来说，属于Scala中的单例object。这样，静态成员和普通成员统一了起来，都附属于某个实例(instance)。</p>
+
+    <pre><code>  object Dog {
+    val sound = "wang wang" //static field
+  }
+</code></pre>
+  </li>
+</ul>
+
+<h2 id="section-1">函数是值</h2>
+
+<p>函数是一等公民，跟普通的值没区别</p>
+
+<ul>
+  <li>
+    <p>可以当作参数传递</p>
+
+    <pre><code>  val  compare = (x: Int , y: Int ) =&gt; x &gt;  y
+  list sortWith compare
+</code></pre>
+  </li>
+  <li>
+    <p>不管它是实例的方法</p>
+
+    <pre><code>  class AComparator  {
+    def  compare(x: Int , y: Int ) = x &gt;  y
+  }
+  list sortWith ( new  AComparator ).compare
+</code></pre>
+  </li>
+  <li>
+    <p>还是匿名子句</p>
+
+    <pre><code>  object  annonymous extends scala.Function2[Int , Int , Boolean] {
+    override  def  apply(x: Int , y: Int ) = x &gt;  y
+  }
+  list sortWith annonymous 
+</code></pre>
+  </li>
+</ul>
+
+<h2 id="section-2">一切操作都是函数调用</h2>
+<!-- more -->
+
+<ul>
+  <li>
+    <p>运算符是函数调用</p>
+
+    <pre><code>  1 +  1
+  1.+(1)
+  1.&gt;(0)
+  1 &gt;  0
+  (1 &gt;  0).&amp;(2 &gt;  1)
+  (1 &gt;  0) &amp; 2 &gt;  1
+  stack.push(10)
+  stack push  10
+  stack.pop
+  stack pop
+</code></pre>
+
+    <p>注意，上述代码中，只有一个参数或零个参数的方法在调用时可以省略”.” 和”()”。</p>
+  </li>
+  <li>
+    <p>更多的符号需要用作方法名</p>
+
+    <pre><code>  def  !@#%^&amp;*\-&lt;=&gt;?|~:/ = println("noop" )
+  def  √(x: Double ) = Math.sqrt( x)
+  val  Π =  Math.Pi
+  val  r =  √( 9*Π)
+</code></pre>
+  </li>
+  <li>
+    <p>‘&lt;’, ‘&gt;’ 更适合作方法名，所以用’[’ 和‘]’ 来表示类型参数</p>
+  </li>
+  <li>
+    <p>for语句是函数调用</p>
+
+    <pre><code>  for  (i &lt;- List(1, 2)) {
+    println(i)
+  }
+  List(1, 2) foreach { i =&gt; println(i)}
+  for  (i &lt;- List(1, 2))  yield {
+    i +  10
+  }
+  List(1, 2) map {i =&gt; i +  10}
+</code></pre>
+  </li>
+  <li>
+    <p>更多的例子</p>
+
+    <pre><code>  // synchronized is function call instead of keyword
+  def  check = synchronized {
+    // isInstanceOf is function call instead of keyword
+    100.isInstanceOf[ String ] 
+  }
+</code></pre>
+  </li>
+  <li>
+    <p>额外的好处：自左向右顺序书写语句</p>
+
+    <pre><code>  stack.pop.asInstanceOf[ Int ] // (Integer) stack.pop() in Java
+</code></pre>
+  </li>
+</ul>
+
+<h2 id="section-3">一切操作都有返回值</h2>
+
+<ul>
+  <li>
+    <p>默认返回最后一条语句的值，也可以用return 显式返回</p>
+
+    <pre><code>  val  r1 = { // return 3
+    val  a =  1
+    val  b =  2
+    a +  b
+  }
+  val  r2 =  if (true) 1 else 2
+  val  r3 =  // return (): Unit
+    for  (i &lt;- List(1, 2)) {
+      println(i)
+    }
+  val  r4 =  // return List(11, 12)
+    for  (i &lt;- List(1, 2))  yield {
+       i +  10
+    }
+  val  r5 =  // return java.io.File
+  try  {
+     val  f =  new  File("afile")
+     f
+  }  catch {
+     case ex: IOException  =&gt; null
+  }
+</code></pre>
+  </li>
+</ul>
+
+<p>Scala里不再像C/C++, Java，区分语句(statement)和表达式(expression)。Scala里没有statement，只有expression，因此一切操作都是表达式，都有返回值。Scala可以说是<strong>expression-oriented</strong>。</p>
+
+<p>关于语句和表达式的区别，可以看”Scala in depth”一书中的比较:</p>
+
+<blockquote>
+  <p><strong>Statement Versus Expression</strong> A statement is something that execute; an expression is something that evaluates to a value.</p>
+</blockquote>
+
+<h2 id="oo--fp-1">一切都是对象+数据即操作，操作即数据 = OO + FP</h2>
+
+<h1 id="type-system">一致的类型系统(type system)</h1>
+
+<h2 id="scala-class-hierarchy">scala class hierarchy</h2>
+
+<p><img src="http://www.scala-lang.org/old/sites/default/files/images/classhierarchy.png" /></p>
+
+<h2 id="any">根类 Any</h2>
+
+<p>Scala 上有一个共同的根类<strong>Any</strong>。Any统一了基本类型和引用类型。</p>
+
+<h2 id="nullnothing">两个尾类Null和Nothing。</h2>
+
+<p>JVM上的null是Null类，它是所有AnyRef的子类。</p>
+
+<p>Nothing是所有类型（包括AnyVal和AnyRef）的子类。它没有值（实例），用于处理一些特殊情况，例如出错时返回该类型。</p>
+
+<h2 id="invariant-covariant-contravariant">Invariant, Covariant, Contravariant</h2>
+
+<h2 id="type-parameter-vs-abstract-type-member">类型参数(type parameter) VS. 抽象类型成员(abstract type member)</h2>
+
+<pre><code>trait Pair[K, V] {
+  def get(key: K): V
+  def set(key: K, value: V)
+}
+class PairImpl extends Pair[Dog, Fox] {
+  def get(key: Dog): Fox
+  def put(key: Dog, value: Fox)
+}
+</code></pre>
+
+<p>类型参数的名字会发散到所有子类和引用的类，因此改变类型名字时需要修改很多地方</p>
+
+<pre><code>trait Pair{
+  type K // deferred type
+  type V // deferred type
+  defget(key: K): V
+  defset(key: K, value: V)
+}
+class PairImpl extends Pair{
+  type K= Dog
+  type V= Fox
+  defget(key: K): V
+  defset(key: K, value: V)
+}
+</code></pre>
+
+<p>抽象类型成员，改变类型名字时，只需要修改一处地方</p>
+
+<h1 id="section-4">一些牛人的讨论</h1>
+
+<p><a href="http://dcaoyuan.iteye.com/blog/502730">2 楼 dcaoyuan 2009-10-25</a>  </p>
+
+<blockquote>
+  <p>这次会上讲PPT时间有点不够，但这个PPT中提到的每句话都是仔细想过的，强调的是Scala中一些概念的一致性，比如，有关Scala的文章中常提到“值都是对象”，准确地说，应该是“值都是对象的实例”，还有，“操作、函数、参数可以互相转化，都是值，都是实例的对象”，这其实是Scala可以扩展的关键，也是OO+FP能够比较好地在Scala中结合的关键。 </p>
+
+  <p>还有就是Scala的类型体系，看上去复杂，其实是为了修正Java中类型体系的一些问题，并且带了了一个JVM上的完整一致的类型体系。弄清了几个概念后，也就不觉得复杂了，反倒是比Java的简单。 </p>
+
+  <p>总之，我看到的Scala的简单性都是由其一致性带来的，虽然设计者为了开发人员的习惯作了一点点妥协，但还是非常坚持他的设计理念。 </p>
+
+  <p>Martin不是一个简单的人，为了在JVM上实现他的设计理念，其后台的具体实现其实是相当复杂和困难的，但他坚持并不断实践，有时候甚至不惜把原来的实现推倒重来，终于在2.6以后有了我们现在看到的相当理想的结果。</p>
+</blockquote>
+
+<h1 id="section-5">参考资料</h1>
+
+<ol>
+  <li><a href="http://www.slideshare.net/dcaoyuan/scalajava">2009. 邓草原. 对Java的修正和超越</a></li>
+</ol>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[安装Spark集群(在CentOS上)]]></title>
@@ -939,7 +1188,9 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
 
 <p>如果不想折腾，可以下载我已经生成好的项目, <a href="http://pan.baidu.com/share/link?shareid=534521368&amp;uk=2466605404">spark-0.7.2.zip</a>。解压，启动Scala IDE，选择菜单<code>File-&gt;Import-&gt;General-&gt;Existing projects into workspace</code>，浏览到 spark-0.7.2目录，批量导入5个项目。导入后项目图标有红色感叹号，这是因为你的电脑上路径和我的路径不一样，找不到引用的jar了。右击项目，选择<code>Build Path-&gt;Configure Build Path</code>，选择<code>Libraries</code>标签，这时可以看到所有jar都有红叉叉，全选，删除，然后点击<code>Add External Jars</code>，浏览到<code>spark-0.7.2\lib_managed\jars</code>，把所有jar都导入，导入后红色感叹号就消失了。对每个项目都执行上述操作。</p>
 
-<p><strong>TODO</strong>: 虽然红色感叹号消失了，不过项目还是有红色小叉叉图标，这是因为IDE找不到某些类的定义，暂时不知道如何解决。</p>
+<p><strong>2013-07-27 更新</strong>：eclipse项目上有红色小叉叉图标，之前一直没解决，今天解决了，主要原因是，<strong>Scala IDE 版本不对！</strong> scala-ide.org 官网最新的的3.0.1只支持scala 2.10，不再支持2.9.3。由于Spark目前使用scala 2.9.3写的，所以我们要下载支持 scala 2.9.3 版，scala ide 3.0.0是支持 2.9.3的，不过首选要下载 eclipse JUNO，不要使用新版的eclipse，例如eclipse Indigo, Kepler都不行。</p>
+
+<p>因此，正确的做法是，先下载 eclipse juno，然后下载 3.0.0 的zip包，解压，然后启动eclipse，点击菜单”help-&gt;Install New Software”，浏览到刚刚解压的<code>site</code>文件夹，就可以安装scala ide插件了。</p>
 ]]></content>
   </entry>
   
@@ -2746,7 +2997,7 @@ Windows预设是Big5编码,所以要想’rake generate’的时候不报编码�
 
 <p>Java的数值计算库主要分为两类：Pure Java和Natie Wrapper。Pure Java是指用纯Java编写的，Native Wrapper是指该库底层调用了C++或Fortan编写的第三方库，上面封装了一层，提供了更有好的接口。</p>
 
-<p>Pure Java的有：<a href="http://dsd.lbl.gov/~hoschek/colt/">Colt</a>, <a href="http://commons.apache.org/proper/commons-math/">Commons Math</a>, <a href="https://code.google.com/p/efficient-java-matrix-library/">EJML</a>, <a href="http://math.nist.gov/javanumerics/jama/">JAMA</a>, </p>
+<p>Pure Java的有：<a href="http://dsd.lbl.gov/~hoschek/colt/">Colt</a>, <a href="http://commons.apache.org/proper/commons-math/">Commons Math</a>, <a href="https://code.google.com/p/efficient-java-matrix-library/">EJML</a>, <a href="http://math.nist.gov/javanumerics/jama/">JAMA</a>, <a href="http://trove.starlight-systems.com/">Trove</a></p>
 
 <p>Native Wrapper有：<a href="http://jblas.org">jblas</a>，<a href="https://github.com/fommil/matrix-toolkits-java">Matrix Toolkit Java</a></p>
 
@@ -3743,10 +3994,12 @@ apr, apr-util官网 http://apr.apache.org , pcre官网为 <a href="http://pcre.o
 <span class="line-number">10</span>
 <span class="line-number">11</span>
 <span class="line-number">12</span>
+<span class="line-number">13</span>
 </pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="c">#开始解压，编译，安装</span>
 </span><span class="line">tar -jxf Python-3.2.3.tar.bz2
 </span><span class="line"><span class="nb">cd </span>Python-3.2.3
 </span><span class="line"><span class="c"># 查看一下说明, vim README</span>
+</span><span class="line">sudo yum install zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel
 </span><span class="line">./configure
 </span><span class="line">make
 </span><span class="line"><span class="c">#为了加快安装速度，这步可以省略</span>
@@ -5494,76 +5747,6 @@ Metadata的类和接口。</p>
 
 <h2 id="section-5">3.7 事件监听</h2>
 <p>略</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Java质量检测评估工具]]></title>
-    <link href="http://www.yanjiuyanjiu.com/blog/20100331"/>
-    <updated>2010-03-31T16:45:00+08:00</updated>
-    <id>http://www.yanjiuyanjiu.com/blog/java-qa-tools</id>
-    <content type="html"><![CDATA[<p>Java代码质量检测评估工具
-“五大” 代码分析领域：</p>
-
-<ul>
-  <li>编码风格</li>
-  <li>冗余代码</li>
-  <li>代码覆盖率</li>
-  <li>依赖项分析</li>
-  <li>复杂度监控</li>
-</ul>
-
-<p>一下列举了一些目前比较流行的工具。网址后面列出了其PR值，可以反映此工具的流行度。</p>
-
-<h2 id="section">1. 编码风格</h2>
-<p>CheckStyle
-Home page: <a href="http://checkstyle.sourceforge.net/">http://checkstyle.sourceforge.net/</a> (6)<br />
-对应的eclipse插件有多个，其中eclipsecs最常用<br />
-Home page: <a href="http://eclipse-cs.sourceforge.net/">http://eclipse-cs.sourceforge.net/</a> (6)<br />
-eclipse插件URL：<a href="http://eclipse-cs.sf.net/update/">http://eclipse-cs.sf.net/update/</a></p>
-
-<h2 id="section-1">2. 冗余代码</h2>
-<p>Simian <a href="http://www.redhillconsulting.com.au/products/simian/">http://www.redhillconsulting.com.au/products/simian/</a> (5)<br />
-PMD 的 CPD <a href="http://pmd.sourceforge.net/cpd.html">http://pmd.sourceforge.net/cpd.html</a> (5)</p>
-
-<h2 id="section-2">3. 代码覆盖率</h2>
-<p>EMMA  <a href="http://emma.sourceforge.net/">http://emma.sourceforge.net/</a> (6)<br />
-Cobertura  <a href="http://cobertura.sourceforge.net/">http://cobertura.sourceforge.net/</a> (6)<br />
-EclEmma <a href="http://update.eclemma.org/">http://update.eclemma.org/</a> (5)<br />
-Coverlipse <a href="http://coverlipse.sourceforge.net/">http://coverlipse.sourceforge.net/</a> (3)</p>
-
-<h2 id="section-3">4. 依赖项分析</h2>
-<p>JDepend <a href="http://clarkware.com/software/JDepend.html">http://clarkware.com/software/JDepend.html</a> (6)</p>
-
-<h2 id="section-4">5. 复杂度监控</h2>
-<p>Metrics <a href="http://metrics.sourceforge.net/">http://metrics.sourceforge.net/</a> (4)</p>
-
-<h2 id="section-5">6. 静态分析工具</h2>
-<p>具有以上两项或两项以上的综合工具（也称为静态分析工具）： </p>
-
-<h3 id="pmd">6.1 PMD</h3>
-<p>Home page: <a href="http://pmd.sourceforge.net/">http://pmd.sourceforge.net/</a> (6)<br />
-eclipse插件URL：<a href="http://sourceforge.net/projects/pmd/files/pmd-eclipse/update-site/">http://sourceforge.net/projects/pmd/files/pmd-eclipse/update-site/</a></p>
-
-<h3 id="findbugs-httpfindbugssourceforgenet-6">6.2 FindBugs <a href="http://findbugs.sourceforge.net/">http://findbugs.sourceforge.net/</a> (6)</h3>
-<p>eclipse插件URL：<a href="http://findbugs.cs.umd.edu/eclipse">http://findbugs.cs.umd.edu/eclipse</a></p>
-
-<p>FindBugs 检查程序生成的class文件，即分析字节码
-PMD 检查源码，分析源代码</p>
-
-<h3 id="jtest">6.3 Jtest</h3>
-<p><a href="http://www.parasoft.com/jtest">http://www.parasoft.com/jtest</a></p>
-
-<h3 id="jlint">6.4 Jlint</h3>
-<p><a href="http://artho.com/jlint/">http://artho.com/jlint/</a> (5)</p>
-
-<h3 id="lint4j">6.5 Lint4j</h3>
-<p><a href="http://www.jutils.com/">http://www.jutils.com/</a> (4)</p>
-
-<p>我个人平时最常用的是Checkstyle，其次是PMD，大家可以参考一下。</p>
-
-<h2 id="section-6">参考资料</h2>
-<p><a href="http://blog.csdn.net/cb_121/archive/2009/05/22/4208792.aspx">http://blog.csdn.net/cb_121/archive/2009/05/22/4208792.aspx</a></p>
 ]]></content>
   </entry>
   

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: machine-learning | 研究研究]]></title>
   <link href="http://www.yanjiuyanjiu.com/blog/categories/machine-learning/atom.xml" rel="self"/>
   <link href="http://www.yanjiuyanjiu.com/"/>
-  <updated>2013-07-23T23:00:58+08:00</updated>
+  <updated>2013-08-29T22:33:14+08:00</updated>
   <id>http://www.yanjiuyanjiu.com/</id>
   <author>
     <name><![CDATA[soulmachine]]></name>
@@ -99,7 +99,7 @@
 
 <p>Java的数值计算库主要分为两类：Pure Java和Natie Wrapper。Pure Java是指用纯Java编写的，Native Wrapper是指该库底层调用了C++或Fortan编写的第三方库，上面封装了一层，提供了更有好的接口。</p>
 
-<p>Pure Java的有：<a href="http://dsd.lbl.gov/~hoschek/colt/">Colt</a>, <a href="http://commons.apache.org/proper/commons-math/">Commons Math</a>, <a href="https://code.google.com/p/efficient-java-matrix-library/">EJML</a>, <a href="http://math.nist.gov/javanumerics/jama/">JAMA</a>, </p>
+<p>Pure Java的有：<a href="http://dsd.lbl.gov/~hoschek/colt/">Colt</a>, <a href="http://commons.apache.org/proper/commons-math/">Commons Math</a>, <a href="https://code.google.com/p/efficient-java-matrix-library/">EJML</a>, <a href="http://math.nist.gov/javanumerics/jama/">JAMA</a>, <a href="http://trove.starlight-systems.com/">Trove</a></p>
 
 <p>Native Wrapper有：<a href="http://jblas.org">jblas</a>，<a href="https://github.com/fommil/matrix-toolkits-java">Matrix Toolkit Java</a></p>
 
