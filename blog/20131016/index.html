@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>用VisualVM连接 tomcat 服务器时，如何配置tomcat启动JMX - 研究研究</title>
+  <title>安装Spark集群(在CentOS上) - 研究研究</title>
   <meta name="author" content="soulmachine">
 
   
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://www.yanjiuyanjiu.com/blog/20120811">
+  <link rel="canonical" href="http://www.yanjiuyanjiu.com/blog/20131016">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/bootstrap/bootstrap.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/stylesheets/bootstrap/responsive.css" media="screen, projection" rel="stylesheet" type="text/css">
@@ -112,7 +112,7 @@
   
   <header class="page-header">
     
-      <h1 class="entry-title">用VisualVM连接 Tomcat 服务器时，如何配置tomcat启动JMX</h1>
+      <h1 class="entry-title">安装Spark集群(在CentOS上)</h1>
     
     
       <p class="meta">
@@ -128,7 +128,7 @@
   
 
 
-<time datetime="2012-08-11T21:37:00+08:00" pubdate data-updated="true">Aug 11<span>th</span>, 2012</time>
+<time datetime="2013-10-16T11:58:00+08:00" pubdate data-updated="true">Oct 16<span>th</span>, 2013</time>
         
 		
          | <a href="#duoshuo_thread">Comments</a>
@@ -138,16 +138,200 @@
   </header>
 
 
-<div class="entry-content"><p>用VisualVM连接 tomcat 服务器时，需要让tomcat启动JMX，在catalina.sh 中添加一行代码即可：</p>
+<div class="entry-content"><p><strong>环境</strong>:CentOS 6.4, Hadoop 1.1.2, JDK 1.7, Spark 0.8.0, Scala 2.9.3</p>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">JAVA_OPTS</span><span class="o">=</span>”<span class="nv">$JAVA_OPTS</span> -Djava.rmi.server.hostname<span class="o">=</span>192.168.0.123 -Dcom.sun.management.jmxremote<span class="o">=</span><span class="nb">true</span> -Dcom.sun.management.jmxremote.port<span class="o">=</span>8086 -Dcom.sun.management.jmxremote.ssl<span class="o">=</span><span class="nb">false</span> -Dcom.sun.management.jmxremote.authenticate<span class="o">=</span><span class="nb">false</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-<p>注意，用hostname -i 查看是否为127.0.01，这步非常重要,否则会连接失败，如果是，必须要配置-Djava.rmi.server.hostname。</p>
+<p>Spark 0.7.2 的安装请看之前的一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20130617/">安装Spark集群(在CentOS上)</a> 。</p>
 
-<p>参考： <br />
-<a href="http://blog.tty.nl/2010/09/03/using-visualvm-to-fix-live-tomcat-and-jvm-problems/">Using VisualVM to fix live Tomcat and JVM problems</a><br />
-<a href="http://blog.csdn.net/linghunhong/article/details/6438572">JVM内存监控:visualVM jconsole jstatd jmap</a></p>
+<p>Spark的安装很简单，总结起来一句话：下载，解压，然后拷贝到所有机器，完毕，无需任何配置。</p>
+
+<h1 id="jdk-17">1. 安装 JDK 1.7</h1>
+<pre><code>yum search openjdk-devel
+sudo yum install java-1.7.0-openjdk-devel.x86_64
+/usr/sbin/alternatives --config java
+/usr/sbin/alternatives --config javac
+sudo vim /etc/profile
+# add the following lines at the end
+export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.19.x86_64
+export JRE_HOME=$JAVA_HOME/jre
+export PATH=$PATH:$JAVA_HOME/bin
+export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+# save and exit vim
+# make the bash profile take effect immediately
+$ source /etc/profile
+# test
+$ java -version
+</code></pre>
+
+<p>参考我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20120423/">安装和配置CentOS服务器的详细步骤</a>。</p>
+
+<h1 id="scala-293">2. 安装 Scala 2.9.3</h1>
+<p>Spark 0.8.0 依赖 Scala 2.9.3, 我们必须要安装Scala 2.9.3.</p>
+
+<p>下载 <a href="http://www.scala-lang.org/downloads/distrib/files/scala-2.9.3.tgz">scala-2.9.3.tgz</a> 并 保存到home目录.</p>
+
+<pre><code>$ tar -zxf scala-2.9.3.tgz
+$ sudo mv scala-2.9.3 /usr/lib
+$ sudo vim /etc/profile
+# add the following lines at the end
+export SCALA_HOME=/usr/lib/scala-2.9.3
+export PATH=$PATH:$SCALA_HOME/bin
+# save and exit vim
+#make the bash profile take effect immediately
+source /etc/profile
+# test
+$ scala -version
+</code></pre>
+
+<h1 id="spark">3. 下载预编译好的Spark</h1>
+<p>下载预编译好的Spark, <a href="http://spark-project.org/download/spark-0.8.0-incubating-bin-hadoop1.tgz">spark-0.8.0-incubating-bin-hadoop1.tgz</a>. </p>
+
+<p>如果你想从零开始编译，则下载源码包，但是我不建议你这么做，因为有一个Maven仓库，twitter4j.org, 被墙了，导致编译时需要翻墙，非常麻烦。如果你有DIY精神，并能顺利翻墙，则可以试试这种方式。</p>
+
+<h1 id="local">4. Local模式</h1>
+
+<h2 id="section">4.1 解压</h2>
+
+<pre><code>$ tar -zxf spark-0.8.0-incubating-bin-hadoop1.tgz
+</code></pre>
+
+<h2 id="sparkhome">4.2 （可选）设置 SPARK_HOME环境变量</h2>
+
+<pre><code>$ vim ~/.bash_profile
+# add the following lines at the end
+export SPARK_HOME=$HOME/spark-0.8.0
+# save and exit vim
+#make the bash profile take effect immediately
+$ source /etc/profile
+</code></pre>
+
+<h2 id="sparkpi">4.3 现在可以运行SparkPi了</h2>
+
+<pre><code>$ cd $SPARK_HOME
+$ ./run-example org.apache.spark.examples.SparkPi local
+</code></pre>
+
+<h1 id="cluster">5. Cluster模式</h1>
+
+<!-- more -->
+
+<h2 id="hadoop">5.1 安装Hadoop</h2>
+<p>用VMware Workstation 创建三台CentOS 虚拟机，hostname分别设置为 master, slave01, slave02，设置SSH无密码登陆，安装hadoop，然后启动hadoop集群。参考我的这篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20130612">在CentOS上安装Hadoop</a>. </p>
+
+<h2 id="scala">5.2 Scala</h2>
+<p>在三台机器上都要安装 Scala 2.9.3 , 按照第2节的步骤。JDK在安装Hadoop时已经安装了。</p>
+
+<h2 id="masterspark">5.3 在master上安装并配置Spark</h2>
+<p>解压</p>
+
+<pre><code>$ tar -zxf spark-0.8.0-incubating-bin-hadoop1.tgz.tgz
+</code></pre>
+
+<p>在 in <code>conf/spark-env.sh</code> 中设置<code>SCALA_HOME</code></p>
+
+<pre><code>$ cd ~/spark-0.8.0/conf
+$ mv spark-env.sh.template spark-env.sh
+$ vim spark-env.sh
+# add the following line
+export SCALA_HOME=/usr/lib/scala-2.9.3
+# save and exit
+</code></pre>
+
+<p>在<code>conf/slaves</code>, 添加Spark worker的hostname, 一行一个。</p>
+
+<pre><code>$ vim slaves
+slave01
+slave02
+# save and exit
+</code></pre>
+
+<p>（可选）设置 SPARK_HOME环境变量，并将SPARK_HOME/bin加入PATH</p>
+
+<pre><code>$ vim ~/.bash_profile
+# add the following lines at the end
+export SPARK_HOME=$HOME/spark-0.8.0
+export PATH=$PATH:$SPARK_HOME/bin
+# save and exit vim
+#make the bash profile take effect immediately
+$ source /etc/profile
+</code></pre>
+
+<h2 id="workerspark">5.4 在所有worker上安装并配置Spark</h2>
+<p>既然master上的这个文件件已经配置好了，把它拷贝到所有的worker即可。<strong>注意，三台机器spark所在目录必须一致，因为master会登陆到worker上执行命令，master认为worker的spark路径与自己一样。</strong></p>
+
+<pre><code>$ cd
+$ scp -r spark-0.8.0 dev@slave01:~
+$ scp -r spark-0.8.0 dev@slave02:~
+</code></pre>
+
+<h2 id="spark-">5.5 启动 Spark 集群</h2>
+<p>在master上执行</p>
+
+<pre><code>$ cd ~/spark-0.8.0
+$ bin/start-all.sh
+</code></pre>
+
+<p>检测进程是否启动</p>
+
+<pre><code>$ jps
+11055 Jps
+2313 SecondaryNameNode
+2409 JobTracker
+2152 NameNode
+4822 Master
+</code></pre>
+
+<p>浏览master的web UI(默认<a href="http://localhost:8080">http://localhost:8080</a>). 这是你应该可以看到所有的word节点，以及他们的CPU个数和内存等信息。</p>
+
+<h2 id="spark-1">5.6 运行Spark自带的例子</h2>
+
+<p>运行SparkPi</p>
+
+<pre><code>$ cd ~/spark-0.8.0
+$ ./run-example org.apache.spark.examples.SparkPi spark://master:7077
+</code></pre>
+
+<p>运行 SparkLR</p>
+
+<pre><code>#Logistic Regression
+#./run-example org.apache.spark.examples.SparkLR spark://master:7077
+</code></pre>
+
+<p>运行 SparkKMeans</p>
+
+<pre><code>#kmeans
+$ ./run-example org.apache.spark.examples.SparkKMeans spark://master:7077 ./kmeans_data.txt 2 1
+</code></pre>
+
+<h2 id="hdfswordcount">5.7 从HDFS读取文件并运行WordCount</h2>
+
+<pre><code>$ cd ~/spark-0.8.0
+$ hadoop fs -put README.md .
+$ MASTER=spark://master:7077 ./spark-shell
+scala&gt; val file = sc.textFile("hdfs://master:9000/user/dev/README.md")
+scala&gt; val count = file.flatMap(line =&gt; line.split(" ")).map(word =&gt; (word, 1)).reduceByKey(_+_)
+scala&gt; count.collect()
+</code></pre>
+
+<h2 id="spark--1">5.8 停止 Spark 集群</h2>
+
+<pre><code>$ cd ~/spark-0.8.0
+$ bin/stop-all.sh
+</code></pre>
+
+<h1 id="section-1">参考资料</h1>
+<ol>
+  <li><a href="http://spark-project.org/docs/latest/spark-standalone.html">Spark Standalone Mode</a></li>
+  <li><a href="https://github.com/mesos/spark/wiki/Running-A-Spark-Standalone-Cluster">Running A Spark Standalone Cluster</a></li>
+  <li><a href="http://sprism.blogspot.com/2012/11/lightning-fast-wordcount-using-spark.html">Lightning-Fast WordCount using Spark Alongside Hadoop</a></li>
+</ol>
+
+<p>以下博客都已经过时了：</p>
+
+<ol>
+  <li><a href="http://chapeau.freevariable.com/2013/04/installing-spark-on-fedora-18.html">Installing Spark on Fedora 18</a></li>
+  <li><a href="http://rdc.taobao.com/team/jm/archives/1823">Spark随谈（二）—— 安装攻略</a></li>
+  <li><a href="http://www.cnblogs.com/jerrylead/archive/2012/08/13/2636115.html">Spark安装与学习</a></li>
+</ol>
 </div>
 
 
@@ -170,12 +354,12 @@
   
 
 
-<time datetime="2012-08-11T21:37:00+08:00" pubdate data-updated="true">Aug 11<span>th</span>, 2012</time>
+<time datetime="2013-10-16T11:58:00+08:00" pubdate data-updated="true">Oct 16<span>th</span>, 2013</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/tools/'>tools</a>
+    <a class='category' href='/blog/categories/spark/'>spark</a>
   
 </span>
 
@@ -206,7 +390,7 @@
 	
     <section>
       <div id="duoshuo_thread" aria-live="polite"><!-- Duoshuo Comment BEGIN -->
-<div class="ds-thread" data-thread-key="/blog/20120811" data-title="用VisualVM连接 tomcat 服务器时，如何配置tomcat启动JMX"></div>
+<div class="ds-thread" data-thread-key="/blog/20131016" data-title="安装Spark集群(在CentOS上)"></div>
 <script type="text/javascript">
 var duoshuoQuery = {short_name:"yanjiuyanjiu"};
 	(function() {
@@ -224,13 +408,13 @@ var duoshuoQuery = {short_name:"yanjiuyanjiu"};
     <ul class="pager">
       
       <li class="previous"><a class="basic-alignment left"
-        href="/blog/20120423" title="Previous Post:
-        安装和配置CentOS服务器的详细步骤">&laquo; 安装和配置CentOS服务器的详细步骤</a></li>
+        href="/blog/20130829" title="Previous Post:
+        简洁的Scala">&laquo; 简洁的Scala</a></li>
       
       <li><a href="/blog/archives">Blog Archives</a></li>
       
-      <li class="next"><a class="basic-alignment right" href="/blog/20130225"
-        title="Next Post: KNN与K-Means的区别">KNN与K-Means的区别
+      <li class="next"><a class="basic-alignment right" href="/blog/20131024"
+        title="Next Post: CentOS 6.4 升级内核到 3.11.6">CentOS 6.4 升级内核到 3.11.6
         &raquo;</a></li>
       
     </ul>
