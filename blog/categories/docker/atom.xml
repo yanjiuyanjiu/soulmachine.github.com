@@ -4,7 +4,7 @@
   <title><![CDATA[Category: docker | 研究研究]]></title>
   <link href="http://www.yanjiuyanjiu.com/blog/categories/docker/atom.xml" rel="self"/>
   <link href="http://www.yanjiuyanjiu.com/"/>
-  <updated>2013-10-26T00:44:46+08:00</updated>
+  <updated>2013-10-26T00:48:18+08:00</updated>
   <id>http://www.yanjiuyanjiu.com/</id>
   <author>
     <name><![CDATA[soulmachine]]></name>
@@ -52,7 +52,7 @@
 
 <p>完了几遍交互式入门教程后，你会好奇，怎么自己定制一个 image，例如把常用的软件装好后打包 ? 这时候该 Dockfile 登场了。Dockerfile 实质上是一个脚本文件，用于自动化创建image。</p>
 
-<p>&lt;– more –&gt;</p>
+<!--more-->
 
 <p>请跟着官方教程走一遍，<a href="http://www.docker.io/gettingstarted/">Dockerfile Tutorial</a></p>
 
@@ -205,7 +205,7 @@ nodev   aufs
 
 <h3 id="hello-world">1.11 运行 hello world</h3>
 
-<p>&lt;— more –&gt;</p>
+<!--more-->
 
 <pre><code>sudo docker run ubuntu /bin/echo hello world
 hello world
