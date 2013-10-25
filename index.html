@@ -157,9 +157,7 @@
 <pre><code>sudo HTTP_PROXY=proxy_server:port docker -d &amp;
 </code></pre>
 
-<p>同时要注意，不要使用<code>http_proxy</code>和<code>https_proxy</code>环境变量。</p>
-
-<p>docker貌似是不识别<code>http_proxy</code>, <code>https_proxy</code>和<code>no_proxy</code>环境变量的，因此要在命令行里指定。</p>
+<p>docker貌似是不识别<code>http_proxy</code>, <code>https_proxy</code>和<code>no_proxy</code>环境变量的，因此要在命令行里指定，参考 <a href="https://github.com/dotcloud/docker/issues/402">Github Issue #402 Using Docker behind a firewall</a>。</p>
 
 <p>如果在命令行里指定了<code>HTTP_PROXY</code>，则要unset掉<code>http_proxy</code>和<code>https_proxy</code>环境变量。原因是：</p>
 
