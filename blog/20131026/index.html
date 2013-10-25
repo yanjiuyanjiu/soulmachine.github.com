@@ -148,7 +148,78 @@
 
 <p>玩完了后，在自己的真实机器上，把上面的命令重新敲一遍，感受一下。</p>
 
-<h3 id="http">添加http代理</h3>
+<h2 id="hello-world">Hello World</h2>
+
+<p>参考官方文档<a href="http://docs.docker.io/en/latest/examples/hello_world/#running-examples">Hello World</a></p>
+
+<p>首先下载官方的ubuntu image:</p>
+
+<pre><code>sudo docker pull ubuntu
+</code></pre>
+
+<p>然后运行 hello world：</p>
+
+<pre><code>sudo docker run ubuntu /bin/echo hello world
+</code></pre>
+
+<h2 id="section-1">三种运行命令的模式</h2>
+
+<p>docker 有三种运行命令的方式，短暂方式，交互方式，daemon方式。</p>
+
+<p><strong>短暂方式</strong>，就是刚刚的那个”hello world”，命令执行完后，container就终止了，不过并没有消失，可以用 <code>sudo docker ps -a</code> 看一下所有的container，第一个就是刚刚执行过的container，可以再次执行一遍：</p>
+
+<pre><code>sudo docker start container_id
+</code></pre>
+
+<p>不过这次看不到”hello world”了，只能看到ID，用<code>logs</code>命令才能看得到，</p>
+
+<pre><code>sudo docker logs container_id
+</code></pre>
+
+<p>可以看到两个”hello world”，因为这个container运行了两次。</p>
+
+<p><strong>交互方式</strong>，</p>
+
+<pre><code>sudo docker run -i -t image_name /bin/bash
+</code></pre>
+
+<p><strong>daemon方式</strong>，即让软件作为长时间服务运行，这就是SAAS啊！</p>
+
+<p>例如，一个无限循环打印的脚本（替换为memcached, apache等，操作方法仍然不变！）：</p>
+
+<pre><code>CONTAINER_ID=$(sudo docker run -d ubuntu /bin/sh -c "while true; do echo hello world; sleep 1; done")
+</code></pre>
+
+<p>在container外面查看它的输出</p>
+
+<pre><code>sudo docker logs $CONTAINER_ID
+</code></pre>
+
+<p>或者连接上容器实时查看</p>
+
+<pre><code>sudo docker attach $CONTAINER_ID
+</code></pre>
+
+<p>终止容器</p>
+
+<pre><code>sudo docker stop $CONTAINER_ID
+</code></pre>
+
+<p><code>sudo docker ps</code>看一下，已经没了</p>
+
+<h2 id="docker-ps-">docker ps 命令详解</h2>
+
+<p><code>sudo docker ps</code>，列出当前所有正在运行的container</p>
+
+<p><code>sudo docker ps -l</code>，列出最近一次启动的，且正在运行的container</p>
+
+<p><code>sudo docker ps -a</code>，列出所有的container</p>
+
+<p>其他用法请参考 <code>sudo docker ps -h</code></p>
+
+<p>还有一种方式可以让程序在daemon模式下运行，就是在Dockerfile里设置USER为daemon，见<a href="http://www.docker.io/learn/dockerfile/level2/">Dockerfile tutorial Level2</a>。</p>
+
+<h2 id="http">添加http代理</h2>
 
 <p>在国内，pull或push的时候经常连不上docker.com（原因你懂的，或者在公司内部统一用一个代理上网的时候），可以在docker daemon进程启动的时候加个代理，例如</p>
 
@@ -221,9 +292,9 @@ RUN apt-get install -y vim
 
 <p><strong>注意一个坑：</strong> <code>apt-get upgrade</code> 在当前官方的ubuntu image里是无法运行成功的，见 <a href="https://github.com/dotcloud/docker/issues/1724">Issue #1724 apt-get upgrade in plain Ubuntu precise image fails</a>。所以，干脆放弃更新吧，能<code>apt-get install</code>软件就行了，不要有更新强迫症 :)</p>
 
-<h2 id="section-1">删除容器</h2>
+<h2 id="section-2">删除容器</h2>
 
-<p>每一行命令都会产生一个新的容器（无论是在<code>sudo docker run -i -t ubuntu /bin/bash</code> 模式下，还是Dockerfile里的RUN命令），玩了一会儿后，<code>sudo docker ps -a</code> 会看到很多容器，很是干扰视线，可以用一行命令删除所有容器：</p>
+<p><strong>每一行命令都会产生一个新的容器</strong>（无论是在<code>sudo docker run -i -t ubuntu /bin/bash</code> 模式下，还是Dockerfile里的RUN命令），玩了一会儿后，<code>sudo docker ps -a</code> 会看到很多容器，很是干扰视线，可以用一行命令删除所有容器：</p>
 
 <pre><code>sudo docker rm `sudo docker ps -a -q`
 </code></pre>
@@ -253,7 +324,7 @@ RUN apt-get install -y vim
 
 <p>自己build了一个image，想要共享，怎么办？参考这篇文章，<a href="http://crohr.me/journal/2013/docker-repository-create-base-boxes.html">How to build and publish base boxes for Docker?</a></p>
 
-<h3 id="section-2">注册一个账号</h3>
+<h3 id="section-3">注册一个账号</h3>
 <p>首先，要去 <a href="https://index.docker.io/">https://index.docker.io/</a> 注册一个账号，例如我的是 soulmachine。</p>
 
 <h3 id="buildimage">build一个image</h3>
@@ -265,7 +336,7 @@ RUN apt-get install -y vim
 
 <p>如果没有tag，则默认为 latest。</p>
 
-<h3 id="section-3">登陆</h3>
+<h3 id="section-4">登陆</h3>
 
 <pre><code>sudo docker login
 </code></pre>
