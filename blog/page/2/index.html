@@ -114,6 +114,159 @@
       
   <header class="page-header">
     
+      <h1 class="entry-title"><a href="/blog/20130402">我的Octopress配置</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-04-02T15:35:00+08:00" pubdate data-updated="true">Apr 2<span>nd</span>, 2013</time>
+        
+		
+         | <a href="/blog/20130402#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2 id="section">实时预览</h2>
+<p>使用如下命令可以实现实时预览：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line">rake preview
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p><code>rake preview</code> 会自动监视文件的变化，重新生成静态页面。因此修改markdown文件后，只需要在浏览器里刷新一下页面，就立刻可以看到效果。不过如果修改了_config.yml的话，则需要Ctrl+C终止，用<code>rake generate</code>重新生成，才能看到效果。</p>
+
+<h2 id="section-1">嵌入代码块</h2>
+<p>见官方文档<a href="http://octopress.org/docs/blogging/code/">Sharing Code Snippets</a>。</p>
+
+<p>Octopress是一款为hacker量身定制的博客系统，当然内置了代码高亮的功能！它的代码高亮功能是通过Pygments实现的，配色方案用的是Solarized，堪称完美。</p>
+
+<p>Octopress支持多种方式嵌入代码，可以直接嵌入代码，也可以引用github上的gist 。</p>
+
+<p>我喜欢用<strong>三个反引号</strong>直接嵌入代码，比 <code>codeblock</code>要简洁。</p>
+
+<h3 id="mathjax">启用MathJax</h3>
+<p>在<code>source/_includes/custom/footer.html</code>的第一行加入如下代码：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+</pre></td><td class="code"><pre><code class="javascript"><span class="line"><span class="c">&lt;!--</span> <span class="nx">mathjax</span> <span class="nx">config</span> <span class="nx">similar</span> <span class="nx">to</span> <span class="nx">math</span><span class="p">.</span><span class="nx">stackexchange</span> <span class="o">--&gt;</span>
+</span><span class="line"><span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/x-mathjax-config&quot;</span><span class="o">&gt;</span>
+</span><span class="line"><span class="nx">MathJax</span><span class="p">.</span><span class="nx">Hub</span><span class="p">.</span><span class="nx">Config</span><span class="p">({</span>
+</span><span class="line">  <span class="nx">jax</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;input/TeX&quot;</span><span class="p">,</span> <span class="s2">&quot;output/HTML-CSS&quot;</span><span class="p">],</span>
+</span><span class="line">  <span class="nx">tex2jax</span><span class="o">:</span> <span class="p">{</span>
+</span><span class="line">    <span class="nx">inlineMath</span><span class="o">:</span> <span class="p">[</span> <span class="p">[</span><span class="s1">&#39;$&#39;</span><span class="p">,</span> <span class="s1">&#39;$&#39;</span><span class="p">]</span> <span class="p">],</span>
+</span><span class="line">    <span class="nx">displayMath</span><span class="o">:</span> <span class="p">[</span> <span class="p">[</span><span class="s1">&#39;$$&#39;</span><span class="p">,</span> <span class="s1">&#39;$$&#39;</span><span class="p">]],</span>
+</span><span class="line">    <span class="nx">processEscapes</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+</span><span class="line">    <span class="nx">skipTags</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;script&#39;</span><span class="p">,</span> <span class="s1">&#39;noscript&#39;</span><span class="p">,</span> <span class="s1">&#39;style&#39;</span><span class="p">,</span> <span class="s1">&#39;textarea&#39;</span><span class="p">,</span> <span class="s1">&#39;pre&#39;</span><span class="p">,</span> <span class="s1">&#39;code&#39;</span><span class="p">]</span>
+</span><span class="line">  <span class="p">},</span>
+</span><span class="line">  <span class="nx">messageStyle</span><span class="o">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+</span><span class="line">  <span class="s2">&quot;HTML-CSS&quot;</span><span class="o">:</span> <span class="p">{</span> <span class="nx">preferredFont</span><span class="o">:</span> <span class="s2">&quot;TeX&quot;</span><span class="p">,</span> <span class="nx">availableFonts</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;STIX&quot;</span><span class="p">,</span><span class="s2">&quot;TeX&quot;</span><span class="p">]</span> <span class="p">}</span>
+</span><span class="line"><span class="p">});</span>
+</span><span class="line"><span class="o">&lt;</span><span class="err">/script&gt;</span>
+</span><span class="line"><span class="o">&lt;</span><span class="nx">script</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML&quot;</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>这样就引入了MathJax的JS包，可以直接在markdown文件里直接写公式了，例如 $\dfrac {\pi}{2}$。</p>
+
+<p>上面的代码也可以在<code>source/_includes/custom/header.html</code>里添加，不过这样会使得页面的加载速度变慢。还可以在<code>source/_layouts/default.html</code>里添加。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20130402">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20130401">使用github + Octopress 搭建免费博客</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-04-01T15:14:00+08:00" pubdate data-updated="true">Apr 1<span>st</span>, 2013</time>
+        
+		
+         | <a href="/blog/20130401#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3 id="section">前提条件</h3>
+<p>注册一个github账号。</p>
+
+<p>任何资料，都不如<a href="http://octopress.org/docs/">Octopress</a> 和<a href="https://help.github.com/categories/20/articles">Github Pages</a>的官方文档，建议首先阅读官方文档。</p>
+
+<h3 id="github-pages">GitHub Pages快速体验</h3>
+<p>在GitHub网站上，点击右上角的+号图标，创建一个新的Repo，Repository 的名字必须为 username.github.com。然后点击Settings进入该Repo的设置页面。看到”Automatic Page Generator”，说明这个Repo已经启用了GitHub Page。点击按钮进入设置。</p>
+
+<p>在”Create a GitHub User Page”填写一些基本信息，点击右下角的”Continue to Layout”。布局就用默认的，点击绿色的”Publish”按钮。</p>
+
+<p>大功告成，输入”username.github.com”，看到一个页面没？这就是你刚刚创建的一个页面。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20130401">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
       <h1 class="entry-title"><a href="/blog/20130327">机器学习的一些通俗易懂的tutorial</a></h1>
     
     
@@ -897,128 +1050,6 @@ CentOS 自带了ssh  </p>
 
     </article>
   
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20110623">用javac命令行编译多个java文件</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2011-06-23T17:22:00+08:00" pubdate data-updated="true">Jun 23<span>rd</span>, 2011</time>
-        
-		
-         | <a href="/blog/20110623#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><ol>
-  <li>CLASSPATH一定要具体到jar路径，例如</li>
-</ol>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nb">export </span><span class="nv">CLASSPATH</span><span class="o">=</span>/usr/lib/jvm/java-6-sun/lib/commons-codec.jar:/usr/lib/jvm/java-6-sun/lib/commons-httpclient-3.1.jar:/usr/lib/jvm/java-6-sun/lib/commons-logging-1.1.jar:/usr/lib/jvm/java-6-sun/lib/dt.jar:/usr/lib/jvm/java-6-sun/lib/htmlconverter.jar:/usr/lib/jvm/java-6-sun/lib/jconsole.jar:/usr/lib/jvm/java-6-sun/lib/junit-4.1.jar:/usr/lib/jvm/java-6-sun/lib/mysql-connector-java-5.1.16-bin.jar:/usr/lib/jvm/java-6-sun/lib/sa-jdi.jar:/usr/lib/jvm/java-6-sun/lib/tools.jar
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<ol>
-  <li>
-    <p>每个java文件给出路径，最常见的是用通配符*，不支持目录递归。</p>
-  </li>
-  <li>
-    <p>最好加上 -d，这样会在这个目录下生成class文件，而不会和java文件混在一起</p>
-  </li>
-</ol>
-
-<p>看我的一个具体的例子</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">javac -d /home/dfq/crawler/bin crawler/*.java weibo4j/*.java weibo4j/org/json/*.java weibo4j/*.java weibo4j/util/*.java weibo4j/http/*.java
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>运行时用如下命令：</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nb">cd</span> /home/dfq/crawler/bin
-</span><span class="line">java -cp .:<span class="nv">$CLASSPATH</span> crawler.ManagerThread
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20110417">推荐给TeX新手的电子书和书籍</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2011-04-17T17:03:00+08:00" pubdate data-updated="true">Apr 17<span>th</span>, 2011</time>
-        
-		
-         | <a href="/blog/20110417#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2 id="ctex">CTEX自带的文档</h2>
-<ol>
-  <li>安装好CTEX后，c:CTEXCTeXctexdoc下的两个文档，ctex-faq.pdf和lshort-cn.pdf（即93 分钟学会 LaTeX2e）</li>
-  <li>
-    <p><a href="ftp://ftp.ctex.org/pub/tex/documents/bible/">ftp://ftp.ctex.org/pub/tex/documents/bible/</a> 下的 LaTeX_manual.zip
-对于初学者，上面3个文档足够了，在c:CTEXCTeXctexdoc目录下的其他几个文档也非常好。</p>
-
-    <p>如果想进一步学习，推荐下面一本书。</p>
-  </li>
-  <li><a href="http://www.amazon.cn/mn/detailApp/ref=sr_1_1?_encoding=UTF8&amp;s=books&amp;qid=1271499096&amp;asin=B00114JYBU&amp;sr=8-1">《LaTeX入门与提高》</a>，陈志杰，2008，高等教育出版社，卓越上有卖的。<a href="http://ishare.iask.sina.com.cn/f/7485622.html">这里有个PDF扫描版</a>。</li>
-</ol>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/20110417">继续阅读 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <ul class="pager">
     
     <li class="previous"><a href="/blog/page/3/">&larr; Older</a></li>
@@ -1038,7 +1069,7 @@ CentOS 自带了ssh  </p>
 </section>
 <section>
   <h2>分类目录</h2>
-    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/spark/'>spark (4)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/docker/'>docker (2)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/spark/'>spark (4)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
 </section>
 <section>
   <h2>友情链接</h2>
@@ -1078,6 +1109,14 @@ CentOS 自带了ssh  </p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/20131026">docker 快速入门</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20131025">docker安装</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/20131024">CentOS 6.4 升级内核到 3.11.6</a>
       </li>
     
@@ -1087,14 +1126,6 @@ CentOS 自带了ssh  </p>
     
       <li class="post">
         <a href="/blog/20130829">简洁的Scala</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20130617">安装Spark集群(在CentOS上)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20130614">Installing Spark on CentOS</a>
       </li>
     
   </ul>

@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>制作 VMware ESXI 5 U盘安装盘 - 研究研究</title>
+  <title>docker 快速入门 - 研究研究</title>
   <meta name="author" content="soulmachine">
 
   
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://www.yanjiuyanjiu.com/blog/20120418">
+  <link rel="canonical" href="http://www.yanjiuyanjiu.com/blog/20131026">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/bootstrap/bootstrap.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/stylesheets/bootstrap/responsive.css" media="screen, projection" rel="stylesheet" type="text/css">
@@ -112,7 +112,7 @@
   
   <header class="page-header">
     
-      <h1 class="entry-title">制作 VMware ESXI 5 U盘安装盘</h1>
+      <h1 class="entry-title">Docker 快速入门</h1>
     
     
       <p class="meta">
@@ -128,7 +128,7 @@
   
 
 
-<time datetime="2012-04-18T20:17:00+08:00" pubdate data-updated="true">Apr 18<span>th</span>, 2012</time>
+<time datetime="2013-10-26T23:41:00+08:00" pubdate data-updated="true">Oct 26<span>th</span>, 2013</time>
         
 		
          | <a href="#duoshuo_thread">Comments</a>
@@ -138,55 +138,99 @@
   </header>
 
 
-<div class="entry-content"><p>有两种方法，使用 unetbootin ，或使用 LinuxLive USB Creator刻录可启动U盘。 
-##使用 unetbootin
-这个方法最自动化，点击两下按钮即可，但是有时候会失败(我用EXSi 5.0 的ISO失败，但是用 EXSi 5.0U1可以成功)，U盘启动不了。 </p>
+<div class="entry-content"><p><strong>前提条件：</strong>要安装好 docker，见我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20131025">docker 安装</a></p>
 
-<ol>
-  <li>单击 光盘镜像，选择ISO文件VMware-VMvisor-Installer-5.0.0.update01-623860.x86_64.iso。 </li>
-  <li>选择U盘，点击“确定”开始刻录。刻录后用U盘启动机器开始安装即可。如下图所示。
-<img src="http://yanjiuyanjiu-wordpress.stor.sinaapp.com/uploads/2012/04/unetbootin1.jpg" /></li>
-</ol>
+<h2 id="section">交互式命令行入门教程</h2>
 
-<h2 id="linuxlive-usb-creator">使用 LinuxLive USB Creator</h2>
+<p>首先强烈建议玩一遍官方的一个交互式命令行入门教程，<a href="http://www.docker.io/gettingstarted/">Interactive commandline tutorial</a>。甚至要多玩几遍，加深印象。</p>
 
-<ol>
-  <li>格式化U盘，文件系统为FAT32，并设置为主分区，命令如下：
-     # 使用管理员权限运行cmd 
-     diskpart 
-     list disk 
-     select disk USB number （例如 select dist 1） 
-     clean 
-     create partition primary 
-     active 
-     format fs=fat32 quick 
-     assign 
-     exit</li>
-</ol>
+<p>初次过完这个教程，感觉docker用起来跟git很类似。</p>
 
-<!-- more -->
+<p>玩完了后，在自己的真实机器上，把上面的命令重新敲一遍，感受一下。</p>
 
-<ol>
-  <li>下载，安装 LinuxLive USB Creator(<a href="http://www.linuxliveusb.com/">http://www.linuxliveusb.com/</a>) </li>
-  <li>
-    <p>按照上图中的步骤 1,2,4，选择ISO文件<code>VMware-VMvisor-Installer-5.0.0.update01-623860.x86_64.iso</code>，然后点击 5 ，开始创建U盘安装盘。等待U盘刻录结束。</p>
+<h3 id="http">添加http代理</h3>
 
-    <p><img src="http://yanjiuyanjiu-wordpress.stor.sinaapp.com/uploads/2012/04/liliusb_thumb1.png" /></p>
+<p>在国内，pull或push的时候经常连不上docker.com（原因你懂的，或者在公司内部统一用一个代理上网的时候），可以在docker daemon进程启动的时候加个代理，例如</p>
 
-    <p>大功告成，是不是很简单？！ </p>
-  </li>
-  <li>编辑U盘根目录下的BOOT.CFG文件。注意，不要添加 “ks=usb”，因为下面会用交互模式来安装。 </li>
-  <li>大功告成</li>
-  <li>注意，本文主要参考了末尾的参考资料。但是不需要原文的第4步和第5步。因为用普通的 “interactive installation”安装就很方便了。第4步和第5步用于一键自动化安装，适用于大量安装的情况，这里不详细讨论。 
-见文章末尾的评论，</li>
-</ol>
+<pre><code>sudo HTTP_PROXY=proxy_server:port docker -d &amp;
+</code></pre>
 
-<blockquote>
-  <p>@Cesar: if you do not edit the boot.cfg with the “ks=usb” option and select a interactive installation it will work。</p>
-</blockquote>
+<p>同时要注意，不要使用<code>http_proxy</code>和<code>https_proxy</code>环境变量。</p>
 
-<p><strong>参考资料</strong><br />
-<a href="http://www.ivobeerens.nl/2011/09/17/create-a-bootable-vmware-esxi-5-usb-stick-in-windows-and-perform-a-scripted-installation/">Create a bootable VMware ESXi 5 USB stick in Windows and perform a scripted installation</a></p>
+<p>docker貌似是不识别<code>http_proxy</code>, <code>https_proxy</code>和<code>no_proxy</code>环境变量的，因此要在命令行里指定。</p>
+
+<p>如果在命令行里指定了<code>HTTP_PROXY</code>，则要unset掉<code>http_proxy</code>和<code>https_proxy</code>环境变量。原因是：</p>
+
+<ul>
+  <li>首先， docker daemon进程是通过http协议与docker.com通信的</li>
+  <li>其次，docker的各种命令（例如 <code>run</code>, <code>login</code>等）也是通过http协议与docker daemon进程通信的（发送jasn字符串，daemon进程返回的也是json字符串），有时候docker客户端命令貌似能识别http_proxy变量，这时，客户端发送一个命令，路径是<code>localhost-&gt;http_proxy-&gt;daemon进程</code>，daemon进程返回的数据，路径是 <code>daemon进程-&gt;proxy-&gt;proxy-&gt;localhost</code>，其中，从<code>proxy-&gt;localhost</code>的路径是不通的，因为proxy连接不了内网IP。</li>
+</ul>
+
+<p>之所以把这一步放在本文开始，是因为这一步不做的话，后面很多命令会出错，让人摸不着头脑，我在这里就掉进坑了，花了很长时间才搞明白，原来是网络连接不稳定。</p>
+
+<h2 id="dockerfile">熟悉一下 Dockerfile</h2>
+
+<p>完了几遍交互式入门教程后，你会好奇，怎么自己定制一个 image，例如把常用的软件装好后打包 ? 这时候该 Dockfile 登场了。Dockerfile 实质上是一个脚本文件，用于自动化创建image。</p>
+
+<p>&lt;– more –&gt;</p>
+
+<p>请跟着官方教程走一遍，<a href="http://www.docker.io/gettingstarted/">Dockerfile Tutorial</a></p>
+
+<p>到这里， 官网的 Getting started 的内容基本上消化完了，接下来就是翻官网的<a href="http://docs.docker.io/en/latest/">Documentation</a>了。</p>
+
+<h2 id="section-1">删除容器</h2>
+
+<p>每一行命令都会产生一个新的容器（无论是在<code>sudo docker run -i -t ubuntu /bin/bash</code> 模式下，还是Dockerfile里的RUN命令），玩了一会儿后，<code>sudo docker ps -a</code> 会看到很多容器，很是干扰视线，可以用一行命令删除所有容器：</p>
+
+<pre><code>sudo docker rm `sudo docker ps -a -q`
+</code></pre>
+
+<h2 id="image">创建image</h2>
+<p>有两种用方式，</p>
+
+<ul>
+  <li>写一个Dockerfile，然后用<code>docker build</code>创建一个image</li>
+  <li>在容器里交互式地（例如<code>sudo docker run -i -t ubuntu /bin/bash</code>）进行一些列操作，然后<code>docker commit</code>固化成一个image。</li>
+</ul>
+
+<p>image相当于编程语言里的类，container相当于实例，不过可以动态给实例安装新软件，然后把这个container用commit命令固化成一个image。</p>
+
+<h2 id="image-1">下载image</h2>
+
+<p><a href="https://index.docker.io/">https://index.docker.io/</a> 是官方的image仓库，也可以用 <a href="https://github.com/dotcloud/docker-registry">Docker-Registry</a>创建自己的仓库，这就好比git，<a href="https://index.docker.io/">https://index.docker.io/</a>相当于Github，也可以自己DIY搭建一个git服务器，把自己的代码托管到私有的服务器上。</p>
+
+<p><code>sudo docker pull ubuntu</code> 是从 <a href="https://index.docker.io/_/ubuntu/">https://index.docker.io/_/ubuntu/</a> 下载名为 ubuntu 的repo，里面包含了几个tag，默认使用latest这个tag。这个repo是docker官方的。</p>
+
+<h2 id="image-2">上传并共享image</h2>
+
+<p>自己build了一个image，想要共享，怎么办？参考这篇文章，<a href="http://crohr.me/journal/2013/docker-repository-create-base-boxes.html">How to build and publish base boxes for Docker?</a></p>
+
+<h3 id="section-2">注册一个账号</h3>
+<p>首先，要去 <a href="https://index.docker.io/">https://index.docker.io/</a> 注册一个账号，例如我的是 soulmachine。</p>
+
+<h3 id="buildimage">build一个image</h3>
+
+<p>build命令格式如下：</p>
+
+<pre><code>sudo docker build -t username/repo:tag - &lt; Dockerfile
+</code></pre>
+
+<p>如果没有tag，则默认为 latest。</p>
+
+<h3 id="section-3">登陆</h3>
+
+<pre><code>sudo docker login
+</code></pre>
+
+<p>输入自己的用户名和密码。</p>
+
+<h3 id="push--docker-index">push 到 Docker index</h3>
+
+<pre><code>sudo docker push username/repo
+</code></pre>
+
+<p>这条命令会把一个repo下面的所有tag都push到<a href="https://index.docker.io/">https://index.docker.io/</a></p>
+
 </div>
 
 
@@ -209,12 +253,12 @@
   
 
 
-<time datetime="2012-04-18T20:17:00+08:00" pubdate data-updated="true">Apr 18<span>th</span>, 2012</time>
+<time datetime="2013-10-26T23:41:00+08:00" pubdate data-updated="true">Oct 26<span>th</span>, 2013</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/tools/'>tools</a>
+    <a class='category' href='/blog/categories/docker/'>docker</a>
   
 </span>
 
@@ -245,7 +289,7 @@
 	
     <section>
       <div id="duoshuo_thread" aria-live="polite"><!-- Duoshuo Comment BEGIN -->
-<div class="ds-thread" data-thread-key="/blog/20120418" data-title="制作 VMware ESXI 5 U盘安装盘"></div>
+<div class="ds-thread" data-thread-key="/blog/20131026" data-title="docker 快速入门"></div>
 <script type="text/javascript">
 var duoshuoQuery = {short_name:"yanjiuyanjiu"};
 	(function() {
@@ -263,14 +307,10 @@ var duoshuoQuery = {short_name:"yanjiuyanjiu"};
     <ul class="pager">
       
       <li class="previous"><a class="basic-alignment left"
-        href="/blog/20120103" title="Previous Post:
-        在Ubuntu上安装Hadoop">&laquo; 在Ubuntu上安装Hadoop</a></li>
+        href="/blog/20131025" title="Previous Post:
+        docker安装">&laquo; docker安装</a></li>
       
       <li><a href="/blog/archives">Blog Archives</a></li>
-      
-      <li class="next"><a class="basic-alignment right" href="/blog/20120423"
-        title="Next Post: 安装和配置CentOS服务器的详细步骤">安装和配置CentOS服务器的详细步骤
-        &raquo;</a></li>
       
     </ul>
   </footer>

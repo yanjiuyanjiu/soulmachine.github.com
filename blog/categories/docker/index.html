@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>制作 VMware ESXI 5 U盘安装盘 - 研究研究</title>
+  <title>Category: docker - 研究研究</title>
   <meta name="author" content="soulmachine">
 
   
-  <meta name="description" content="一个关于机器学习的技术博客">
+  <meta name="description" content="Category: docker">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://www.yanjiuyanjiu.com/blog/20120418">
+  <link rel="canonical" href="http://www.yanjiuyanjiu.comblog/categories/docker">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/bootstrap/bootstrap.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/stylesheets/bootstrap/responsive.css" media="screen, projection" rel="stylesheet" type="text/css">
@@ -107,173 +107,54 @@
   <div class="container">
     <div class="row-fluid">
       
-<article class="hentry span9" role="article">
+<article role="article" class="span9">
 
   
   <header class="page-header">
-    
-      <h1 class="entry-title">制作 VMware ESXI 5 U盘安装盘</h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-04-18T20:17:00+08:00" pubdate data-updated="true">Apr 18<span>th</span>, 2012</time>
-        
-		
-         | <a href="#duoshuo_thread">Comments</a>
-        
-      </p>
+    <h1 class="entry-title">Category: Docker</h1>
     
   </header>
+  
+  <div id="blog-archives" class="category">
 
 
-<div class="entry-content"><p>有两种方法，使用 unetbootin ，或使用 LinuxLive USB Creator刻录可启动U盘。 
-##使用 unetbootin
-这个方法最自动化，点击两下按钮即可，但是有时候会失败(我用EXSi 5.0 的ISO失败，但是用 EXSi 5.0U1可以成功)，U盘启动不了。 </p>
 
-<ol>
-  <li>单击 光盘镜像，选择ISO文件VMware-VMvisor-Installer-5.0.0.update01-623860.x86_64.iso。 </li>
-  <li>选择U盘，点击“确定”开始刻录。刻录后用U盘启动机器开始安装即可。如下图所示。
-<img src="http://yanjiuyanjiu-wordpress.stor.sinaapp.com/uploads/2012/04/unetbootin1.jpg" /></li>
-</ol>
+  
+  <h1>2013</h1>
 
-<h2 id="linuxlive-usb-creator">使用 LinuxLive USB Creator</h2>
+<article>
+  <div class="well">
 
-<ol>
-  <li>格式化U盘，文件系统为FAT32，并设置为主分区，命令如下：
-     # 使用管理员权限运行cmd 
-     diskpart 
-     list disk 
-     select disk USB number （例如 select dist 1） 
-     clean 
-     create partition primary 
-     active 
-     format fs=fat32 quick 
-     assign 
-     exit</li>
-</ol>
+<h2><a href="/blog/20131026">docker 快速入门</a></h2>
+<time datetime="2013-10-26T23:41:00+08:00" pubdate><span class='month'>Oct</span> <span class='day'>26</span> <span class='year'>2013</span></time>
 
-<!-- more -->
+<footer>
+  <span class="categories">posted in <a class='category' href='/blog/categories/docker/'>docker</a></span>
+</footer>
 
-<ol>
-  <li>下载，安装 LinuxLive USB Creator(<a href="http://www.linuxliveusb.com/">http://www.linuxliveusb.com/</a>) </li>
-  <li>
-    <p>按照上图中的步骤 1,2,4，选择ISO文件<code>VMware-VMvisor-Installer-5.0.0.update01-623860.x86_64.iso</code>，然后点击 5 ，开始创建U盘安装盘。等待U盘刻录结束。</p>
-
-    <p><img src="http://yanjiuyanjiu-wordpress.stor.sinaapp.com/uploads/2012/04/liliusb_thumb1.png" /></p>
-
-    <p>大功告成，是不是很简单？！ </p>
-  </li>
-  <li>编辑U盘根目录下的BOOT.CFG文件。注意，不要添加 “ks=usb”，因为下面会用交互模式来安装。 </li>
-  <li>大功告成</li>
-  <li>注意，本文主要参考了末尾的参考资料。但是不需要原文的第4步和第5步。因为用普通的 “interactive installation”安装就很方便了。第4步和第5步用于一键自动化安装，适用于大量安装的情况，这里不详细讨论。 
-见文章末尾的评论，</li>
-</ol>
-
-<blockquote>
-  <p>@Cesar: if you do not edit the boot.cfg with the “ks=usb” option and select a interactive installation it will work。</p>
-</blockquote>
-
-<p><strong>参考资料</strong><br />
-<a href="http://www.ivobeerens.nl/2011/09/17/create-a-bootable-vmware-esxi-5-usb-stick-in-windows-and-perform-a-scripted-installation/">Create a bootable VMware ESXi 5 USB stick in Windows and perform a scripted installation</a></p>
 </div>
 
-
-  <footer>
-    <p class="meta">
-      
-  
-
-<span class="byline author vcard">Posted by <span class="fn">soulmachine</span></span>
-
-      
+</article>
 
 
 
+<article>
+  <div class="well">
 
+<h2><a href="/blog/20131025">docker安装</a></h2>
+<time datetime="2013-10-25T23:41:00+08:00" pubdate><span class='month'>Oct</span> <span class='day'>25</span> <span class='year'>2013</span></time>
 
+<footer>
+  <span class="categories">posted in <a class='category' href='/blog/categories/docker/'>docker</a></span>
+</footer>
 
-
-
-  
-
-
-<time datetime="2012-04-18T20:17:00+08:00" pubdate data-updated="true">Apr 18<span>th</span>, 2012</time>
-      
-
-<span class="categories">
-  
-    <a class='category' href='/blog/categories/tools/'>tools</a>
-  
-</span>
-
-
-    </p>
-    
-      <div class="sharing">
-  <!-- AddThis Button BEGIN -->
-  <div class="addthis_toolbox addthis_default_style addthis_32x32_style">
-    <a class="addthis_button_sinaweibo"></a>
-    <a class="addthis_button_facebook"></a>
-    <a class="addthis_button_twitter"></a>
-    <a class="addthis_button_google_plusone_share"></a>
-    <a class="addthis_button_delicious"></a>
-    <a class="addthis_button_digg"></a>
-    <a class="addthis_button_reddit"></a>
-    <a class="addthis_button_compact"></a><a class="addthis_counter addthis_bubble_style"></a>
-  </div>
-  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=undefined"></script>
-  <!-- AddThis Button END -->
-  
-  
-  
 </div>
 
-    
-    
-	
-    <section>
-      <div id="duoshuo_thread" aria-live="polite"><!-- Duoshuo Comment BEGIN -->
-<div class="ds-thread" data-thread-key="/blog/20120418" data-title="制作 VMware ESXI 5 U盘安装盘"></div>
-<script type="text/javascript">
-var duoshuoQuery = {short_name:"yanjiuyanjiu"};
-	(function() {
-		var ds = document.createElement('script');
-		ds.type = 'text/javascript';ds.async = true;
-		ds.src = 'http://static.duoshuo.com/embed.js';
-		ds.charset = 'UTF-8';
-		(document.getElementsByTagName('head')[0] 
-		|| document.getElementsByTagName('body')[0]).appendChild(ds);
-	})();
-</script>
-<!-- Duoshuo Comment END --></div>
-    </section>
-    
-    <ul class="pager">
-      
-      <li class="previous"><a class="basic-alignment left"
-        href="/blog/20120103" title="Previous Post:
-        在Ubuntu上安装Hadoop">&laquo; 在Ubuntu上安装Hadoop</a></li>
-      
-      <li><a href="/blog/archives">Blog Archives</a></li>
-      
-      <li class="next"><a class="basic-alignment right" href="/blog/20120423"
-        title="Next Post: 安装和配置CentOS服务器的详细步骤">安装和配置CentOS服务器的详细步骤
-        &raquo;</a></li>
-      
-    </ul>
-  </footer>
+</article>
+
+</div>
+
+  
 </article>
 
 <aside class="sidebar-nav span3">

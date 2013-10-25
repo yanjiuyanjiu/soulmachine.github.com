@@ -114,6 +114,128 @@
       
   <header class="page-header">
     
+      <h1 class="entry-title"><a href="/blog/20110623">用javac命令行编译多个java文件</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-06-23T17:22:00+08:00" pubdate data-updated="true">Jun 23<span>rd</span>, 2011</time>
+        
+		
+         | <a href="/blog/20110623#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><ol>
+  <li>CLASSPATH一定要具体到jar路径，例如</li>
+</ol>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nb">export </span><span class="nv">CLASSPATH</span><span class="o">=</span>/usr/lib/jvm/java-6-sun/lib/commons-codec.jar:/usr/lib/jvm/java-6-sun/lib/commons-httpclient-3.1.jar:/usr/lib/jvm/java-6-sun/lib/commons-logging-1.1.jar:/usr/lib/jvm/java-6-sun/lib/dt.jar:/usr/lib/jvm/java-6-sun/lib/htmlconverter.jar:/usr/lib/jvm/java-6-sun/lib/jconsole.jar:/usr/lib/jvm/java-6-sun/lib/junit-4.1.jar:/usr/lib/jvm/java-6-sun/lib/mysql-connector-java-5.1.16-bin.jar:/usr/lib/jvm/java-6-sun/lib/sa-jdi.jar:/usr/lib/jvm/java-6-sun/lib/tools.jar
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<ol>
+  <li>
+    <p>每个java文件给出路径，最常见的是用通配符*，不支持目录递归。</p>
+  </li>
+  <li>
+    <p>最好加上 -d，这样会在这个目录下生成class文件，而不会和java文件混在一起</p>
+  </li>
+</ol>
+
+<p>看我的一个具体的例子</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line">javac -d /home/dfq/crawler/bin crawler/*.java weibo4j/*.java weibo4j/org/json/*.java weibo4j/*.java weibo4j/util/*.java weibo4j/http/*.java
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>运行时用如下命令：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nb">cd</span> /home/dfq/crawler/bin
+</span><span class="line">java -cp .:<span class="nv">$CLASSPATH</span> crawler.ManagerThread
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20110417">推荐给TeX新手的电子书和书籍</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-04-17T17:03:00+08:00" pubdate data-updated="true">Apr 17<span>th</span>, 2011</time>
+        
+		
+         | <a href="/blog/20110417#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2 id="ctex">CTEX自带的文档</h2>
+<ol>
+  <li>安装好CTEX后，c:CTEXCTeXctexdoc下的两个文档，ctex-faq.pdf和lshort-cn.pdf（即93 分钟学会 LaTeX2e）</li>
+  <li>
+    <p><a href="ftp://ftp.ctex.org/pub/tex/documents/bible/">ftp://ftp.ctex.org/pub/tex/documents/bible/</a> 下的 LaTeX_manual.zip
+对于初学者，上面3个文档足够了，在c:CTEXCTeXctexdoc目录下的其他几个文档也非常好。</p>
+
+    <p>如果想进一步学习，推荐下面一本书。</p>
+  </li>
+  <li><a href="http://www.amazon.cn/mn/detailApp/ref=sr_1_1?_encoding=UTF8&amp;s=books&amp;qid=1271499096&amp;asin=B00114JYBU&amp;sr=8-1">《LaTeX入门与提高》</a>，陈志杰，2008，高等教育出版社，卓越上有卖的。<a href="http://ishare.iask.sina.com.cn/f/7485622.html">这里有个PDF扫描版</a>。</li>
+</ol>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20110417">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
       <h1 class="entry-title"><a href="/blog/20100528">基于朴素贝叶斯的文本分类算法</a></h1>
     
     
@@ -564,7 +686,7 @@ PMD 检查源码，分析源代码</p>
 </section>
 <section>
   <h2>分类目录</h2>
-    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/spark/'>spark (4)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/docker/'>docker (2)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/spark/'>spark (4)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
 </section>
 <section>
   <h2>友情链接</h2>
@@ -604,6 +726,14 @@ PMD 检查源码，分析源代码</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/20131026">docker 快速入门</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20131025">docker安装</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/20131024">CentOS 6.4 升级内核到 3.11.6</a>
       </li>
     
@@ -613,14 +743,6 @@ PMD 检查源码，分析源代码</p>
     
       <li class="post">
         <a href="/blog/20130829">简洁的Scala</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20130617">安装Spark集群(在CentOS上)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20130614">Installing Spark on CentOS</a>
       </li>
     
   </ul>

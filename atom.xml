@@ -4,7 +4,7 @@
   <title><![CDATA[研究研究]]></title>
   <link href="http://www.yanjiuyanjiu.com/atom.xml" rel="self"/>
   <link href="http://www.yanjiuyanjiu.com/"/>
-  <updated>2013-10-24T00:38:26+08:00</updated>
+  <updated>2013-10-26T00:44:46+08:00</updated>
   <id>http://www.yanjiuyanjiu.com/</id>
   <author>
     <name><![CDATA[soulmachine]]></name>
@@ -12,6 +12,212 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[docker 快速入门]]></title>
+    <link href="http://www.yanjiuyanjiu.com/blog/20131026"/>
+    <updated>2013-10-26T23:41:00+08:00</updated>
+    <id>http://www.yanjiuyanjiu.com/blog/docker-tutorial</id>
+    <content type="html"><![CDATA[<p><strong>前提条件：</strong>要安装好 docker，见我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20131025">docker 安装</a></p>
+
+<h2 id="section">交互式命令行入门教程</h2>
+
+<p>首先强烈建议玩一遍官方的一个交互式命令行入门教程，<a href="http://www.docker.io/gettingstarted/">Interactive commandline tutorial</a>。甚至要多玩几遍，加深印象。</p>
+
+<p>初次过完这个教程，感觉docker用起来跟git很类似。</p>
+
+<p>玩完了后，在自己的真实机器上，把上面的命令重新敲一遍，感受一下。</p>
+
+<h3 id="http">添加http代理</h3>
+
+<p>在国内，pull或push的时候经常连不上docker.com（原因你懂的，或者在公司内部统一用一个代理上网的时候），可以在docker daemon进程启动的时候加个代理，例如</p>
+
+<pre><code>sudo HTTP_PROXY=proxy_server:port docker -d &amp;
+</code></pre>
+
+<p>同时要注意，不要使用<code>http_proxy</code>和<code>https_proxy</code>环境变量。</p>
+
+<p>docker貌似是不识别<code>http_proxy</code>, <code>https_proxy</code>和<code>no_proxy</code>环境变量的，因此要在命令行里指定。</p>
+
+<p>如果在命令行里指定了<code>HTTP_PROXY</code>，则要unset掉<code>http_proxy</code>和<code>https_proxy</code>环境变量。原因是：</p>
+
+<ul>
+  <li>首先， docker daemon进程是通过http协议与docker.com通信的</li>
+  <li>其次，docker的各种命令（例如 <code>run</code>, <code>login</code>等）也是通过http协议与docker daemon进程通信的（发送jasn字符串，daemon进程返回的也是json字符串），有时候docker客户端命令貌似能识别http_proxy变量，这时，客户端发送一个命令，路径是<code>localhost-&gt;http_proxy-&gt;daemon进程</code>，daemon进程返回的数据，路径是 <code>daemon进程-&gt;proxy-&gt;proxy-&gt;localhost</code>，其中，从<code>proxy-&gt;localhost</code>的路径是不通的，因为proxy连接不了内网IP。</li>
+</ul>
+
+<p>之所以把这一步放在本文开始，是因为这一步不做的话，后面很多命令会出错，让人摸不着头脑，我在这里就掉进坑了，花了很长时间才搞明白，原来是网络连接不稳定。</p>
+
+<h2 id="dockerfile">熟悉一下 Dockerfile</h2>
+
+<p>完了几遍交互式入门教程后，你会好奇，怎么自己定制一个 image，例如把常用的软件装好后打包 ? 这时候该 Dockfile 登场了。Dockerfile 实质上是一个脚本文件，用于自动化创建image。</p>
+
+<p>&lt;– more –&gt;</p>
+
+<p>请跟着官方教程走一遍，<a href="http://www.docker.io/gettingstarted/">Dockerfile Tutorial</a></p>
+
+<p>到这里， 官网的 Getting started 的内容基本上消化完了，接下来就是翻官网的<a href="http://docs.docker.io/en/latest/">Documentation</a>了。</p>
+
+<h2 id="section-1">删除容器</h2>
+
+<p>每一行命令都会产生一个新的容器（无论是在<code>sudo docker run -i -t ubuntu /bin/bash</code> 模式下，还是Dockerfile里的RUN命令），玩了一会儿后，<code>sudo docker ps -a</code> 会看到很多容器，很是干扰视线，可以用一行命令删除所有容器：</p>
+
+<pre><code>sudo docker rm `sudo docker ps -a -q`
+</code></pre>
+
+<h2 id="image">创建image</h2>
+<p>有两种用方式，</p>
+
+<ul>
+  <li>写一个Dockerfile，然后用<code>docker build</code>创建一个image</li>
+  <li>在容器里交互式地（例如<code>sudo docker run -i -t ubuntu /bin/bash</code>）进行一些列操作，然后<code>docker commit</code>固化成一个image。</li>
+</ul>
+
+<p>image相当于编程语言里的类，container相当于实例，不过可以动态给实例安装新软件，然后把这个container用commit命令固化成一个image。</p>
+
+<h2 id="image-1">下载image</h2>
+
+<p><a href="https://index.docker.io/">https://index.docker.io/</a> 是官方的image仓库，也可以用 <a href="https://github.com/dotcloud/docker-registry">Docker-Registry</a>创建自己的仓库，这就好比git，<a href="https://index.docker.io/">https://index.docker.io/</a>相当于Github，也可以自己DIY搭建一个git服务器，把自己的代码托管到私有的服务器上。</p>
+
+<p><code>sudo docker pull ubuntu</code> 是从 <a href="https://index.docker.io/_/ubuntu/">https://index.docker.io/_/ubuntu/</a> 下载名为 ubuntu 的repo，里面包含了几个tag，默认使用latest这个tag。这个repo是docker官方的。</p>
+
+<h2 id="image-2">上传并共享image</h2>
+
+<p>自己build了一个image，想要共享，怎么办？参考这篇文章，<a href="http://crohr.me/journal/2013/docker-repository-create-base-boxes.html">How to build and publish base boxes for Docker?</a></p>
+
+<h3 id="section-2">注册一个账号</h3>
+<p>首先，要去 <a href="https://index.docker.io/">https://index.docker.io/</a> 注册一个账号，例如我的是 soulmachine。</p>
+
+<h3 id="buildimage">build一个image</h3>
+
+<p>build命令格式如下：</p>
+
+<pre><code>sudo docker build -t username/repo:tag - &lt; Dockerfile
+</code></pre>
+
+<p>如果没有tag，则默认为 latest。</p>
+
+<h3 id="section-3">登陆</h3>
+
+<pre><code>sudo docker login
+</code></pre>
+
+<p>输入自己的用户名和密码。</p>
+
+<h3 id="push--docker-index">push 到 Docker index</h3>
+
+<pre><code>sudo docker push username/repo
+</code></pre>
+
+<p>这条命令会把一个repo下面的所有tag都push到<a href="https://index.docker.io/">https://index.docker.io/</a></p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[docker安装]]></title>
+    <link href="http://www.yanjiuyanjiu.com/blog/20131025"/>
+    <updated>2013-10-25T23:41:00+08:00</updated>
+    <id>http://www.yanjiuyanjiu.com/blog/docker-installation</id>
+    <content type="html"><![CDATA[<h2 id="centos-64--docker">1 在 CentOS 6.4 上安装 docker</h2>
+
+<p>docker当前官方只支持Ubuntu，所以在 CentOS 安装Docker比较麻烦。</p>
+
+<p>docker官方文档说要求Linux kernel至少3.8以上，CentOS 6.4是2.6的内核，于是我哼哧哼哧的<a href="http://www.yanjiuyanjiu.com/blog/20131024">编译安装了最新的kernel 3.11.6</a>，重启后运行docker还是失败，最后找到原因，是因为编译时忘记集成aufs模块了。aufs 需要和 kernel 一起编译，很麻烦。</p>
+
+<p>不过不需要这么麻烦，有强人已经编译好了带aufs模块的内核，见这里<a href="http://nareshv.blogspot.com/2013/08/installing-dockerio-on-centos-64-64-bit.html">Installing docker.io on centos 6.4 (64-bit)</a></p>
+
+<h3 id="selinuxlxc">1.1 取消selinux，因为它会干扰lxc的正常功能</h3>
+
+<pre><code>sudo vim /etc/selinux/config 
+SELINUX=disabled
+SELINUXTYPE=targeted
+</code></pre>
+
+<h3 id="fedora-epel">1.2 安装 Fedora EPEL</h3>
+
+<pre><code>sudo yum install http://ftp.riken.jp/Linux/fedora/epel/6/x86_64/epel-release-6-8.noarch.rpm
+</code></pre>
+
+<h3 id="hop5-repo">1.3 添加 hop5 repo地址</h3>
+
+<pre><code>cd /etc/yum.repos.d
+sudo wget http://www.hop5.in/yum/el6/hop5.repo
+</code></pre>
+
+<h3 id="docker-io">1.4 安装 docker-io</h3>
+
+<pre><code>sudo yum install docker-io
+</code></pre>
+
+<p>会自动安装带aufs模块的3.10内核，以及docker-io包。</p>
+
+<h3 id="cgroup--etcfstab--docker">1.5 将 cgroup 文件系统添加到 <code>/etc/fstab</code> , 只有这样docker才能正常工作</h3>
+
+<pre><code>sudo echo "none                    /sys/fs/cgroup          cgroup  defaults        0 0" &gt;&gt; /etc/fstab
+</code></pre>
+
+<h3 id="grub">1.6 修改grub引导顺序</h3>
+
+<pre><code>sudo vim /etc/grub.conf
+default=0
+</code></pre>
+
+<p>设置default为新安装的内核的位置，一般是0</p>
+
+<h3 id="section">1.7 重启</h3>
+
+<pre><code>sudo reboot
+</code></pre>
+
+<h3 id="section-1">1.8 检查新内核是否引导成功</h3>
+
+<p>重启后，检查一下新内核是否引导起来了</p>
+
+<pre><code>uname -r
+3.10.5-3.el6.x86_64
+</code></pre>
+
+<p>说明成功了</p>
+
+<p>看一下 aufs是否存在</p>
+
+<pre><code>grep aufs /proc/filesystems 
+nodev   aufs
+</code></pre>
+
+<p>说明存在</p>
+
+<h3 id="docker-daemon-">1.9 启动 docker daemon 进程</h3>
+
+<pre><code>sudo docker -d &amp;
+</code></pre>
+
+<p>如果你在公司，且公司内部都是通过代理上网，则可以把代理服务器告诉docker，用如下命令(参考<a href="https://github.com/dotcloud/docker/issues/402">这里</a>)：</p>
+
+<pre><code>sudo HTTP_PROXY=http://xxx:port docker -d &amp;
+</code></pre>
+
+<h3 id="ubuntu-">1.10 下载 ubuntu 镜像</h3>
+
+<pre><code>sudo docker pull ubuntu
+</code></pre>
+
+<h3 id="hello-world">1.11 运行 hello world</h3>
+
+<p>&lt;— more –&gt;</p>
+
+<pre><code>sudo docker run ubuntu /bin/echo hello world
+hello world
+</code></pre>
+
+<p>安装成功了！！</p>
+
+<h2 id="ubuntu--docker">2 在 Ubuntu 上安装 docker</h2>
+
+<p>见官方文档，<a href="http://docs.docker.io/en/latest/installation/ubuntulinux/">Ubuntu Linux</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[CentOS 6.4 升级内核到 3.11.6]]></title>
@@ -4777,79 +4983,6 @@ dev@slave02:~$ jps
 <h2 id="section-4">更新记录</h2>
 <p>2012-01-03 针对 Ubuntu 13.04, Hadoop 1.1.2<br />
 2012-01-03 针对 Ubuntu 10.04, Hadoop 1.0.0</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[用javac命令行编译多个java文件]]></title>
-    <link href="http://www.yanjiuyanjiu.com/blog/20110623"/>
-    <updated>2011-06-23T17:22:00+08:00</updated>
-    <id>http://www.yanjiuyanjiu.com/blog/using-javac-to-compile-multi-java-files</id>
-    <content type="html"><![CDATA[<ol>
-  <li>CLASSPATH一定要具体到jar路径，例如</li>
-</ol>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nb">export </span><span class="nv">CLASSPATH</span><span class="o">=</span>/usr/lib/jvm/java-6-sun/lib/commons-codec.jar:/usr/lib/jvm/java-6-sun/lib/commons-httpclient-3.1.jar:/usr/lib/jvm/java-6-sun/lib/commons-logging-1.1.jar:/usr/lib/jvm/java-6-sun/lib/dt.jar:/usr/lib/jvm/java-6-sun/lib/htmlconverter.jar:/usr/lib/jvm/java-6-sun/lib/jconsole.jar:/usr/lib/jvm/java-6-sun/lib/junit-4.1.jar:/usr/lib/jvm/java-6-sun/lib/mysql-connector-java-5.1.16-bin.jar:/usr/lib/jvm/java-6-sun/lib/sa-jdi.jar:/usr/lib/jvm/java-6-sun/lib/tools.jar
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<ol>
-  <li>
-    <p>每个java文件给出路径，最常见的是用通配符*，不支持目录递归。</p>
-  </li>
-  <li>
-    <p>最好加上 -d，这样会在这个目录下生成class文件，而不会和java文件混在一起</p>
-  </li>
-</ol>
-
-<p>看我的一个具体的例子</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">javac -d /home/dfq/crawler/bin crawler/*.java weibo4j/*.java weibo4j/org/json/*.java weibo4j/*.java weibo4j/util/*.java weibo4j/http/*.java
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>运行时用如下命令：</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nb">cd</span> /home/dfq/crawler/bin
-</span><span class="line">java -cp .:<span class="nv">$CLASSPATH</span> crawler.ManagerThread
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[推荐给TeX新手的电子书和书籍]]></title>
-    <link href="http://www.yanjiuyanjiu.com/blog/20110417"/>
-    <updated>2011-04-17T17:03:00+08:00</updated>
-    <id>http://www.yanjiuyanjiu.com/blog/tex-resources-for-newbies</id>
-    <content type="html"><![CDATA[<h2 id="ctex">CTEX自带的文档</h2>
-<ol>
-  <li>安装好CTEX后，c:CTEXCTeXctexdoc下的两个文档，ctex-faq.pdf和lshort-cn.pdf（即93 分钟学会 LaTeX2e）</li>
-  <li>
-    <p><a href="ftp://ftp.ctex.org/pub/tex/documents/bible/">ftp://ftp.ctex.org/pub/tex/documents/bible/</a> 下的 LaTeX_manual.zip
-对于初学者，上面3个文档足够了，在c:CTEXCTeXctexdoc目录下的其他几个文档也非常好。</p>
-
-    <p>如果想进一步学习，推荐下面一本书。</p>
-  </li>
-  <li><a href="http://www.amazon.cn/mn/detailApp/ref=sr_1_1?_encoding=UTF8&amp;s=books&amp;qid=1271499096&amp;asin=B00114JYBU&amp;sr=8-1">《LaTeX入门与提高》</a>，陈志杰，2008，高等教育出版社，卓越上有卖的。<a href="http://ishare.iask.sina.com.cn/f/7485622.html">这里有个PDF扫描版</a>。</li>
-</ol>
-
-<!-- more -->
-
-<h2 id="section">网上的免费电子书：</h2>
-<ul>
-  <li><a href="http://gigapedia.com/items/104415/a-guide-to-latex--document-preparation-for-beginners-and-advanced-users--3rd-edition-">A Guide to LaTeX</a></li>
-  <li>the latex companion，和第2个文档 LaTeX_manual 在同一个ftp目录下,还有<a href="http://gigapedia.com/items/3842/the-latex-companion--tools-and-techniques-for-computer-typesetting-">另一个下载地址</a>。</li>
-  <li><a href="http://ftp.ctex.org/pub/tex/documents/texguru/homepage/guide.html">LaTeX2e使用手册</a></li>
-  <li><a href="ftp://ftp.ctex.org/pub/tex/documents/bible/LaTeX_graphics.zip">LaTeX2e插图指南</a></li>
-</ul>
-
-<h2 id="section-1">参考资料</h2>
-<ul>
-  <li><a href="http://bbs.ctex.org/redirect.php?tid=31930&amp;goto=lastpost">陈志杰老师的《latex入门与提高》这本书怎么样啊？</a></li>
-  <li><a href="http://bbs.ctex.org/viewthread.php?&amp;tid=1023">中国LaTeX 新用户，LaTeX中文必读教程</a></li>
-</ul>
 ]]></content>
   </entry>
   

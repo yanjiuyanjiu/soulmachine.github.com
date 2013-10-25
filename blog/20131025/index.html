@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>制作 VMware ESXI 5 U盘安装盘 - 研究研究</title>
+  <title>docker安装 - 研究研究</title>
   <meta name="author" content="soulmachine">
 
   
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://www.yanjiuyanjiu.com/blog/20120418">
+  <link rel="canonical" href="http://www.yanjiuyanjiu.com/blog/20131025">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/bootstrap/bootstrap.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/stylesheets/bootstrap/responsive.css" media="screen, projection" rel="stylesheet" type="text/css">
@@ -112,7 +112,7 @@
   
   <header class="page-header">
     
-      <h1 class="entry-title">制作 VMware ESXI 5 U盘安装盘</h1>
+      <h1 class="entry-title">Docker安装</h1>
     
     
       <p class="meta">
@@ -128,7 +128,7 @@
   
 
 
-<time datetime="2012-04-18T20:17:00+08:00" pubdate data-updated="true">Apr 18<span>th</span>, 2012</time>
+<time datetime="2013-10-25T23:41:00+08:00" pubdate data-updated="true">Oct 25<span>th</span>, 2013</time>
         
 		
          | <a href="#duoshuo_thread">Comments</a>
@@ -138,55 +138,103 @@
   </header>
 
 
-<div class="entry-content"><p>有两种方法，使用 unetbootin ，或使用 LinuxLive USB Creator刻录可启动U盘。 
-##使用 unetbootin
-这个方法最自动化，点击两下按钮即可，但是有时候会失败(我用EXSi 5.0 的ISO失败，但是用 EXSi 5.0U1可以成功)，U盘启动不了。 </p>
+<div class="entry-content"><h2 id="centos-64--docker">1 在 CentOS 6.4 上安装 docker</h2>
 
-<ol>
-  <li>单击 光盘镜像，选择ISO文件VMware-VMvisor-Installer-5.0.0.update01-623860.x86_64.iso。 </li>
-  <li>选择U盘，点击“确定”开始刻录。刻录后用U盘启动机器开始安装即可。如下图所示。
-<img src="http://yanjiuyanjiu-wordpress.stor.sinaapp.com/uploads/2012/04/unetbootin1.jpg" /></li>
-</ol>
+<p>docker当前官方只支持Ubuntu，所以在 CentOS 安装Docker比较麻烦。</p>
 
-<h2 id="linuxlive-usb-creator">使用 LinuxLive USB Creator</h2>
+<p>docker官方文档说要求Linux kernel至少3.8以上，CentOS 6.4是2.6的内核，于是我哼哧哼哧的<a href="http://www.yanjiuyanjiu.com/blog/20131024">编译安装了最新的kernel 3.11.6</a>，重启后运行docker还是失败，最后找到原因，是因为编译时忘记集成aufs模块了。aufs 需要和 kernel 一起编译，很麻烦。</p>
 
-<ol>
-  <li>格式化U盘，文件系统为FAT32，并设置为主分区，命令如下：
-     # 使用管理员权限运行cmd 
-     diskpart 
-     list disk 
-     select disk USB number （例如 select dist 1） 
-     clean 
-     create partition primary 
-     active 
-     format fs=fat32 quick 
-     assign 
-     exit</li>
-</ol>
+<p>不过不需要这么麻烦，有强人已经编译好了带aufs模块的内核，见这里<a href="http://nareshv.blogspot.com/2013/08/installing-dockerio-on-centos-64-64-bit.html">Installing docker.io on centos 6.4 (64-bit)</a></p>
 
-<!-- more -->
+<h3 id="selinuxlxc">1.1 取消selinux，因为它会干扰lxc的正常功能</h3>
 
-<ol>
-  <li>下载，安装 LinuxLive USB Creator(<a href="http://www.linuxliveusb.com/">http://www.linuxliveusb.com/</a>) </li>
-  <li>
-    <p>按照上图中的步骤 1,2,4，选择ISO文件<code>VMware-VMvisor-Installer-5.0.0.update01-623860.x86_64.iso</code>，然后点击 5 ，开始创建U盘安装盘。等待U盘刻录结束。</p>
+<pre><code>sudo vim /etc/selinux/config 
+SELINUX=disabled
+SELINUXTYPE=targeted
+</code></pre>
 
-    <p><img src="http://yanjiuyanjiu-wordpress.stor.sinaapp.com/uploads/2012/04/liliusb_thumb1.png" /></p>
+<h3 id="fedora-epel">1.2 安装 Fedora EPEL</h3>
 
-    <p>大功告成，是不是很简单？！ </p>
-  </li>
-  <li>编辑U盘根目录下的BOOT.CFG文件。注意，不要添加 “ks=usb”，因为下面会用交互模式来安装。 </li>
-  <li>大功告成</li>
-  <li>注意，本文主要参考了末尾的参考资料。但是不需要原文的第4步和第5步。因为用普通的 “interactive installation”安装就很方便了。第4步和第5步用于一键自动化安装，适用于大量安装的情况，这里不详细讨论。 
-见文章末尾的评论，</li>
-</ol>
+<pre><code>sudo yum install http://ftp.riken.jp/Linux/fedora/epel/6/x86_64/epel-release-6-8.noarch.rpm
+</code></pre>
 
-<blockquote>
-  <p>@Cesar: if you do not edit the boot.cfg with the “ks=usb” option and select a interactive installation it will work。</p>
-</blockquote>
+<h3 id="hop5-repo">1.3 添加 hop5 repo地址</h3>
 
-<p><strong>参考资料</strong><br />
-<a href="http://www.ivobeerens.nl/2011/09/17/create-a-bootable-vmware-esxi-5-usb-stick-in-windows-and-perform-a-scripted-installation/">Create a bootable VMware ESXi 5 USB stick in Windows and perform a scripted installation</a></p>
+<pre><code>cd /etc/yum.repos.d
+sudo wget http://www.hop5.in/yum/el6/hop5.repo
+</code></pre>
+
+<h3 id="docker-io">1.4 安装 docker-io</h3>
+
+<pre><code>sudo yum install docker-io
+</code></pre>
+
+<p>会自动安装带aufs模块的3.10内核，以及docker-io包。</p>
+
+<h3 id="cgroup--etcfstab--docker">1.5 将 cgroup 文件系统添加到 <code>/etc/fstab</code> , 只有这样docker才能正常工作</h3>
+
+<pre><code>sudo echo "none                    /sys/fs/cgroup          cgroup  defaults        0 0" &gt;&gt; /etc/fstab
+</code></pre>
+
+<h3 id="grub">1.6 修改grub引导顺序</h3>
+
+<pre><code>sudo vim /etc/grub.conf
+default=0
+</code></pre>
+
+<p>设置default为新安装的内核的位置，一般是0</p>
+
+<h3 id="section">1.7 重启</h3>
+
+<pre><code>sudo reboot
+</code></pre>
+
+<h3 id="section-1">1.8 检查新内核是否引导成功</h3>
+
+<p>重启后，检查一下新内核是否引导起来了</p>
+
+<pre><code>uname -r
+3.10.5-3.el6.x86_64
+</code></pre>
+
+<p>说明成功了</p>
+
+<p>看一下 aufs是否存在</p>
+
+<pre><code>grep aufs /proc/filesystems 
+nodev   aufs
+</code></pre>
+
+<p>说明存在</p>
+
+<h3 id="docker-daemon-">1.9 启动 docker daemon 进程</h3>
+
+<pre><code>sudo docker -d &amp;
+</code></pre>
+
+<p>如果你在公司，且公司内部都是通过代理上网，则可以把代理服务器告诉docker，用如下命令(参考<a href="https://github.com/dotcloud/docker/issues/402">这里</a>)：</p>
+
+<pre><code>sudo HTTP_PROXY=http://xxx:port docker -d &amp;
+</code></pre>
+
+<h3 id="ubuntu-">1.10 下载 ubuntu 镜像</h3>
+
+<pre><code>sudo docker pull ubuntu
+</code></pre>
+
+<h3 id="hello-world">1.11 运行 hello world</h3>
+
+<p>&lt;— more –&gt;</p>
+
+<pre><code>sudo docker run ubuntu /bin/echo hello world
+hello world
+</code></pre>
+
+<p>安装成功了！！</p>
+
+<h2 id="ubuntu--docker">2 在 Ubuntu 上安装 docker</h2>
+
+<p>见官方文档，<a href="http://docs.docker.io/en/latest/installation/ubuntulinux/">Ubuntu Linux</a></p>
 </div>
 
 
@@ -209,12 +257,12 @@
   
 
 
-<time datetime="2012-04-18T20:17:00+08:00" pubdate data-updated="true">Apr 18<span>th</span>, 2012</time>
+<time datetime="2013-10-25T23:41:00+08:00" pubdate data-updated="true">Oct 25<span>th</span>, 2013</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/tools/'>tools</a>
+    <a class='category' href='/blog/categories/docker/'>docker</a>
   
 </span>
 
@@ -245,7 +293,7 @@
 	
     <section>
       <div id="duoshuo_thread" aria-live="polite"><!-- Duoshuo Comment BEGIN -->
-<div class="ds-thread" data-thread-key="/blog/20120418" data-title="制作 VMware ESXI 5 U盘安装盘"></div>
+<div class="ds-thread" data-thread-key="/blog/20131025" data-title="docker安装"></div>
 <script type="text/javascript">
 var duoshuoQuery = {short_name:"yanjiuyanjiu"};
 	(function() {
@@ -263,13 +311,13 @@ var duoshuoQuery = {short_name:"yanjiuyanjiu"};
     <ul class="pager">
       
       <li class="previous"><a class="basic-alignment left"
-        href="/blog/20120103" title="Previous Post:
-        在Ubuntu上安装Hadoop">&laquo; 在Ubuntu上安装Hadoop</a></li>
+        href="/blog/20131024" title="Previous Post:
+        CentOS 6.4 升级内核到 3.11.6">&laquo; CentOS 6.4 升级内核到 3.11.6</a></li>
       
       <li><a href="/blog/archives">Blog Archives</a></li>
       
-      <li class="next"><a class="basic-alignment right" href="/blog/20120423"
-        title="Next Post: 安装和配置CentOS服务器的详细步骤">安装和配置CentOS服务器的详细步骤
+      <li class="next"><a class="basic-alignment right" href="/blog/20131026"
+        title="Next Post: docker 快速入门">docker 快速入门
         &raquo;</a></li>
       
     </ul>
