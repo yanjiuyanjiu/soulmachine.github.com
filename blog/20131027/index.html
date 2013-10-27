@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Java质量检测评估工具 - 研究研究</title>
+  <title>使用docker打造spark集群 - 研究研究</title>
   <meta name="author" content="soulmachine">
 
   
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://www.yanjiuyanjiu.com/blog/20100331">
+  <link rel="canonical" href="http://www.yanjiuyanjiu.com/blog/20131027">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/bootstrap/bootstrap.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/stylesheets/bootstrap/responsive.css" media="screen, projection" rel="stylesheet" type="text/css">
@@ -112,7 +112,7 @@
   
   <header class="page-header">
     
-      <h1 class="entry-title">Java质量检测评估工具</h1>
+      <h1 class="entry-title">使用docker打造spark集群</h1>
     
     
       <p class="meta">
@@ -128,7 +128,7 @@
   
 
 
-<time datetime="2010-03-31T16:45:00+08:00" pubdate data-updated="true">Mar 31<span>st</span>, 2010</time>
+<time datetime="2013-10-27T20:30:00+08:00" pubdate data-updated="true">Oct 27<span>th</span>, 2013</time>
         
 		
          | <a href="#duoshuo_thread">Comments</a>
@@ -138,68 +138,57 @@
   </header>
 
 
-<div class="entry-content"><p>Java代码质量检测评估工具
-“五大” 代码分析领域：</p>
+<div class="entry-content"><p><strong>前提条件：</strong>安装好了docker，见我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20131025">Docker安装</a></p>
 
-<ul>
-  <li>编码风格</li>
-  <li>冗余代码</li>
-  <li>代码覆盖率</li>
-  <li>依赖项分析</li>
-  <li>复杂度监控</li>
-</ul>
+<p>主要利用<a href="https://github.com/amplab/docker-scripts">AMPLab开源的这个docker脚本</a>，来打造一个spark集群。</p>
 
-<p>一下列举了一些目前比较流行的工具。网址后面列出了其PR值，可以反映此工具的流行度。</p>
+<h2 id="wget">升级wget</h2>
+<p>如果发现wget不识别<code>--no-proxy</code>选项，需要升级wget。</p>
 
-<h2 id="section">1. 编码风格</h2>
-<p>CheckStyle
-Home page: <a href="http://checkstyle.sourceforge.net/">http://checkstyle.sourceforge.net/</a> (6)<br />
-对应的eclipse插件有多个，其中eclipsecs最常用<br />
-Home page: <a href="http://eclipse-cs.sourceforge.net/">http://eclipse-cs.sourceforge.net/</a> (6)<br />
-eclipse插件URL：<a href="http://eclipse-cs.sf.net/update/">http://eclipse-cs.sf.net/update/</a></p>
+<h2 id="section">下载镜像</h2>
+<p>为了让脚本第一次执行的时候更快，还是手动下载所有的镜像吧，amplab在index.docker.io上有一个官方账号，把这个账号有关spark的repo都pull下来。</p>
 
-<h2 id="section-1">2. 冗余代码</h2>
-<p>Simian <a href="http://www.redhillconsulting.com.au/products/simian/">http://www.redhillconsulting.com.au/products/simian/</a> (5)<br />
-PMD 的 CPD <a href="http://pmd.sourceforge.net/cpd.html">http://pmd.sourceforge.net/cpd.html</a> (5)</p>
+<pre><code>sudo docker pull amplab/apache-hadoop-hdfs-precise
+sudo docker pull amplab/dnsmasq-precise
+sudo docker pull amplab/spark-worker
+sudo docker pull amplab/spark-master
+sudo docker pull amplab/spark-shell
+</code></pre>
 
-<h2 id="section-2">3. 代码覆盖率</h2>
-<p>EMMA  <a href="http://emma.sourceforge.net/">http://emma.sourceforge.net/</a> (6)<br />
-Cobertura  <a href="http://cobertura.sourceforge.net/">http://cobertura.sourceforge.net/</a> (6)<br />
-EclEmma <a href="http://update.eclemma.org/">http://update.eclemma.org/</a> (5)<br />
-Coverlipse <a href="http://coverlipse.sourceforge.net/">http://coverlipse.sourceforge.net/</a> (3)</p>
+<h2 id="git-clone-">git clone 脚本</h2>
 
-<h2 id="section-3">4. 依赖项分析</h2>
-<p>JDepend <a href="http://clarkware.com/software/JDepend.html">http://clarkware.com/software/JDepend.html</a> (6)</p>
+<pre><code>git@github.com:amplab/docker-scripts.git
+</code></pre>
 
-<h2 id="section-4">5. 复杂度监控</h2>
-<p>Metrics <a href="http://metrics.sourceforge.net/">http://metrics.sourceforge.net/</a> (4)</p>
+<p>这个脚本可以一键启动集群，爽啊哈哈哈！</p>
 
-<h2 id="section-5">6. 静态分析工具</h2>
-<p>具有以上两项或两项以上的综合工具（也称为静态分析工具）： </p>
+<h2 id="spark">一键启动spark集群</h2>
 
-<h3 id="pmd">6.1 PMD</h3>
-<p>Home page: <a href="http://pmd.sourceforge.net/">http://pmd.sourceforge.net/</a> (6)<br />
-eclipse插件URL：<a href="http://sourceforge.net/projects/pmd/files/pmd-eclipse/update-site/">http://sourceforge.net/projects/pmd/files/pmd-eclipse/update-site/</a></p>
+<pre><code>sudo ./deploy/deploy.sh -i amplab/spark:0.8.0 -w 3 
+</code></pre>
 
-<h3 id="findbugs-httpfindbugssourceforgenet-6">6.2 FindBugs <a href="http://findbugs.sourceforge.net/">http://findbugs.sourceforge.net/</a> (6)</h3>
-<p>eclipse插件URL：<a href="http://findbugs.cs.umd.edu/eclipse">http://findbugs.cs.umd.edu/eclipse</a></p>
+<h2 id="spark-shell">启动 Spark shell</h2>
+<p>启动一个交互式shell吧，IP为上一步输出的Master的IP</p>
 
-<p>FindBugs 检查程序生成的class文件，即分析字节码
-PMD 检查源码，分析源代码</p>
+<pre><code>sudo docker run -i -t -dns 172.17.0.90 amplab/spark-shell:0.8.0
+</code></pre>
 
-<h3 id="jtest">6.3 Jtest</h3>
-<p><a href="http://www.parasoft.com/jtest">http://www.parasoft.com/jtest</a></p>
+<h2 id="section-1">运行一个简单的的例子</h2>
 
-<h3 id="jlint">6.4 Jlint</h3>
-<p><a href="http://artho.com/jlint/">http://artho.com/jlint/</a> (5)</p>
+<pre><code>scala&gt; val textFile = sc.textFile("hdfs://master:9000/user/hdfs/test.txt")
+scala&gt; textFile.count()
+scala&gt; textFile.map({line =&gt; line}).collect()
+</code></pre>
 
-<h3 id="lint4j">6.5 Lint4j</h3>
-<p><a href="http://www.jutils.com/">http://www.jutils.com/</a> (4)</p>
+<h2 id="section-2">关闭集群</h2>
 
-<p>我个人平时最常用的是Checkstyle，其次是PMD，大家可以参考一下。</p>
+<pre><code>$ sudo ./deploy/kill_all.sh spark
+$ sudo ./deploy/kill_all.sh nameserver
+</code></pre>
 
-<h2 id="section-6">参考资料</h2>
-<p><a href="http://blog.csdn.net/cb_121/archive/2009/05/22/4208792.aspx">http://blog.csdn.net/cb_121/archive/2009/05/22/4208792.aspx</a></p>
+<h2 id="section-3">更多详情请参考项目主页的文档</h2>
+
+<p><a href="https://github.com/amplab/docker-scripts">https://github.com/amplab/docker-scripts</a></p>
 </div>
 
 
@@ -222,12 +211,12 @@ PMD 检查源码，分析源代码</p>
   
 
 
-<time datetime="2010-03-31T16:45:00+08:00" pubdate data-updated="true">Mar 31<span>st</span>, 2010</time>
+<time datetime="2013-10-27T20:30:00+08:00" pubdate data-updated="true">Oct 27<span>th</span>, 2013</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/tools/'>tools</a>
+    <a class='category' href='/blog/categories/spark/'>spark</a>
   
 </span>
 
@@ -258,7 +247,7 @@ PMD 检查源码，分析源代码</p>
 	
     <section>
       <div id="duoshuo_thread" aria-live="polite"><!-- Duoshuo Comment BEGIN -->
-<div class="ds-thread" data-thread-key="/blog/20100331" data-title="Java质量检测评估工具"></div>
+<div class="ds-thread" data-thread-key="/blog/20131027" data-title="使用docker打造spark集群"></div>
 <script type="text/javascript">
 var duoshuoQuery = {short_name:"yanjiuyanjiu"};
 	(function() {
@@ -276,14 +265,10 @@ var duoshuoQuery = {short_name:"yanjiuyanjiu"};
     <ul class="pager">
       
       <li class="previous"><a class="basic-alignment left"
-        href="/blog/20100328" title="Previous Post:
-        使用pdfbox 抽取PDF文件中的文本">&laquo; 使用pdfbox 抽取PDF文件中的文本</a></li>
+        href="/blog/20131026" title="Previous Post:
+        docker 快速入门">&laquo; docker 快速入门</a></li>
       
       <li><a href="/blog/archives">Blog Archives</a></li>
-      
-      <li class="next"><a class="basic-alignment right" href="/blog/20100401"
-        title="Next Post: Java使用imageio 读写图像">Java使用imageio 读写图像
-        &raquo;</a></li>
       
     </ul>
   </footer>

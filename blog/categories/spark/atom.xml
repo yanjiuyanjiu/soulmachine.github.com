@@ -4,7 +4,7 @@
   <title><![CDATA[Category: spark | 研究研究]]></title>
   <link href="http://www.yanjiuyanjiu.com/blog/categories/spark/atom.xml" rel="self"/>
   <link href="http://www.yanjiuyanjiu.com/"/>
-  <updated>2013-10-26T01:47:38+08:00</updated>
+  <updated>2013-10-27T16:18:49+08:00</updated>
   <id>http://www.yanjiuyanjiu.com/</id>
   <author>
     <name><![CDATA[soulmachine]]></name>
@@ -12,6 +12,65 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[使用docker打造spark集群]]></title>
+    <link href="http://www.yanjiuyanjiu.com/blog/20131027"/>
+    <updated>2013-10-27T20:30:00+08:00</updated>
+    <id>http://www.yanjiuyanjiu.com/blog/build-spark-cluster-with-docker</id>
+    <content type="html"><![CDATA[<p><strong>前提条件：</strong>安装好了docker，见我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20131025">Docker安装</a></p>
+
+<p>主要利用<a href="https://github.com/amplab/docker-scripts">AMPLab开源的这个docker脚本</a>，来打造一个spark集群。</p>
+
+<h2 id="wget">升级wget</h2>
+<p>如果发现wget不识别<code>--no-proxy</code>选项，需要升级wget。</p>
+
+<h2 id="section">下载镜像</h2>
+<p>为了让脚本第一次执行的时候更快，还是手动下载所有的镜像吧，amplab在index.docker.io上有一个官方账号，把这个账号有关spark的repo都pull下来。</p>
+
+<pre><code>sudo docker pull amplab/apache-hadoop-hdfs-precise
+sudo docker pull amplab/dnsmasq-precise
+sudo docker pull amplab/spark-worker
+sudo docker pull amplab/spark-master
+sudo docker pull amplab/spark-shell
+</code></pre>
+
+<h2 id="git-clone-">git clone 脚本</h2>
+
+<pre><code>git@github.com:amplab/docker-scripts.git
+</code></pre>
+
+<p>这个脚本可以一键启动集群，爽啊哈哈哈！</p>
+
+<h2 id="spark">一键启动spark集群</h2>
+
+<pre><code>sudo ./deploy/deploy.sh -i amplab/spark:0.8.0 -w 3 
+</code></pre>
+
+<h2 id="spark-shell">启动 Spark shell</h2>
+<p>启动一个交互式shell吧，IP为上一步输出的Master的IP</p>
+
+<pre><code>sudo docker run -i -t -dns 172.17.0.90 amplab/spark-shell:0.8.0
+</code></pre>
+
+<h2 id="section-1">运行一个简单的的例子</h2>
+
+<pre><code>scala&gt; val textFile = sc.textFile("hdfs://master:9000/user/hdfs/test.txt")
+scala&gt; textFile.count()
+scala&gt; textFile.map({line =&gt; line}).collect()
+</code></pre>
+
+<h2 id="section-2">关闭集群</h2>
+
+<pre><code>$ sudo ./deploy/kill_all.sh spark
+$ sudo ./deploy/kill_all.sh nameserver
+</code></pre>
+
+<h2 id="section-3">更多详情请参考项目主页的文档</h2>
+
+<p><a href="https://github.com/amplab/docker-scripts">https://github.com/amplab/docker-scripts</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[安装Spark集群(在CentOS上)]]></title>

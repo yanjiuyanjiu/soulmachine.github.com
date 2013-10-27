@@ -114,6 +114,95 @@
       
   <header class="page-header">
     
+      <h1 class="entry-title"><a href="/blog/20131027">使用docker打造spark集群</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-10-27T20:30:00+08:00" pubdate data-updated="true">Oct 27<span>th</span>, 2013</time>
+        
+		
+         | <a href="/blog/20131027#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><strong>前提条件：</strong>安装好了docker，见我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20131025">Docker安装</a></p>
+
+<p>主要利用<a href="https://github.com/amplab/docker-scripts">AMPLab开源的这个docker脚本</a>，来打造一个spark集群。</p>
+
+<h2 id="wget">升级wget</h2>
+<p>如果发现wget不识别<code>--no-proxy</code>选项，需要升级wget。</p>
+
+<h2 id="section">下载镜像</h2>
+<p>为了让脚本第一次执行的时候更快，还是手动下载所有的镜像吧，amplab在index.docker.io上有一个官方账号，把这个账号有关spark的repo都pull下来。</p>
+
+<pre><code>sudo docker pull amplab/apache-hadoop-hdfs-precise
+sudo docker pull amplab/dnsmasq-precise
+sudo docker pull amplab/spark-worker
+sudo docker pull amplab/spark-master
+sudo docker pull amplab/spark-shell
+</code></pre>
+
+<h2 id="git-clone-">git clone 脚本</h2>
+
+<pre><code>git@github.com:amplab/docker-scripts.git
+</code></pre>
+
+<p>这个脚本可以一键启动集群，爽啊哈哈哈！</p>
+
+<h2 id="spark">一键启动spark集群</h2>
+
+<pre><code>sudo ./deploy/deploy.sh -i amplab/spark:0.8.0 -w 3 
+</code></pre>
+
+<h2 id="spark-shell">启动 Spark shell</h2>
+<p>启动一个交互式shell吧，IP为上一步输出的Master的IP</p>
+
+<pre><code>sudo docker run -i -t -dns 172.17.0.90 amplab/spark-shell:0.8.0
+</code></pre>
+
+<h2 id="section-1">运行一个简单的的例子</h2>
+
+<pre><code>scala&gt; val textFile = sc.textFile("hdfs://master:9000/user/hdfs/test.txt")
+scala&gt; textFile.count()
+scala&gt; textFile.map({line =&gt; line}).collect()
+</code></pre>
+
+<h2 id="section-2">关闭集群</h2>
+
+<pre><code>$ sudo ./deploy/kill_all.sh spark
+$ sudo ./deploy/kill_all.sh nameserver
+</code></pre>
+
+<h2 id="section-3">更多详情请参考项目主页的文档</h2>
+
+<p><a href="https://github.com/amplab/docker-scripts">https://github.com/amplab/docker-scripts</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
       <h1 class="entry-title"><a href="/blog/20131026">Docker 快速入门</a></h1>
     
     
@@ -143,7 +232,6 @@
   <div class="entry-content"><p><strong>前提条件：</strong>要安装好 docker，见我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20131025">docker 安装</a></p>
 
 <h2 id="section">交互式命令行入门教程</h2>
-
 <p>首先强烈建议玩一遍官方的一个交互式命令行入门教程，<a href="http://www.docker.io/gettingstarted/">Interactive commandline tutorial</a>。甚至要多玩几遍，加深印象。</p>
 
 <p>初次过完这个教程，感觉docker用起来跟git很类似。</p>
@@ -151,7 +239,6 @@
 <p>玩完了后，在自己的真实机器上，把上面的命令重新敲一遍，感受一下。</p>
 
 <h2 id="hello-world">Hello World</h2>
-
 <p>参考官方文档<a href="http://docs.docker.io/en/latest/examples/hello_world/#running-examples">Hello World</a></p>
 
 <p>首先下载官方的ubuntu image:</p>
@@ -165,7 +252,6 @@
 </code></pre>
 
 <h2 id="section-1">三种运行命令的模式</h2>
-
 <p>docker 有三种运行命令的方式，短暂方式，交互方式，daemon方式。</p>
 
 <p><strong>短暂方式</strong>，就是刚刚的那个”hello world”，命令执行完后，container就终止了，不过并没有消失，可以用 <code>sudo docker ps -a</code> 看一下所有的container，第一个就是刚刚执行过的container，可以再次执行一遍：</p>
@@ -210,7 +296,6 @@
 <p><code>sudo docker ps</code>看一下，已经没了</p>
 
 <h2 id="docker-ps-">docker ps 命令详解</h2>
-
 <p><code>sudo docker ps</code>，列出当前所有正在运行的container</p>
 
 <p><code>sudo docker ps -l</code>，列出最近一次启动的，且正在运行的container</p>
@@ -222,7 +307,6 @@
 <p>还有一种方式可以让程序在daemon模式下运行，就是在Dockerfile里设置USER为daemon，见<a href="http://www.docker.io/learn/dockerfile/level2/">Dockerfile tutorial Level2</a>。</p>
 
 <h2 id="http">添加http代理</h2>
-
 <p>在国内，pull或push的时候经常连不上docker.com（原因你懂的，或者在公司内部统一用一个代理上网的时候），可以在docker daemon进程启动的时候加个代理，例如</p>
 
 <pre><code>sudo HTTP_PROXY=proxy_server:port docker -d &amp;
@@ -240,7 +324,6 @@
 <p>之所以把这一步放在本文开始，是因为这一步不做的话，后面很多命令会出错，让人摸不着头脑，我在这里就掉进坑了，花了很长时间才搞明白，原来是网络连接不稳定。</p>
 
 <h2 id="dockerfile">熟悉一下 Dockerfile</h2>
-
 <p>完了几遍交互式入门教程后，你会好奇，怎么自己定制一个 image，例如把常用的软件装好后打包 ? 这时候该 Dockfile 登场了。Dockerfile 实质上是一个脚本文件，用于自动化创建image。</p>
 
 </div>
@@ -287,7 +370,7 @@
 
   <div class="entry-content"><h2 id="centos-64--docker">1 在 CentOS 6.4 上安装 docker</h2>
 
-<p>docker当前官方只支持Ubuntu，所以在 CentOS 安装Docker比较麻烦。</p>
+<p>docker当前官方只支持Ubuntu，所以在 CentOS 安装Docker比较麻烦(<a href="https://github.com/dotcloud/docker/issues/172">Issue #172</a>)。</p>
 
 <p>docker官方文档说要求Linux kernel至少3.8以上，CentOS 6.4是2.6的内核，于是我哼哧哼哧的<a href="http://www.yanjiuyanjiu.com/blog/20131024">编译安装了最新的kernel 3.11.6</a>，重启后运行docker还是失败，最后找到原因，是因为编译时忘记集成aufs模块了。aufs 需要和 kernel 一起编译，很麻烦。</p>
 
@@ -1199,209 +1282,6 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
 
     </article>
   
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20130412">LaTeX的各种发行版和编辑器的比较</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-04-12T11:01:00+08:00" pubdate data-updated="true">Apr 12<span>th</span>, 2013</time>
-        
-		
-         | <a href="/blog/20130412#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2 id="distribution">发行版(distribution)</h2>
-<p>TeX类似于Linux，有很多不同的发行版(distribution)。</p>
-
-<p>先看看各个发行版的流行程度。</p>
-
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center"><strong>名字</strong></th>
-      <th style="text-align: center"><strong>官网</strong></th>
-      <th style="text-align: center"><strong>PR</strong></th>
-      <th style="text-align: center"><strong>Alexa</strong></th>
-      <th style="text-align: center"><strong>最后更新</strong></th>
-      <th style="text-align: center"><strong>weibo</strong></th>
-      <th style="text-align: center"><strong>quora</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">TeX Live</td>
-      <td style="text-align: center"><a href="http://www.tug.org/texlive/">http://www.tug.org/texlive/</a></td>
-      <td style="text-align: center">7</td>
-      <td style="text-align: center">N/A</td>
-      <td style="text-align: center">2012-07-01</td>
-      <td style="text-align: center">43</td>
-      <td style="text-align: center">N/A</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">MiKTeX</td>
-      <td style="text-align: center"><a href="http://miktex.org/">http://miktex.org/</a></td>
-      <td style="text-align: center">7</td>
-      <td style="text-align: center">188,485</td>
-      <td style="text-align: center">1.3.2 2012-09-24</td>
-      <td style="text-align: center">54</td>
-      <td style="text-align: center">N/A</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">CTeX</td>
-      <td style="text-align: center"><a href="http://www.ctex.org/">http://www.ctex.org/</a></td>
-      <td style="text-align: center">6</td>
-      <td style="text-align: center">252,657</td>
-      <td style="text-align: center">2.9.2 2012-03-30</td>
-      <td style="text-align: center">344</td>
-      <td style="text-align: center">N/A</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">proTeXt</td>
-      <td style="text-align: center"><a href="http://www.tug.org/protext/">http://www.tug.org/protext/</a></td>
-      <td style="text-align: center">7</td>
-      <td style="text-align: center">N/A</td>
-      <td style="text-align: center">3.1.1 2012-07-23</td>
-      <td style="text-align: center">10</td>
-      <td style="text-align: center">N/A</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>其中CTeX和proTeXt都是基于MiKTeX的，再次进行了打包。国内估计用CTeX比较多。</p>
-
-<h2 id="editor">编辑器(editor)</h2>
-<p>编辑器大概分为两种，一种为WYSIWYG，所见即所得，实时预览，类似于Word，另一种是纯文本编辑器，有语法高亮，没有预览功能，需要另外安装一个发行版，编译成PDF后才能预览。</p>
-
-<p>先看看各个编辑器的流行程度。</p>
-
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center"><strong>名字</strong></th>
-      <th style="text-align: center"><strong>官网</strong></th>
-      <th style="text-align: center"><strong>PR</strong></th>
-      <th style="text-align: center"><strong>Alexa</strong></th>
-      <th style="text-align: center"><strong>预览类型</strong></th>
-      <th style="text-align: center"><strong>最后更新</strong></th>
-      <th style="text-align: center"><strong>weibo</strong></th>
-      <th style="text-align: center"><strong>quora</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">TeXmaker</td>
-      <td style="text-align: center"><a href="http://www.xm1math.net/texmaker/">http://www.xm1math.net/texmaker/</a></td>
-      <td style="text-align: center">6</td>
-      <td style="text-align: center">289,311</td>
-      <td style="text-align: center">无预览</td>
-      <td style="text-align: center">4.0.1 2013-03-16</td>
-      <td style="text-align: center">60</td>
-      <td style="text-align: center">N/A</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">TeXworks</td>
-      <td style="text-align: center"><a href="http://www.tug.org/texworks/">http://www.tug.org/texworks/</a></td>
-      <td style="text-align: center">5</td>
-      <td style="text-align: center">90,230</td>
-      <td style="text-align: center">无预览</td>
-      <td style="text-align: center">0.4.4  2012-04</td>
-      <td style="text-align: center">23</td>
-      <td style="text-align: center">N/A</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">TeXstudio</td>
-      <td style="text-align: center"><a href="http://texstudio.sourceforge.net/">http://texstudio.sourceforge.net/</a></td>
-      <td style="text-align: center">6</td>
-      <td style="text-align: center">N/A</td>
-      <td style="text-align: center">无预览</td>
-      <td style="text-align: center">2.5.2 2013-01-08</td>
-      <td style="text-align: center">15</td>
-      <td style="text-align: center">N/A</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">TeXnicCenter</td>
-      <td style="text-align: center"><a href="http://www.texniccenter.org/">http://www.texniccenter.org/</a></td>
-      <td style="text-align: center">7</td>
-      <td style="text-align: center">884,570</td>
-      <td style="text-align: center">无预览</td>
-      <td style="text-align: center">v2.0 beta1 2012-11-03</td>
-      <td style="text-align: center">10</td>
-      <td style="text-align: center">N/A</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">Lyx</td>
-      <td style="text-align: center"><a href="http://www.lyx.org/">http://www.lyx.org/</a></td>
-      <td style="text-align: center">6</td>
-      <td style="text-align: center">261,649</td>
-      <td style="text-align: center">实时预览</td>
-      <td style="text-align: center">2.0.5.1 2013-01-08</td>
-      <td style="text-align: center">56</td>
-      <td style="text-align: center">42</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">Bakoma</td>
-      <td style="text-align: center"><a href="http://www.bakoma-tex.com/">http://www.bakoma-tex.com/</a></td>
-      <td style="text-align: center">5</td>
-      <td style="text-align: center">1,327,901</td>
-      <td style="text-align: center">实时预览</td>
-      <td style="text-align: center">10.10 2013-01-13</td>
-      <td style="text-align: center">3</td>
-      <td style="text-align: center">N/A</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">TeXmacs</td>
-      <td style="text-align: center"><a href="http://www.texmacs.org">http://www.texmacs.org</a></td>
-      <td style="text-align: center">6</td>
-      <td style="text-align: center">1,525,373</td>
-      <td style="text-align: center">实时预览</td>
-      <td style="text-align: center">1.0.7.19 2013-03-27</td>
-      <td style="text-align: center">27</td>
-      <td style="text-align: center">N/A</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">LEd</td>
-      <td style="text-align: center"><a href="http://www.latexeditor.org/">http://www.latexeditor.org/</a></td>
-      <td style="text-align: center">6</td>
-      <td style="text-align: center">624,564</td>
-      <td style="text-align: center">实时预览</td>
-      <td style="text-align: center">0.53 2009-10-09</td>
-      <td style="text-align: center">0</td>
-      <td style="text-align: center">N/A</td>
-    </tr>
-  </tbody>
-</table>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/20130412">继续阅读 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <ul class="pager">
     
     <li class="previous"><a href="/blog/page/2/">&larr; Older</a></li>
@@ -1419,7 +1299,7 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
 </section>
 <section>
   <h2>分类目录</h2>
-    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/docker/'>docker (2)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/spark/'>spark (4)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/docker/'>docker (2)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/spark/'>spark (5)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
 </section>
 <section>
   <h2>友情链接</h2>
@@ -1459,6 +1339,10 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/20131027">使用docker打造spark集群</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/20131026">docker 快速入门</a>
       </li>
     
@@ -1472,10 +1356,6 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
     
       <li class="post">
         <a href="/blog/20131016">安装Spark集群(在CentOS上)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20130829">简洁的Scala</a>
       </li>
     
   </ul>

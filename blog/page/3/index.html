@@ -114,6 +114,71 @@
       
   <header class="page-header">
     
+      <h1 class="entry-title"><a href="/blog/20120103">在Ubuntu上安装Hadoop</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-01-03T18:54:00+08:00" pubdate data-updated="true">Jan 3<span>rd</span>, 2012</time>
+        
+		
+         | <a href="/blog/20120103#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>本文所使用的版本是 hadoop 1.0.0，即 <a href="http://www.iteye.com/news/23874">2011年12月27日发布的1.0正式版</a>。</p>
+
+<p>详细安装步骤如下，有大步骤，每个步骤里面有小步骤，绝大部分是必选，只有2步是可选的，粗体表示要特别注意的地方。</p>
+
+<h2 id="vmware-workstation-">1. 用vmware workstation 新建三台虚拟机</h2>
+<p>首先用vmware workstation 新建一台ubuntu server，装好操作系统，安装各种必须的软件，包括安装好hadoop。安装好后然后用浅拷贝<code>Create a linked clone</code> 克隆出两台作为slave，这样有了三台ubuntu机器。启动三台机器，假设IP分别为<code>192.168.1.131, 192.168.1.132, 192.168.1.133</code>, 131做为master 和 SecondaryNameNode, 身兼两职，132为 slave01, 133为slave02。</p>
+
+<h2 id="section">2. 修改机器名</h2>
+<p>这一步看起来貌似不必要，其实是必须的，否则最后运行wordcount等例子时，会出现“Too many fetch-failures”。因为HDFS用hostname而不是IP，来相互之间进行通信（见后面的注意1）。</p>
+
+<ul>
+  <li>
+    <p>192.168.1.131上执行</p>
+
+    <pre><code>  dev@bogon:~$ sudo vi /etc/hostname
+</code></pre>
+  </li>
+</ul>
+
+<p>输入<code>master</code>，重启，会发现命令提示符变为了 <code>dev@master:~$</code></p>
+
+<p>用同样的方法，将<code>192.168.1.132</code>改为slave01，<code>192.168.1.133</code>改为slave02。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20120103">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
       <h1 class="entry-title"><a href="/blog/20110623">用javac命令行编译多个java文件</a></h1>
     
     
@@ -686,7 +751,7 @@ PMD 检查源码，分析源代码</p>
 </section>
 <section>
   <h2>分类目录</h2>
-    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/docker/'>docker (2)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/spark/'>spark (4)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/docker/'>docker (2)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/spark/'>spark (5)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
 </section>
 <section>
   <h2>友情链接</h2>
@@ -726,6 +791,10 @@ PMD 检查源码，分析源代码</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/20131027">使用docker打造spark集群</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/20131026">docker 快速入门</a>
       </li>
     
@@ -739,10 +808,6 @@ PMD 检查源码，分析源代码</p>
     
       <li class="post">
         <a href="/blog/20131016">安装Spark集群(在CentOS上)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20130829">简洁的Scala</a>
       </li>
     
   </ul>
