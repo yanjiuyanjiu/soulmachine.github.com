@@ -140,12 +140,69 @@
 
 <div class="entry-content"><p><strong>前提条件：</strong>安装好了docker，见我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20131025">Docker安装</a></p>
 
-<p>主要利用<a href="https://github.com/amplab/docker-scripts">AMPLab开源的这个docker脚本</a>，来打造一个spark集群。</p>
+<p>有两种方式，</p>
+
+<ul>
+  <li><a href="https://github.com/apache/incubator-spark">Spark官方repo</a>里，docker文件夹下的脚本。官方的这个脚本封装很薄，尽可能把必要的信息展示出来。</li>
+  <li><a href="https://github.com/amplab/docker-scripts">AMPLab开源的这个独立小项目</a>，来打造一个spark集群。这个脚本封装很深，自带了一个DNS服务器，还有hadoop，非常自动化，缺点是很多信息看不到了。</li>
+</ul>
+
+<h1 id="section">1. 第1种方式</h1>
+
+<h2 id="git-clone-">git clone 源码</h2>
+<p>首先要把官方repo的代码下载下来</p>
+
+<pre><code>git clone git@github.com:apache/incubator-spark.git
+</code></pre>
+
+<h2 id="apt">（可选）修改apt源</h2>
+<p>在国内，将apt源修改国内源，例如163的源，速度会快很多。将<code>base/Dockerfile</code>里的</p>
+
+<pre><code>RUN echo "deb http://archive.ubuntu.com/ubuntu precise main universe" &gt; /etc/apt/sources.list
+</code></pre>
+
+<p>替换为</p>
+
+<pre><code>RUN echo "deb http://mirrors.163.com/ubuntu/ precise main restricted universe multiverse" &gt; /etc/apt/sources.list
+RUN echo "deb http://mirrors.163.com/ubuntu/ precise-security main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
+RUN echo "deb http://mirrors.163.com/ubuntu/ precise-updates main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
+RUN echo "deb http://mirrors.163.com/ubuntu/ precise-proposed main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
+RUN echo "deb http://mirrors.163.com/ubuntu/ precise-backports main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
+RUN echo "deb-src http://mirrors.163.com/ubuntu/ precise main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
+RUN echo "deb-src http://mirrors.163.com/ubuntu/ precise-security main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
+RUN echo "deb-src http://mirrors.163.com/ubuntu/ precise-updates main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
+RUN echo "deb-src http://mirrors.163.com/ubuntu/ precise-proposed main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
+RUN echo "deb-src http://mirrors.163.com/ubuntu/ precise-backports main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
+</code></pre>
+
+<h2 id="build">build镜像</h2>
+<p>将<code>build</code>和<code>spark-test/build</code>里的<code>docker</code>命令前，添加<code>sudo</code>，然后执行<code>docker</code>下的<code>build</code></p>
+
+<pre><code>cd docker
+./build
+</code></pre>
+
+<h2 id="master">启动master</h2>
+
+<pre><code>sudo docker run -v $SPARK_HOME:/opt/spark spark-test-master
+</code></pre>
+
+<h2 id="worker">启动worker</h2>
+<p>新开一个终端窗口（强烈推荐tmux），启动一个worker</p>
+
+<pre><code>sudo docker run -v $SPARK_HOME:/opt/spark spark-test-worker &lt;master_ip&gt;
+</code></pre>
+
+<p>可以在master终端窗口看到worker注册上来了。</p>
+
+<p>可以再开多个终端窗口，启动多个worker。</p>
+
+<h1 id="section-1">2. 第2种方式</h1>
 
 <h2 id="wget">升级wget</h2>
 <p>如果发现wget不识别<code>--no-proxy</code>选项，需要升级wget。</p>
 
-<h2 id="section">下载镜像</h2>
+<h2 id="section-2">下载镜像</h2>
 <p>为了让脚本第一次执行的时候更快，还是手动下载所有的镜像吧，amplab在index.docker.io上有一个官方账号，把这个账号有关spark的repo都pull下来。</p>
 
 <pre><code>sudo docker pull amplab/apache-hadoop-hdfs-precise
@@ -155,7 +212,7 @@ sudo docker pull amplab/spark-master
 sudo docker pull amplab/spark-shell
 </code></pre>
 
-<h2 id="git-clone-">git clone 脚本</h2>
+<h2 id="git-clone--1">git clone 脚本</h2>
 
 <pre><code>git@github.com:amplab/docker-scripts.git
 </code></pre>
@@ -173,20 +230,20 @@ sudo docker pull amplab/spark-shell
 <pre><code>sudo docker run -i -t -dns 172.17.0.90 amplab/spark-shell:0.8.0
 </code></pre>
 
-<h2 id="section-1">运行一个简单的的例子</h2>
+<h2 id="section-3">运行一个简单的的例子</h2>
 
 <pre><code>scala&gt; val textFile = sc.textFile("hdfs://master:9000/user/hdfs/test.txt")
 scala&gt; textFile.count()
 scala&gt; textFile.map({line =&gt; line}).collect()
 </code></pre>
 
-<h2 id="section-2">关闭集群</h2>
+<h2 id="section-4">关闭集群</h2>
 
 <pre><code>$ sudo ./deploy/kill_all.sh spark
 $ sudo ./deploy/kill_all.sh nameserver
 </code></pre>
 
-<h2 id="section-3">更多详情请参考项目主页的文档</h2>
+<h2 id="section-5">更多详情请参考项目主页的文档</h2>
 
 <p><a href="https://github.com/amplab/docker-scripts">https://github.com/amplab/docker-scripts</a></p>
 </div>
