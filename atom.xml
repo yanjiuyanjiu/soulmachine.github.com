@@ -4,7 +4,7 @@
   <title><![CDATA[研究研究]]></title>
   <link href="http://www.yanjiuyanjiu.com/atom.xml" rel="self"/>
   <link href="http://www.yanjiuyanjiu.com/"/>
-  <updated>2013-10-29T10:40:22+08:00</updated>
+  <updated>2013-11-08T20:48:21+08:00</updated>
   <id>http://www.yanjiuyanjiu.com/</id>
   <author>
     <name><![CDATA[soulmachine]]></name>
@@ -601,9 +601,9 @@ sudo make -j200 modules_install #编译安装模块
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[安装Spark集群(在CentOS上)]]></title>
-    <link href="http://www.yanjiuyanjiu.com/blog/20131016"/>
-    <updated>2013-10-16T11:58:00+08:00</updated>
+    <title type="html"><![CDATA[安装Spark 0.8 集群(在CentOS上)]]></title>
+    <link href="http://www.yanjiuyanjiu.com/blog/20131017"/>
+    <updated>2013-10-17T11:58:00+08:00</updated>
     <id>http://www.yanjiuyanjiu.com/blog/installing-spark-on-centos-cn</id>
     <content type="html"><![CDATA[<p><strong>环境</strong>:CentOS 6.4, Hadoop 1.1.2, JDK 1.7, Spark 0.8.0, Scala 2.9.3</p>
 
@@ -2767,15 +2767,6 @@ LyX可以导入.tex文件，导入后，不能直接修改.tex源码，只能在
 </span><span class="line">git config --global credential.helper <span class="s1">&#39;cache --timeout=3600&#39;</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div>
 <p>本节参考了 <a href="http://www.cnblogs.com/kysnail/archive/2012/03/16/2399589.html">msysGit 安装后的配置</a>。</p>
-
-<h3 id="repo">克隆Repo到本地</h3>
-<p>在D盘新建一个文件夹，例如github。</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nb">cd </span>d:<span class="se">\g</span>ithub
-</span><span class="line">git clone git@github.com:username/username.github.com.git
-</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 <h3 id="octopress">安装Octopress</h3>
 <p>参考官方文档<a href="http://octopress.org/docs/setup/">setup</a>.<br />

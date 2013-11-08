@@ -4,7 +4,7 @@
   <title><![CDATA[Category: tools | 研究研究]]></title>
   <link href="http://www.yanjiuyanjiu.com/blog/categories/tools/atom.xml" rel="self"/>
   <link href="http://www.yanjiuyanjiu.com/"/>
-  <updated>2013-10-29T10:40:22+08:00</updated>
+  <updated>2013-11-08T20:48:21+08:00</updated>
   <id>http://www.yanjiuyanjiu.com/</id>
   <author>
     <name><![CDATA[soulmachine]]></name>
@@ -715,14 +715,6 @@ ssh -T git@github.com
 	git config --global credential.helper 'cache --timeout=3600'
 </code>
 本节参考了 <a href="http://www.cnblogs.com/kysnail/archive/2012/03/16/2399589.html">msysGit 安装后的配置</a>。</p>
-
-<h3 id="repo">克隆Repo到本地</h3>
-<p>在D盘新建一个文件夹，例如github。</p>
-
-<p><code>bash
-cd d:\github  
-git clone git@github.com:username/username.github.com.git
-</code></p>
 
 <h3 id="octopress">安装Octopress</h3>
 <p>参考官方文档<a href="http://octopress.org/docs/setup/">setup</a>.<br />
