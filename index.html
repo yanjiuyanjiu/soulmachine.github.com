@@ -114,6 +114,75 @@
       
   <header class="page-header">
     
+      <h1 class="entry-title"><a href="/blog/20131223">运行mahout的朴素贝叶斯分类器</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-12-23T17:20:00+08:00" pubdate data-updated="true">Dec 23<span>rd</span>, 2013</time>
+        
+		
+         | <a href="/blog/20131223#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2 id="section">1.准备数据</h2>
+
+<h3 id="section-1">1.1 下载数据集，并解压</h3>
+
+<pre><code>wget http://people.csail.mit.edu/jrennie/20Newsgroups/20news-bydate.tar.gz
+tar -xf 20news-bydate.tar.gz
+#上传到hdfs
+hadoop fs -put 20news-bydate-test .
+hadoop fs -put 20news-bydate-train .
+</code></pre>
+
+<h3 id="section-2">1.2 转换格式</h3>
+
+<pre><code>#转换为序列文件(sequence files)
+mahout seqdirectory -i 20news-bydate-train -o 20news-bydate-train-seq
+mahout seqdirectory -i 20news-bydate-test -o 20news-bydate-test-seq
+#转换为tf-idf向量
+mahout seq2sparse -i 20news-bydate-train-seq -o 20news-bydate-train-vector -lnorm -nv -wt tfidf
+mahout seq2sparse -i 20news-bydate-test-seq -o 20news-bydate-test-vector -lnorm -nv -wt tfidf
+</code></pre>
+
+<h2 id="section-3">2. 训练朴素贝叶斯模型</h2>
+
+<pre><code>mahout trainnb -i 20news-bydate-train-vectors/tfidf-vectors -el -o model -li labelindex -ow
+</code></pre>
+
+<h2 id="section-4">3. 测试朴素贝叶斯模型</h2>
+
+<pre><code>mahout testnb -i 20news-bydate-train-vectors/tfidf-vectors -m model -l labelindex -ow -o test-result
+</code></pre>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
       <h1 class="entry-title"><a href="/blog/20131027">使用docker打造spark集群</a></h1>
     
     
@@ -1252,93 +1321,6 @@ $ cat output/*
 
     </article>
   
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20130611">使用Scala IDE 阅读spark源码 &#8211; 将sbt项目转化为eclipse项目</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-06-11T11:48:00+08:00" pubdate data-updated="true">Jun 11<span>th</span>, 2013</time>
-        
-		
-         | <a href="/blog/20130611#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>阅读Spark源代码，最简单的方式是下载源码包，解压后用纯文本方式来阅读源码。这样效率不高，可以用sbteclipse这个插件，将sbt项目文件转化为eclipse项目文件，然后导入到Scala IDE，用eclipse来阅读源码，效率大大提高。</p>
-
-<p><strong>环境</strong>：Windows 7, JDK 1.6</p>
-
-<ol>
-  <li>安装 scala。去官网 <a href="http://www.scala-lang.org/">http://www.scala-lang.org/</a> ，下载MSI，安装，按默认设置即可。</li>
-  <li>
-    <p>安装 sbt。去官网 <a href="http://www.scala-sbt.org/">http://www.scala-sbt.org/</a> ， 下载MSI，安装，按默认设置即可。
-Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt时它会自动下载对应的scala编译器。</p>
-  </li>
-  <li>
-    <p>安装 Scala IDE。 去官网 <a href="http://scala-ide.org/">http://scala-ide.org/</a>，点击”Get the SDK”绿色按钮，下载。这个IDE的好处是，自带了scala编译器，解压即可使用。</p>
-  </li>
-  <li>
-    <p>下载spark源码。 去官网 <a href="http://spark-project.org/">http://spark-project.org/</a> 下载源码，当前版本是 0.7.2, source package 大约4M左右。解压源码，例如 解压到 d:spark-0.7.0\</p>
-  </li>
-  <li>
-    <p>添加 sbteclipse 插件依赖。spark已经添加了依赖，这一步什么也不需要做。</p>
-
-    <p>这个插件的作用，就是能够读取sbt的配置文件，生成一个eclipse的工程文件。有了eclipse工程文件，就可以导入到eclipse了。</p>
-
-    <p>spark已经添加了依赖，见 d:\spark-0.7.2\project\plugins.sbt，有一行</p>
-
-    <p>addSbtPlugin(“com.typesafe.sbteclipse” % “sbteclipse-plugin” % “2.1.1”)</p>
-  </li>
-  <li>
-    <p>启动cmd，启动sbt。</p>
-
-    <blockquote>
-      <p>cd  d:\spark-0.7.0<br />
- sbt</p>
-    </blockquote>
-
-    <p>Linux下则是</p>
-
-    <blockquote>
-      <p>cd  d:\spark-0.7.0<br />
- sbt/sbt</p>
-    </blockquote>
-
-    <p>开始下载各种依赖包，需要等待很长时间。</p>
-  </li>
-  <li>
-    <p><strong>翻@_@墙。见本文最后一段。</strong></p>
-
-    <p></div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/20130611">继续阅读 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <ul class="pager">
     
     <li class="previous"><a href="/blog/page/2/">&larr; Older</a></li>
@@ -1356,7 +1338,7 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
 </section>
 <section>
   <h2>分类目录</h2>
-    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/docker/'>docker (2)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/spark/'>spark (5)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/docker/'>docker (2)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (5)</a></li><li><a href='/blog/categories/mahout/'>mahout, (1)</a></li><li><a href='/blog/categories/spark/'>spark (5)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
 </section>
 <section>
   <h2>友情链接</h2>
@@ -1399,6 +1381,10 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/20131223">运行mahout的朴素贝叶斯分类器</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/20131027">使用docker打造spark集群</a>
       </li>
     
@@ -1412,10 +1398,6 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
     
       <li class="post">
         <a href="/blog/20131024">CentOS 6.4 升级内核到 3.11.6</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20131017">安装Spark 0.8 集群(在CentOS上)</a>
       </li>
     
   </ul>

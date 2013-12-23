@@ -114,6 +114,74 @@
       
   <header class="page-header">
     
+      <h1 class="entry-title"><a href="/blog/20120418">制作 VMware ESXI 5 U盘安装盘</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-18T20:17:00+08:00" pubdate data-updated="true">Apr 18<span>th</span>, 2012</time>
+        
+		
+         | <a href="/blog/20120418#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>有两种方法，使用 unetbootin ，或使用 LinuxLive USB Creator刻录可启动U盘。 
+##使用 unetbootin
+这个方法最自动化，点击两下按钮即可，但是有时候会失败(我用EXSi 5.0 的ISO失败，但是用 EXSi 5.0U1可以成功)，U盘启动不了。 </p>
+
+<ol>
+  <li>单击 光盘镜像，选择ISO文件VMware-VMvisor-Installer-5.0.0.update01-623860.x86_64.iso。 </li>
+  <li>选择U盘，点击“确定”开始刻录。刻录后用U盘启动机器开始安装即可。如下图所示。
+<img src="http://yanjiuyanjiu-wordpress.stor.sinaapp.com/uploads/2012/04/unetbootin1.jpg" /></li>
+</ol>
+
+<h2 id="linuxlive-usb-creator">使用 LinuxLive USB Creator</h2>
+
+<ol>
+  <li>格式化U盘，文件系统为FAT32，并设置为主分区，命令如下：
+     # 使用管理员权限运行cmd 
+     diskpart 
+     list disk 
+     select disk USB number （例如 select dist 1） 
+     clean 
+     create partition primary 
+     active 
+     format fs=fat32 quick 
+     assign 
+     exit</li>
+</ol>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20120418">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
       <h1 class="entry-title"><a href="/blog/20120103">在Ubuntu上安装Hadoop</a></h1>
     
     
@@ -751,7 +819,7 @@ PMD 检查源码，分析源代码</p>
 </section>
 <section>
   <h2>分类目录</h2>
-    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/docker/'>docker (2)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (4)</a></li><li><a href='/blog/categories/spark/'>spark (5)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/docker/'>docker (2)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (5)</a></li><li><a href='/blog/categories/mahout/'>mahout, (1)</a></li><li><a href='/blog/categories/spark/'>spark (5)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
 </section>
 <section>
   <h2>友情链接</h2>
@@ -794,6 +862,10 @@ PMD 检查源码，分析源代码</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/20131223">运行mahout的朴素贝叶斯分类器</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/20131027">使用docker打造spark集群</a>
       </li>
     
@@ -807,10 +879,6 @@ PMD 检查源码，分析源代码</p>
     
       <li class="post">
         <a href="/blog/20131024">CentOS 6.4 升级内核到 3.11.6</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20131017">安装Spark 0.8 集群(在CentOS上)</a>
       </li>
     
   </ul>

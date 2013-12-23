@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>用javac命令行编译多个java文件 - 研究研究</title>
+  <title>Category: mahout, - 研究研究</title>
   <meta name="author" content="soulmachine">
 
   
-  <meta name="description" content="一个关于机器学习的技术博客">
+  <meta name="description" content="Category: mahout,">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://www.yanjiuyanjiu.com/blog/20110623">
+  <link rel="canonical" href="http://www.yanjiuyanjiu.comblog/categories/mahout">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/bootstrap/bootstrap.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/stylesheets/bootstrap/responsive.css" media="screen, projection" rel="stylesheet" type="text/css">
@@ -107,154 +107,38 @@
   <div class="container">
     <div class="row-fluid">
       
-<article class="hentry span9" role="article">
+<article role="article" class="span9">
 
   
   <header class="page-header">
-    
-      <h1 class="entry-title">用javac命令行编译多个java文件</h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2011-06-23T17:22:00+08:00" pubdate data-updated="true">Jun 23<span>rd</span>, 2011</time>
-        
-		
-         | <a href="#duoshuo_thread">Comments</a>
-        
-      </p>
+    <h1 class="entry-title">Category: Mahout,</h1>
     
   </header>
+  
+  <div id="blog-archives" class="category">
 
 
-<div class="entry-content"><ol>
-  <li>CLASSPATH一定要具体到jar路径，例如</li>
-</ol>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nb">export </span><span class="nv">CLASSPATH</span><span class="o">=</span>/usr/lib/jvm/java-6-sun/lib/commons-codec.jar:/usr/lib/jvm/java-6-sun/lib/commons-httpclient-3.1.jar:/usr/lib/jvm/java-6-sun/lib/commons-logging-1.1.jar:/usr/lib/jvm/java-6-sun/lib/dt.jar:/usr/lib/jvm/java-6-sun/lib/htmlconverter.jar:/usr/lib/jvm/java-6-sun/lib/jconsole.jar:/usr/lib/jvm/java-6-sun/lib/junit-4.1.jar:/usr/lib/jvm/java-6-sun/lib/mysql-connector-java-5.1.16-bin.jar:/usr/lib/jvm/java-6-sun/lib/sa-jdi.jar:/usr/lib/jvm/java-6-sun/lib/tools.jar
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+  
+  <h1>2013</h1>
 
-<ol>
-  <li>
-    <p>每个java文件给出路径，最常见的是用通配符*，不支持目录递归。</p>
-  </li>
-  <li>
-    <p>最好加上 -d，这样会在这个目录下生成class文件，而不会和java文件混在一起</p>
-  </li>
-</ol>
+<article>
+  <div class="well">
 
-<p>看我的一个具体的例子</p>
+<h2><a href="/blog/20131223">运行mahout的朴素贝叶斯分类器</a></h2>
+<time datetime="2013-12-23T17:20:00+08:00" pubdate><span class='month'>Dec</span> <span class='day'>23</span> <span class='year'>2013</span></time>
 
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">javac -d /home/dfq/crawler/bin crawler/*.java weibo4j/*.java weibo4j/org/json/*.java weibo4j/*.java weibo4j/util/*.java weibo4j/http/*.java
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+<footer>
+  <span class="categories">posted in <a class='category' href='/blog/categories/machine-learning/'>machine-learning</a>, <a class='category' href='/blog/categories/mahout/'>mahout,</a></span>
+</footer>
 
-<p>运行时用如下命令：</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nb">cd</span> /home/dfq/crawler/bin
-</span><span class="line">java -cp .:<span class="nv">$CLASSPATH</span> crawler.ManagerThread
-</span></code></pre></td></tr></table></div></figure></notextile></div>
 </div>
 
+</article>
 
-  <footer>
-    <p class="meta">
-      
-  
-
-<span class="byline author vcard">Posted by <span class="fn">soulmachine</span></span>
-
-      
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2011-06-23T17:22:00+08:00" pubdate data-updated="true">Jun 23<span>rd</span>, 2011</time>
-      
-
-<span class="categories">
-  
-    <a class='category' href='/blog/categories/language/'>language</a>
-  
-</span>
-
-
-    </p>
-    
-      <div class="sharing">
-  <!-- AddThis Button BEGIN -->
-  <div class="addthis_toolbox addthis_default_style addthis_32x32_style">
-    <a class="addthis_button_sinaweibo"></a>
-    <a class="addthis_button_facebook"></a>
-    <a class="addthis_button_twitter"></a>
-    <a class="addthis_button_google_plusone_share"></a>
-    <a class="addthis_button_delicious"></a>
-    <a class="addthis_button_digg"></a>
-    <a class="addthis_button_reddit"></a>
-    <a class="addthis_button_compact"></a><a class="addthis_counter addthis_bubble_style"></a>
-  </div>
-  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=undefined"></script>
-  <!-- AddThis Button END -->
-  
-  
-  
 </div>
 
-    
-    
-	
-    <section>
-      <div id="duoshuo_thread" aria-live="polite"><!-- Duoshuo Comment BEGIN -->
-<div class="ds-thread" data-thread-key="/blog/20110623" data-title="用javac命令行编译多个java文件"></div>
-<script type="text/javascript">
-var duoshuoQuery = {short_name:"yanjiuyanjiu"};
-	(function() {
-		var ds = document.createElement('script');
-		ds.type = 'text/javascript';ds.async = true;
-		ds.src = 'http://static.duoshuo.com/embed.js';
-		ds.charset = 'UTF-8';
-		(document.getElementsByTagName('head')[0] 
-		|| document.getElementsByTagName('body')[0]).appendChild(ds);
-	})();
-</script>
-<!-- Duoshuo Comment END --></div>
-    </section>
-    
-    <ul class="pager">
-      
-      <li class="previous"><a class="basic-alignment left"
-        href="/blog/20110417" title="Previous Post:
-        推荐给TeX新手的电子书和书籍">&laquo; 推荐给TeX新手的电子书和书籍</a></li>
-      
-      <li><a href="/blog/archives">Blog Archives</a></li>
-      
-      <li class="next"><a class="basic-alignment right" href="/blog/20120103"
-        title="Next Post: 在Ubuntu上安装Hadoop">在Ubuntu上安装Hadoop
-        &raquo;</a></li>
-      
-    </ul>
-  </footer>
+  
 </article>
 
 <aside class="sidebar-nav span3">

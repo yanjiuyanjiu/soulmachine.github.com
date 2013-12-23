@@ -4,7 +4,7 @@
   <title><![CDATA[Category: machine-learning | 研究研究]]></title>
   <link href="http://www.yanjiuyanjiu.com/blog/categories/machine-learning/atom.xml" rel="self"/>
   <link href="http://www.yanjiuyanjiu.com/"/>
-  <updated>2013-11-11T10:29:01+08:00</updated>
+  <updated>2013-12-23T17:40:53+08:00</updated>
   <id>http://www.yanjiuyanjiu.com/</id>
   <author>
     <name><![CDATA[soulmachine]]></name>
@@ -14,11 +14,53 @@
 
   
   <entry>
+    <title type="html"><![CDATA[运行mahout的朴素贝叶斯分类器]]></title>
+    <link href="http://www.yanjiuyanjiu.com/blog/20131223"/>
+    <updated>2013-12-23T17:20:00+08:00</updated>
+    <id>http://www.yanjiuyanjiu.com/blog/run-mahout-nbc</id>
+    <content type="html"><![CDATA[<h2 id="section">1.准备数据</h2>
+
+<h3 id="section-1">1.1 下载数据集，并解压</h3>
+
+<pre><code>wget http://people.csail.mit.edu/jrennie/20Newsgroups/20news-bydate.tar.gz
+tar -xf 20news-bydate.tar.gz
+#上传到hdfs
+hadoop fs -put 20news-bydate-test .
+hadoop fs -put 20news-bydate-train .
+</code></pre>
+
+<h3 id="section-2">1.2 转换格式</h3>
+
+<pre><code>#转换为序列文件(sequence files)
+mahout seqdirectory -i 20news-bydate-train -o 20news-bydate-train-seq
+mahout seqdirectory -i 20news-bydate-test -o 20news-bydate-test-seq
+#转换为tf-idf向量
+mahout seq2sparse -i 20news-bydate-train-seq -o 20news-bydate-train-vector -lnorm -nv -wt tfidf
+mahout seq2sparse -i 20news-bydate-test-seq -o 20news-bydate-test-vector -lnorm -nv -wt tfidf
+</code></pre>
+
+<h2 id="section-3">2. 训练朴素贝叶斯模型</h2>
+
+<pre><code>mahout trainnb -i 20news-bydate-train-vectors/tfidf-vectors -el -o model -li labelindex -ow
+</code></pre>
+
+<h2 id="section-4">3. 测试朴素贝叶斯模型</h2>
+
+<pre><code>mahout testnb -i 20news-bydate-train-vectors/tfidf-vectors -m model -l labelindex -ow -o test-result
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[机器学习的一些通俗易懂的tutorial]]></title>
     <link href="http://www.yanjiuyanjiu.com/blog/20130327"/>
     <updated>2013-03-27T21:50:00+08:00</updated>
     <id>http://www.yanjiuyanjiu.com/blog/some-classical-machine-learning-tutorials</id>
     <content type="html"><![CDATA[<p>以下记录了我的学习历程，按我的阅读顺序排序。</p>
+
+<h2 id="prior-likelihood-posterior">Prior, Likelihood, Posterior</h2>
+<p>MLAPP第3.2节，讲的很好，用了一个叫 number game 的小游戏做例子，通俗易懂</p>
 
 <h2 id="section">距离和相似度度量</h2>
 <p><a href="http://webdataanalysis.net/reference-and-source/distance-and-similarity/">距离和相似度度量 » webdataanalysis.net</a></p>
@@ -48,6 +90,9 @@
 <h2 id="pcaprincipal-components-analysis">PCA(Principal Components Analysis)</h2>
 <p><a href="http://www.ce.yildiz.edu.tr/personal/songul/file/1097/principal_components.pdf">2002. Lindsay I Smith. A tutorial on Principal Components Analysis</a></p>
 
+<h2 id="factor-analysis">因子分析(Factor analysis)</h2>
+<p><a href="http://www.cnblogs.com/jerrylead/archive/2011/05/11/2043317.html">因子分析（Factor Analysis）- JerryLead - 博客园</a></p>
+
 <h2 id="em-expectation-maximization">期望最大化(EM, Expectation Maximization)</h2>
 <p><a href="http://www.seanborman.com/publications/EM_algorithm.pdf">2009. Sean Borman. The Expectation Maximization Algorithm A short tutorial</a></p>
 
@@ -56,10 +101,18 @@
 <h2 id="svm-support-vector-machines">支持向量机(SVM, Support Vector Machines)</h2>
 <p><a href="http://cs229.stanford.edu/notes/cs229-notes3.pdf">Andrew Ng. CS229 Lecture notes Support Vector Machines</a></p>
 
+<h2 id="hidden-markov-model-hmm">隐马尔科夫模型(Hidden Markov Model, HMM)</h2>
+<p>李航《统计学习方法》第10章 隐马尔科夫模型，讲得非常好，有非常具体的例子</p>
+
 <h2 id="crf-conditional-random-field">条件随机场(CRF, Conditional Random Field)</h2>
 <p><a href="http://blog.echen.me/2012/01/03/introduction-to-conditional-random-fields/">Introduction to Conditional Random Fields</a></p>
 
 <p>李航.《统计学习方法》，P192 第11章 条件随机场. 2012.</p>
+
+<h2 id="lda">LDA</h2>
+<p><a href="http://vdisk.weibo.com/s/bjfcErv7QQc/1384745764">LDA数学八卦</a></p>
+
+<p><a href="http://vdisk.weibo.com/s/aYEKfaE9OnRv">正态分布的前世今生</a></p>
 ]]></content>
   </entry>
   

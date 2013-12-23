@@ -4,7 +4,7 @@
   <title><![CDATA[研究研究]]></title>
   <link href="http://www.yanjiuyanjiu.com/atom.xml" rel="self"/>
   <link href="http://www.yanjiuyanjiu.com/"/>
-  <updated>2013-11-11T10:29:01+08:00</updated>
+  <updated>2013-12-23T17:40:53+08:00</updated>
   <id>http://www.yanjiuyanjiu.com/</id>
   <author>
     <name><![CDATA[soulmachine]]></name>
@@ -12,6 +12,45 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[运行mahout的朴素贝叶斯分类器]]></title>
+    <link href="http://www.yanjiuyanjiu.com/blog/20131223"/>
+    <updated>2013-12-23T17:20:00+08:00</updated>
+    <id>http://www.yanjiuyanjiu.com/blog/run-mahout-nbc</id>
+    <content type="html"><![CDATA[<h2 id="section">1.准备数据</h2>
+
+<h3 id="section-1">1.1 下载数据集，并解压</h3>
+
+<pre><code>wget http://people.csail.mit.edu/jrennie/20Newsgroups/20news-bydate.tar.gz
+tar -xf 20news-bydate.tar.gz
+#上传到hdfs
+hadoop fs -put 20news-bydate-test .
+hadoop fs -put 20news-bydate-train .
+</code></pre>
+
+<h3 id="section-2">1.2 转换格式</h3>
+
+<pre><code>#转换为序列文件(sequence files)
+mahout seqdirectory -i 20news-bydate-train -o 20news-bydate-train-seq
+mahout seqdirectory -i 20news-bydate-test -o 20news-bydate-test-seq
+#转换为tf-idf向量
+mahout seq2sparse -i 20news-bydate-train-seq -o 20news-bydate-train-vector -lnorm -nv -wt tfidf
+mahout seq2sparse -i 20news-bydate-test-seq -o 20news-bydate-test-vector -lnorm -nv -wt tfidf
+</code></pre>
+
+<h2 id="section-3">2. 训练朴素贝叶斯模型</h2>
+
+<pre><code>mahout trainnb -i 20news-bydate-train-vectors/tfidf-vectors -el -o model -li labelindex -ow
+</code></pre>
+
+<h2 id="section-4">3. 测试朴素贝叶斯模型</h2>
+
+<pre><code>mahout testnb -i 20news-bydate-train-vectors/tfidf-vectors -m model -l labelindex -ow -o test-result
+</code></pre>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[使用docker打造spark集群]]></title>
@@ -253,17 +292,11 @@ MAINTAINER Frank Dai soulmachine@gmail.com
 # RUN echo "Acquire::https::proxy \"proxy_server:port\";" &gt;&gt; /etc/apt/apt.conf
 
 
-# make sure the package repository is up to date
-RUN echo "deb http://mirrors.163.com/ubuntu/ precise main restricted universe multiverse" &gt; /etc/apt/sources.list
-RUN echo "deb http://mirrors.163.com/ubuntu/ precise-security main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
-RUN echo "deb http://mirrors.163.com/ubuntu/ precise-updates main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
-RUN echo "deb http://mirrors.163.com/ubuntu/ precise-proposed main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
-RUN echo "deb http://mirrors.163.com/ubuntu/ precise-backports main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
-RUN echo "deb-src http://mirrors.163.com/ubuntu/ precise main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
-RUN echo "deb-src http://mirrors.163.com/ubuntu/ precise-security main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
-RUN echo "deb-src http://mirrors.163.com/ubuntu/ precise-updates main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
-RUN echo "deb-src http://mirrors.163.com/ubuntu/ precise-proposed main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
-RUN echo "deb-src http://mirrors.163.com/ubuntu/ precise-backports main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
+# choose a faster mirror, see http://t.cn/zWYrzCE
+RUN echo "deb mirror://mirrors.ubuntu.com/mirrors.txt precise main restricted universe multiverse" &gt; /etc/apt/sources.list
+RUN echo "deb mirror://mirrors.ubuntu.com/mirrors.txt precise-updates main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
+RUN echo "deb mirror://mirrors.ubuntu.com/mirrors.txt precise-backports main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
+RUN echo "deb mirror://mirrors.ubuntu.com/mirrors.txt precise-security main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
 
 RUN apt-get update -y
 # currently docker official ubuntu image has a problem with apt-get upgrade
@@ -2927,6 +2960,9 @@ Windows预设是Big5编码,所以要想’rake generate’的时候不报编码�
     <id>http://www.yanjiuyanjiu.com/blog/some-classical-machine-learning-tutorials</id>
     <content type="html"><![CDATA[<p>以下记录了我的学习历程，按我的阅读顺序排序。</p>
 
+<h2 id="prior-likelihood-posterior">Prior, Likelihood, Posterior</h2>
+<p>MLAPP第3.2节，讲的很好，用了一个叫 number game 的小游戏做例子，通俗易懂</p>
+
 <h2 id="section">距离和相似度度量</h2>
 <p><a href="http://webdataanalysis.net/reference-and-source/distance-and-similarity/">距离和相似度度量 » webdataanalysis.net</a></p>
 
@@ -2955,6 +2991,9 @@ Windows预设是Big5编码,所以要想’rake generate’的时候不报编码�
 <h2 id="pcaprincipal-components-analysis">PCA(Principal Components Analysis)</h2>
 <p><a href="http://www.ce.yildiz.edu.tr/personal/songul/file/1097/principal_components.pdf">2002. Lindsay I Smith. A tutorial on Principal Components Analysis</a></p>
 
+<h2 id="factor-analysis">因子分析(Factor analysis)</h2>
+<p><a href="http://www.cnblogs.com/jerrylead/archive/2011/05/11/2043317.html">因子分析（Factor Analysis）- JerryLead - 博客园</a></p>
+
 <h2 id="em-expectation-maximization">期望最大化(EM, Expectation Maximization)</h2>
 <p><a href="http://www.seanborman.com/publications/EM_algorithm.pdf">2009. Sean Borman. The Expectation Maximization Algorithm A short tutorial</a></p>
 
@@ -2963,10 +3002,18 @@ Windows预设是Big5编码,所以要想’rake generate’的时候不报编码�
 <h2 id="svm-support-vector-machines">支持向量机(SVM, Support Vector Machines)</h2>
 <p><a href="http://cs229.stanford.edu/notes/cs229-notes3.pdf">Andrew Ng. CS229 Lecture notes Support Vector Machines</a></p>
 
+<h2 id="hidden-markov-model-hmm">隐马尔科夫模型(Hidden Markov Model, HMM)</h2>
+<p>李航《统计学习方法》第10章 隐马尔科夫模型，讲得非常好，有非常具体的例子</p>
+
 <h2 id="crf-conditional-random-field">条件随机场(CRF, Conditional Random Field)</h2>
 <p><a href="http://blog.echen.me/2012/01/03/introduction-to-conditional-random-fields/">Introduction to Conditional Random Fields</a></p>
 
 <p>李航.《统计学习方法》，P192 第11章 条件随机场. 2012.</p>
+
+<h2 id="lda">LDA</h2>
+<p><a href="http://vdisk.weibo.com/s/bjfcErv7QQc/1384745764">LDA数学八卦</a></p>
+
+<p><a href="http://vdisk.weibo.com/s/aYEKfaE9OnRv">正态分布的前世今生</a></p>
 ]]></content>
   </entry>
   
@@ -4918,63 +4965,6 @@ sudo shutdown -h now
 <p><a href="http://myohmy.blog.51cto.com/140917/327310">CentOS5.5使用yum来安装LAMP</a></p>
 
 <p><a href="http://it.megocollector.com/?p=1719">Install Java JDK on CentOS without prompts using an automated script!</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[制作 VMware ESXI 5 U盘安装盘]]></title>
-    <link href="http://www.yanjiuyanjiu.com/blog/20120418"/>
-    <updated>2012-04-18T20:17:00+08:00</updated>
-    <id>http://www.yanjiuyanjiu.com/blog/create-a-bootable-vmware-esxi-5-usb-stick</id>
-    <content type="html"><![CDATA[<p>有两种方法，使用 unetbootin ，或使用 LinuxLive USB Creator刻录可启动U盘。 
-##使用 unetbootin
-这个方法最自动化，点击两下按钮即可，但是有时候会失败(我用EXSi 5.0 的ISO失败，但是用 EXSi 5.0U1可以成功)，U盘启动不了。 </p>
-
-<ol>
-  <li>单击 光盘镜像，选择ISO文件VMware-VMvisor-Installer-5.0.0.update01-623860.x86_64.iso。 </li>
-  <li>选择U盘，点击“确定”开始刻录。刻录后用U盘启动机器开始安装即可。如下图所示。
-<img src="http://yanjiuyanjiu-wordpress.stor.sinaapp.com/uploads/2012/04/unetbootin1.jpg" /></li>
-</ol>
-
-<h2 id="linuxlive-usb-creator">使用 LinuxLive USB Creator</h2>
-
-<ol>
-  <li>格式化U盘，文件系统为FAT32，并设置为主分区，命令如下：
-     # 使用管理员权限运行cmd 
-     diskpart 
-     list disk 
-     select disk USB number （例如 select dist 1） 
-     clean 
-     create partition primary 
-     active 
-     format fs=fat32 quick 
-     assign 
-     exit</li>
-</ol>
-
-<!-- more -->
-
-<ol>
-  <li>下载，安装 LinuxLive USB Creator(<a href="http://www.linuxliveusb.com/">http://www.linuxliveusb.com/</a>) </li>
-  <li>
-    <p>按照上图中的步骤 1,2,4，选择ISO文件<code>VMware-VMvisor-Installer-5.0.0.update01-623860.x86_64.iso</code>，然后点击 5 ，开始创建U盘安装盘。等待U盘刻录结束。</p>
-
-    <p><img src="http://yanjiuyanjiu-wordpress.stor.sinaapp.com/uploads/2012/04/liliusb_thumb1.png" /></p>
-
-    <p>大功告成，是不是很简单？！ </p>
-  </li>
-  <li>编辑U盘根目录下的BOOT.CFG文件。注意，不要添加 “ks=usb”，因为下面会用交互模式来安装。 </li>
-  <li>大功告成</li>
-  <li>注意，本文主要参考了末尾的参考资料。但是不需要原文的第4步和第5步。因为用普通的 “interactive installation”安装就很方便了。第4步和第5步用于一键自动化安装，适用于大量安装的情况，这里不详细讨论。 
-见文章末尾的评论，</li>
-</ol>
-
-<blockquote>
-  <p>@Cesar: if you do not edit the boot.cfg with the “ks=usb” option and select a interactive installation it will work。</p>
-</blockquote>
-
-<p><strong>参考资料</strong><br />
-<a href="http://www.ivobeerens.nl/2011/09/17/create-a-bootable-vmware-esxi-5-usb-stick-in-windows-and-perform-a-scripted-installation/">Create a bootable VMware ESXi 5 USB stick in Windows and perform a scripted installation</a></p>
 ]]></content>
   </entry>
   
