@@ -114,6 +114,88 @@
       
   <header class="page-header">
     
+      <h1 class="entry-title"><a href="/blog/20140122">在Centos 6.5上安装docker</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-22T15:25:00+08:00" pubdate data-updated="true">Jan 22<span>nd</span>, 2014</time>
+        
+		
+         | <a href="/blog/20140122#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2 id="enable-epel-repo-on-centos">1 Enable EPEL Repo on CentOS</h2>
+
+<p>参考 <a href="http://www.centosblog.com/enable-epel-repo-on-centos-5-and-centos-6/">Enable EPEL Repo on CentOS 5 and CentOS 6</a></p>
+
+<pre><code>rpm -Uvh http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+</code></pre>
+
+<h2 id="install-docker">2 Install docker</h2>
+
+<pre><code>yum install docker-io --enablerepo=epel
+</code></pre>
+
+<h2 id="docker-daemon-">3 启动 docker daemon 进程</h2>
+
+<pre><code>sudo docker -d &amp;
+</code></pre>
+
+<p>这时，有警告，说内核版本过低，</p>
+
+<blockquote>
+  <p>WARNING: You are running linux kernel version 2.6.32-431.el6.x86_64, which might be unstable running docker. Please upgrade your kernel to 3.8.0.</p>
+</blockquote>
+
+<p>如果你在公司，且公司内部都是通过代理上网，则可以把代理服务器告诉docker，用如下命令(参考<a href="https://github.com/dotcloud/docker/issues/402">这里</a>)：</p>
+
+<pre><code>sudo HTTP_PROXY=http://xxx:port docker -d &amp;
+</code></pre>
+
+<h2 id="section">4 升级内核</h2>
+
+<p>见我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20131024">CentOS 6.4 升级内核到 3.11.6</a></p>
+
+<h2 id="ubuntu-">5 下载 ubuntu 镜像</h2>
+
+<pre><code>sudo docker pull ubuntu
+</code></pre>
+
+<h2 id="hello-world">6 运行 hello world</h2>
+
+<pre><code>sudo docker run ubuntu /bin/echo hello world
+hello world
+</code></pre>
+
+<p>安装成功了！！</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
       <h1 class="entry-title"><a href="/blog/20131223">运行mahout的朴素贝叶斯分类器</a></h1>
     
     
@@ -487,88 +569,6 @@ $ sudo ./deploy/kill_all.sh nameserver
     <footer>
       <a rel="full-article" href="/blog/20131026">继续阅读 &rarr;</a>
     </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20131025">在Centos 6.5上安装docker</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-10-25T23:41:00+08:00" pubdate data-updated="true">Oct 25<span>th</span>, 2013</time>
-        
-		
-         | <a href="/blog/20131025#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2 id="enable-epel-repo-on-centos">1 Enable EPEL Repo on CentOS</h2>
-
-<p>参考 <a href="http://www.centosblog.com/enable-epel-repo-on-centos-5-and-centos-6/">Enable EPEL Repo on CentOS 5 and CentOS 6</a></p>
-
-<pre><code>rpm -Uvh http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
-</code></pre>
-
-<h2 id="install-docker">2 Install docker</h2>
-
-<pre><code>yum install docker-io --enablerepo=epel
-</code></pre>
-
-<h2 id="docker-daemon-">3 启动 docker daemon 进程</h2>
-
-<pre><code>sudo docker -d &amp;
-</code></pre>
-
-<p>这时，有警告，说内核版本过低，</p>
-
-<blockquote>
-  <p>WARNING: You are running linux kernel version 2.6.32-431.el6.x86_64, which might be unstable running docker. Please upgrade your kernel to 3.8.0.</p>
-</blockquote>
-
-<p>如果你在公司，且公司内部都是通过代理上网，则可以把代理服务器告诉docker，用如下命令(参考<a href="https://github.com/dotcloud/docker/issues/402">这里</a>)：</p>
-
-<pre><code>sudo HTTP_PROXY=http://xxx:port docker -d &amp;
-</code></pre>
-
-<h2 id="section">4 升级内核</h2>
-
-<p>见我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20131024">CentOS 6.4 升级内核到 3.11.6</a></p>
-
-<h2 id="ubuntu-">5 下载 ubuntu 镜像</h2>
-
-<pre><code>sudo docker pull ubuntu
-</code></pre>
-
-<h2 id="hello-world">6 运行 hello world</h2>
-
-<pre><code>sudo docker run ubuntu /bin/echo hello world
-hello world
-</code></pre>
-
-<p>安装成功了！！</p>
-</div>
-  
   
 
 
@@ -1382,6 +1382,10 @@ $ ./run spark.examples.SparkPi local
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/20140122">在Centos 6.5上安装docker</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/20131223">运行mahout的朴素贝叶斯分类器</a>
       </li>
     
@@ -1391,10 +1395,6 @@ $ ./run spark.examples.SparkPi local
     
       <li class="post">
         <a href="/blog/20131026">docker 快速入门</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20131025">在Centos 6.5上安装docker</a>
       </li>
     
       <li class="post">

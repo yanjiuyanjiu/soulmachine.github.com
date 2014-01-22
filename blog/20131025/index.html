@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>在Centos 6.5上安装docker - 研究研究</title>
+  <title>docker安装 - 研究研究</title>
   <meta name="author" content="soulmachine">
 
   
@@ -112,7 +112,7 @@
   
   <header class="page-header">
     
-      <h1 class="entry-title">在Centos 6.5上安装docker</h1>
+      <h1 class="entry-title">Docker安装</h1>
     
     
       <p class="meta">
@@ -138,50 +138,103 @@
   </header>
 
 
-<div class="entry-content"><h2 id="enable-epel-repo-on-centos">1 Enable EPEL Repo on CentOS</h2>
+<div class="entry-content"><h2 id="centos-64--docker">1 在 CentOS 6.4 上安装 docker</h2>
 
-<p>参考 <a href="http://www.centosblog.com/enable-epel-repo-on-centos-5-and-centos-6/">Enable EPEL Repo on CentOS 5 and CentOS 6</a></p>
+<p>docker当前官方只支持Ubuntu，所以在 CentOS 安装Docker比较麻烦(<a href="https://github.com/dotcloud/docker/issues/172">Issue #172</a>)。</p>
 
-<pre><code>rpm -Uvh http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+<p>docker官方文档说要求Linux kernel至少3.8以上，CentOS 6.4是2.6的内核，于是我哼哧哼哧的<a href="http://www.yanjiuyanjiu.com/blog/20131024">编译安装了最新的kernel 3.11.6</a>，重启后运行docker还是失败，最后找到原因，是因为编译时忘记集成aufs模块了。aufs 需要和 kernel 一起编译，很麻烦。</p>
+
+<p>不过不需要这么麻烦，有强人已经编译好了带aufs模块的内核，见这里<a href="http://nareshv.blogspot.com/2013/08/installing-dockerio-on-centos-64-64-bit.html">Installing docker.io on centos 6.4 (64-bit)</a></p>
+
+<h3 id="selinuxlxc">1.1 取消selinux，因为它会干扰lxc的正常功能</h3>
+
+<pre><code>sudo vim /etc/selinux/config 
+SELINUX=disabled
+SELINUXTYPE=targeted
 </code></pre>
 
-<h2 id="install-docker">2 Install docker</h2>
+<h3 id="fedora-epel">1.2 安装 Fedora EPEL</h3>
 
-<pre><code>yum install docker-io --enablerepo=epel
+<pre><code>sudo yum install http://ftp.riken.jp/Linux/fedora/epel/6/x86_64/epel-release-6-8.noarch.rpm
 </code></pre>
 
-<h2 id="docker-daemon-">3 启动 docker daemon 进程</h2>
+<h3 id="hop5-repo">1.3 添加 hop5 repo地址</h3>
+
+<pre><code>cd /etc/yum.repos.d
+sudo wget http://www.hop5.in/yum/el6/hop5.repo
+</code></pre>
+
+<h3 id="docker-io">1.4 安装 docker-io</h3>
+
+<pre><code>sudo yum install docker-io
+</code></pre>
+
+<p>会自动安装带aufs模块的3.10内核，以及docker-io包。</p>
+
+<h3 id="cgroup--etcfstab--docker">1.5 将 cgroup 文件系统添加到 <code>/etc/fstab</code> , 只有这样docker才能正常工作</h3>
+
+<pre><code>sudo echo "none                    /sys/fs/cgroup          cgroup  defaults        0 0" &gt;&gt; /etc/fstab
+</code></pre>
+
+<h3 id="grub">1.6 修改grub引导顺序</h3>
+
+<pre><code>sudo vim /etc/grub.conf
+default=0
+</code></pre>
+
+<p>设置default为新安装的内核的位置，一般是0</p>
+
+<h3 id="section">1.7 重启</h3>
+
+<pre><code>sudo reboot
+</code></pre>
+
+<h3 id="section-1">1.8 检查新内核是否引导成功</h3>
+
+<p>重启后，检查一下新内核是否引导起来了</p>
+
+<pre><code>uname -r
+3.10.5-3.el6.x86_64
+</code></pre>
+
+<p>说明成功了</p>
+
+<p>看一下 aufs是否存在</p>
+
+<pre><code>grep aufs /proc/filesystems 
+nodev   aufs
+</code></pre>
+
+<p>说明存在</p>
+
+<h3 id="docker-daemon-">1.9 启动 docker daemon 进程</h3>
 
 <pre><code>sudo docker -d &amp;
 </code></pre>
-
-<p>这时，有警告，说内核版本过低，</p>
-
-<blockquote>
-  <p>WARNING: You are running linux kernel version 2.6.32-431.el6.x86_64, which might be unstable running docker. Please upgrade your kernel to 3.8.0.</p>
-</blockquote>
 
 <p>如果你在公司，且公司内部都是通过代理上网，则可以把代理服务器告诉docker，用如下命令(参考<a href="https://github.com/dotcloud/docker/issues/402">这里</a>)：</p>
 
 <pre><code>sudo HTTP_PROXY=http://xxx:port docker -d &amp;
 </code></pre>
 
-<h2 id="section">4 升级内核</h2>
-
-<p>见我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20131024">CentOS 6.4 升级内核到 3.11.6</a></p>
-
-<h2 id="ubuntu-">5 下载 ubuntu 镜像</h2>
+<h3 id="ubuntu-">1.10 下载 ubuntu 镜像</h3>
 
 <pre><code>sudo docker pull ubuntu
 </code></pre>
 
-<h2 id="hello-world">6 运行 hello world</h2>
+<h3 id="hello-world">1.11 运行 hello world</h3>
+
+<!--more-->
 
 <pre><code>sudo docker run ubuntu /bin/echo hello world
 hello world
 </code></pre>
 
 <p>安装成功了！！</p>
+
+<h2 id="ubuntu--docker">2 在 Ubuntu 上安装 docker</h2>
+
+<p>见官方文档，<a href="http://docs.docker.io/en/latest/installation/ubuntulinux/">Ubuntu Linux</a></p>
 </div>
 
 
@@ -240,7 +293,7 @@ hello world
 	
     <section>
       <div id="duoshuo_thread" aria-live="polite"><!-- Duoshuo Comment BEGIN -->
-<div class="ds-thread" data-thread-key="/blog/20131025" data-title="在Centos 6.5上安装docker"></div>
+<div class="ds-thread" data-thread-key="/blog/20131025" data-title="docker安装"></div>
 <script type="text/javascript">
 var duoshuoQuery = {short_name:"yanjiuyanjiu"};
 	(function() {
@@ -258,8 +311,8 @@ var duoshuoQuery = {short_name:"yanjiuyanjiu"};
     <ul class="pager">
       
       <li class="previous"><a class="basic-alignment left"
-        href="/blog/20131025" title="Previous Post:
-        docker安装">&laquo; docker安装</a></li>
+        href="/blog/20131024" title="Previous Post:
+        CentOS 6.4 升级内核到 3.11.6">&laquo; CentOS 6.4 升级内核到 3.11.6</a></li>
       
       <li><a href="/blog/archives">Blog Archives</a></li>
       
@@ -326,6 +379,10 @@ var duoshuoQuery = {short_name:"yanjiuyanjiu"};
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/20140122">在Centos 6.5上安装docker</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/20131223">运行mahout的朴素贝叶斯分类器</a>
       </li>
     
@@ -335,10 +392,6 @@ var duoshuoQuery = {short_name:"yanjiuyanjiu"};
     
       <li class="post">
         <a href="/blog/20131026">docker 快速入门</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20131025">在Centos 6.5上安装docker</a>
       </li>
     
       <li class="post">

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: docker | 研究研究]]></title>
   <link href="http://www.yanjiuyanjiu.com/blog/categories/docker/atom.xml" rel="self"/>
   <link href="http://www.yanjiuyanjiu.com/"/>
-  <updated>2014-01-22T15:07:42+08:00</updated>
+  <updated>2014-01-22T15:26:21+08:00</updated>
   <id>http://www.yanjiuyanjiu.com/</id>
   <author>
     <name><![CDATA[soulmachine]]></name>
@@ -12,6 +12,58 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[在Centos 6.5上安装docker]]></title>
+    <link href="http://www.yanjiuyanjiu.com/blog/20140122"/>
+    <updated>2014-01-22T15:25:00+08:00</updated>
+    <id>http://www.yanjiuyanjiu.com/blog/install-docker-on-centos65</id>
+    <content type="html"><![CDATA[<h2 id="enable-epel-repo-on-centos">1 Enable EPEL Repo on CentOS</h2>
+
+<p>参考 <a href="http://www.centosblog.com/enable-epel-repo-on-centos-5-and-centos-6/">Enable EPEL Repo on CentOS 5 and CentOS 6</a></p>
+
+<pre><code>rpm -Uvh http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+</code></pre>
+
+<h2 id="install-docker">2 Install docker</h2>
+
+<pre><code>yum install docker-io --enablerepo=epel
+</code></pre>
+
+<h2 id="docker-daemon-">3 启动 docker daemon 进程</h2>
+
+<pre><code>sudo docker -d &amp;
+</code></pre>
+
+<p>这时，有警告，说内核版本过低，</p>
+
+<blockquote>
+  <p>WARNING: You are running linux kernel version 2.6.32-431.el6.x86_64, which might be unstable running docker. Please upgrade your kernel to 3.8.0.</p>
+</blockquote>
+
+<p>如果你在公司，且公司内部都是通过代理上网，则可以把代理服务器告诉docker，用如下命令(参考<a href="https://github.com/dotcloud/docker/issues/402">这里</a>)：</p>
+
+<pre><code>sudo HTTP_PROXY=http://xxx:port docker -d &amp;
+</code></pre>
+
+<h2 id="section">4 升级内核</h2>
+
+<p>见我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20131024">CentOS 6.4 升级内核到 3.11.6</a></p>
+
+<h2 id="ubuntu-">5 下载 ubuntu 镜像</h2>
+
+<pre><code>sudo docker pull ubuntu
+</code></pre>
+
+<h2 id="hello-world">6 运行 hello world</h2>
+
+<pre><code>sudo docker run ubuntu /bin/echo hello world
+hello world
+</code></pre>
+
+<p>安装成功了！！</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[docker 快速入门]]></title>
@@ -261,58 +313,6 @@ E: Sub-process /usr/bin/dpkg returned an error code (1)
   <li><a href="http://docs.docker.io/">Official docs</a></li>
   <li><a href="https://log.qingcloud.com/?p=129">Docker 初探</a></li>
 </ol>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[在Centos 6.5上安装docker]]></title>
-    <link href="http://www.yanjiuyanjiu.com/blog/20131025"/>
-    <updated>2013-10-25T23:41:00+08:00</updated>
-    <id>http://www.yanjiuyanjiu.com/blog/install-docker-on-centos65</id>
-    <content type="html"><![CDATA[<h2 id="enable-epel-repo-on-centos">1 Enable EPEL Repo on CentOS</h2>
-
-<p>参考 <a href="http://www.centosblog.com/enable-epel-repo-on-centos-5-and-centos-6/">Enable EPEL Repo on CentOS 5 and CentOS 6</a></p>
-
-<pre><code>rpm -Uvh http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
-</code></pre>
-
-<h2 id="install-docker">2 Install docker</h2>
-
-<pre><code>yum install docker-io --enablerepo=epel
-</code></pre>
-
-<h2 id="docker-daemon-">3 启动 docker daemon 进程</h2>
-
-<pre><code>sudo docker -d &amp;
-</code></pre>
-
-<p>这时，有警告，说内核版本过低，</p>
-
-<blockquote>
-  <p>WARNING: You are running linux kernel version 2.6.32-431.el6.x86_64, which might be unstable running docker. Please upgrade your kernel to 3.8.0.</p>
-</blockquote>
-
-<p>如果你在公司，且公司内部都是通过代理上网，则可以把代理服务器告诉docker，用如下命令(参考<a href="https://github.com/dotcloud/docker/issues/402">这里</a>)：</p>
-
-<pre><code>sudo HTTP_PROXY=http://xxx:port docker -d &amp;
-</code></pre>
-
-<h2 id="section">4 升级内核</h2>
-
-<p>见我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20131024">CentOS 6.4 升级内核到 3.11.6</a></p>
-
-<h2 id="ubuntu-">5 下载 ubuntu 镜像</h2>
-
-<pre><code>sudo docker pull ubuntu
-</code></pre>
-
-<h2 id="hello-world">6 运行 hello world</h2>
-
-<pre><code>sudo docker run ubuntu /bin/echo hello world
-hello world
-</code></pre>
-
-<p>安装成功了！！</p>
 ]]></content>
   </entry>
   
