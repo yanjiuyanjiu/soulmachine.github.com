@@ -114,6 +114,119 @@
       
   <header class="page-header">
     
+      <h1 class="entry-title"><a href="/blog/20130612">在CentOS上安装Hadoop</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-12T12:39:00+08:00" pubdate data-updated="true">Jun 12<span>th</span>, 2013</time>
+        
+		
+         | <a href="/blog/20130612#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Ubuntu上安装，请参考我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20120103/">在Ubuntu上安装Hadoop</a>。</p>
+
+<p><strong>环境</strong>：CentOS 6.4, JDK 1.7, Hadoop 1.1.2</p>
+
+<h2 id="vmware-workstation-">1. 用vmware workstation 创建三台虚拟机</h2>
+<p>首先用vmware workstation 新建一台CentOS 6.4，装好操作系统，选择 Basic Server，安装JDK，参考我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20120423/">安装和配置CentOS服务器的详细步骤</a>。安装好后然后用浅拷贝<code>Create a linked clone</code> 克隆出两台作为slave，这样有了三台虚拟机。启动三台机器，假设IP分别为<code>192.168.1.131, 192.168.1.132, 192.168.1.133</code>, 131做为master 和 SecondaryNameNode, 身兼两职， 132和133为 slaves。</p>
+
+<h2 id="section">2 关闭防火墙</h2>
+<p>临时关闭防火墙</p>
+
+<pre><code>$ sudo service iptables stop
+</code></pre>
+
+<p>下次开机后，防火墙还是会启动。</p>
+
+<p>永久关闭防火墙</p>
+
+<pre><code>$ sudo chkconfig iptables off
+</code></pre>
+
+<p>由于这几台虚拟机是开发机，不是生产环境，因此不必考虑安全性，可以永久关闭防火墙，还能给开发阶段带来很多便利。</p>
+
+<h2 id="hostname">3. 修改hostname</h2>
+<p>这一步看起来貌似不必要，其实是必须的，否则最后运行wordcount等例子时，会出现“Too many fetch-failures”。因为HDFS用hostname而不是IP，来相互之间进行通信（见后面的注意1）。</p>
+
+<p>在CentOS上修改hostname，包含两个步骤(假设将hostname1改为hostname2，参考<a href="http://www.ichiayi.com/wiki/tech/linux_hostname">这里</a>，但不需要第一步)：</p>
+
+<ol>
+  <li>将 <code>/etc/sysconfig/network</code> 內的 HOSTNAME 改成 hostname2</li>
+  <li>用<code>hostname</code>命令，临时修改机器名， <code>sudo hostname hostname2</code></li>
+</ol>
+
+<p>用<code>exit</code>命令退出shell，再次登录，命令提示字符串就会变成<code>[dev@hostname2 ~]$</code>。</p>
+
+<p>用上述方法，将131改名为master，132改名为slave01，133改名为slave02。</p>
+
+<p>在三台机器的/etc/hosts文件中，添加以下三行内容</p>
+
+<pre><code>192.168.1.131 master
+192.168.1.132 slave01
+192.168.1.133 slave02
+</code></pre>
+
+<h2 id="section-1">4. 本地模式和伪分布式模式</h2>
+
+<p>为了能顺利安装成功，我们先练习在单台机器上安装Hadoop。在单台机器上，可以配置成本地模式(local mode)和伪分布式模式(Pseudo-Distributed Mode)，参考官方文档<a href="http://hadoop.apache.org/docs/r1.1.2/single_node_setup.html">Single Node Setup</a>。</p>
+
+<p>将 hadoop-1.1.2-bin.tar.gz 上传到三台机器的 home目录下，然后解压。<strong>注意，三台机器hadoop所在目录必须一致，因为master会登陆到slave上执行命令，master认为slave的hadoop路径与自己一样。</strong></p>
+
+<h3 id="confhadoop-envsh-javahome">4.1 编辑 conf/hadoop-env.sh，设置 JAVA_HOME</h3>
+
+<pre><code>cd hadoop-1.1.2
+vim conf/hadoop-env.sh
+</code></pre>
+
+<p>注释掉第8行的JAVA_HOME，设置正确的JDK位置</p>
+
+<pre><code>export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.19.x86_64
+</code></pre>
+
+<h3 id="section-2">4.2 测试本地模式是否正常</h3>
+<p>默认情况下，Hadoop就被配置为本地模式，现在就可以开始测试一下。</p>
+
+<pre><code>$ mkdir input 
+$ cp conf/*.xml input 
+$ bin/hadoop jar hadoop-examples-*.jar grep input output 'dfs[a-z.]+' 
+$ cat output/*
+</code></pre>
+
+<p>可以看到正常的结果，说明本地模式运行成功了，下面开始配置伪分布式模式。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20130612">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
       <h1 class="entry-title"><a href="/blog/20130611">使用Scala IDE 阅读spark源码 &#8211; 将sbt项目转化为eclipse项目</a></h1>
     
     
@@ -1109,107 +1222,6 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
 
     </article>
   
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20120423">安装和配置CentOS服务器的详细步骤</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-04-23T20:43:00+08:00" pubdate data-updated="true">Apr 23<span>rd</span>, 2012</time>
-        
-		
-         | <a href="/blog/20120423#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>这是我安装CentOS服务器的过程，记录下来，与大家一起分享。</p>
-
-<h2 id="section">安装操作系统</h2>
-<p>CentOS 6.2 ，CentOS-6.2-i386-bin-DVD1.iso（32位） ，CentOS-6.2-x86_64-bin-DVD1.iso（64位）</p>
-
-<p>安装 CentOS时，选择 “Basic Server”<br />
-root密码：root123<br />
-CentOS 自带了ssh  </p>
-
-<p>安装完操作系统后，添加一个用户 dev</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="o">[</span>root@localhost ~<span class="o">]</span><span class="nv">$ </span>useradd dev
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-<p>然后密码设为 dev123</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="o">[</span>root@localhost ~<span class="o">]</span><span class="nv">$ </span>passwd dev
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>给予 sudo 权限</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="o">[</span>root@localhost ~<span class="o">]</span><span class="nv">$ </span>chmod u+w /etc/sudoers
-</span><span class="line"><span class="o">[</span>root@localhost ~<span class="o">]</span><span class="nv">$ </span>vim /etc/sudoers
-</span><span class="line"><span class="c"># 在root ALL=(ALL) ALL 下 添加dev ALL=(ALL) ALL</span>
-</span><span class="line"><span class="o">[</span>root@localhost ~<span class="o">]</span><span class="nv">$ </span>chmod u-w /etc/sudoers
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<h2 id="section-1">设置上网</h2>
-<p>安装完操作系统后，还不能上网，配置DHCP方式上网：</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">vim /etc/sysconfig/network-scripts/ifcfg-eth0
-</span><span class="line"><span class="nv">DEVICE</span><span class="o">=</span><span class="s2">&quot;eth0&quot;</span>
-</span><span class="line"><span class="nv">HWADDR</span><span class="o">=</span><span class="s2">&quot;00:0C:29:BD:E1:19&quot;</span>
-</span><span class="line"><span class="nv">NM_CONTROLLED</span><span class="o">=</span><span class="s2">&quot;yes&quot;</span>
-</span><span class="line"><span class="nv">ONBOOT</span><span class="o">=</span><span class="s2">&quot;yes&quot;</span>
-</span><span class="line"><span class="nv">BOOTPROTO</span><span class="o">=</span>dhcp
-</span><span class="line"><span class="nv">USECTL</span><span class="o">=</span>no
-</span><span class="line"><span class="nv">TYPE</span><span class="o">=</span>Ethernet
-</span><span class="line"><span class="nv">PEERDNS</span><span class="o">=</span>yes
-</span><span class="line"><span class="c">#保存退出</span>
-</span><span class="line">sudo service network restart
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/20120423">继续阅读 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <ul class="pager">
     
     <li class="previous"><a href="/blog/page/3/">&larr; Older</a></li>
@@ -1229,7 +1241,7 @@ CentOS 自带了ssh  </p>
 </section>
 <section>
   <h2>分类目录</h2>
-    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/docker/'>docker (2)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (5)</a></li><li><a href='/blog/categories/spark/'>spark (5)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/docker/'>docker (3)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (5)</a></li><li><a href='/blog/categories/spark/'>spark (5)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
 </section>
 <section>
   <h2>友情链接</h2>
@@ -1287,11 +1299,11 @@ CentOS 自带了ssh  </p>
       </li>
     
       <li class="post">
-        <a href="/blog/20131025">docker安装</a>
+        <a href="/blog/20131025">在Centos 6.5上安装docker</a>
       </li>
     
       <li class="post">
-        <a href="/blog/20131024">CentOS 6.4 升级内核到 3.11.6</a>
+        <a href="/blog/20131025">docker安装</a>
       </li>
     
   </ul>

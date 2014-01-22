@@ -114,6 +114,107 @@
       
   <header class="page-header">
     
+      <h1 class="entry-title"><a href="/blog/20120423">安装和配置CentOS服务器的详细步骤</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-23T20:43:00+08:00" pubdate data-updated="true">Apr 23<span>rd</span>, 2012</time>
+        
+		
+         | <a href="/blog/20120423#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>这是我安装CentOS服务器的过程，记录下来，与大家一起分享。</p>
+
+<h2 id="section">安装操作系统</h2>
+<p>CentOS 6.2 ，CentOS-6.2-i386-bin-DVD1.iso（32位） ，CentOS-6.2-x86_64-bin-DVD1.iso（64位）</p>
+
+<p>安装 CentOS时，选择 “Basic Server”<br />
+root密码：root123<br />
+CentOS 自带了ssh  </p>
+
+<p>安装完操作系统后，添加一个用户 dev</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="o">[</span>root@localhost ~<span class="o">]</span><span class="nv">$ </span>useradd dev
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>然后密码设为 dev123</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="o">[</span>root@localhost ~<span class="o">]</span><span class="nv">$ </span>passwd dev
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>给予 sudo 权限</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="o">[</span>root@localhost ~<span class="o">]</span><span class="nv">$ </span>chmod u+w /etc/sudoers
+</span><span class="line"><span class="o">[</span>root@localhost ~<span class="o">]</span><span class="nv">$ </span>vim /etc/sudoers
+</span><span class="line"><span class="c"># 在root ALL=(ALL) ALL 下 添加dev ALL=(ALL) ALL</span>
+</span><span class="line"><span class="o">[</span>root@localhost ~<span class="o">]</span><span class="nv">$ </span>chmod u-w /etc/sudoers
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="section-1">设置上网</h2>
+<p>安装完操作系统后，还不能上网，配置DHCP方式上网：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line">vim /etc/sysconfig/network-scripts/ifcfg-eth0
+</span><span class="line"><span class="nv">DEVICE</span><span class="o">=</span><span class="s2">&quot;eth0&quot;</span>
+</span><span class="line"><span class="nv">HWADDR</span><span class="o">=</span><span class="s2">&quot;00:0C:29:BD:E1:19&quot;</span>
+</span><span class="line"><span class="nv">NM_CONTROLLED</span><span class="o">=</span><span class="s2">&quot;yes&quot;</span>
+</span><span class="line"><span class="nv">ONBOOT</span><span class="o">=</span><span class="s2">&quot;yes&quot;</span>
+</span><span class="line"><span class="nv">BOOTPROTO</span><span class="o">=</span>dhcp
+</span><span class="line"><span class="nv">USECTL</span><span class="o">=</span>no
+</span><span class="line"><span class="nv">TYPE</span><span class="o">=</span>Ethernet
+</span><span class="line"><span class="nv">PEERDNS</span><span class="o">=</span>yes
+</span><span class="line"><span class="c">#保存退出</span>
+</span><span class="line">sudo service network restart
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20120423">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
       <h1 class="entry-title"><a href="/blog/20120418">制作 VMware ESXI 5 U盘安装盘</a></h1>
     
     
@@ -819,7 +920,7 @@ PMD 检查源码，分析源代码</p>
 </section>
 <section>
   <h2>分类目录</h2>
-    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/docker/'>docker (2)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (5)</a></li><li><a href='/blog/categories/spark/'>spark (5)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/docker/'>docker (3)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (5)</a></li><li><a href='/blog/categories/spark/'>spark (5)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
 </section>
 <section>
   <h2>友情链接</h2>
@@ -877,11 +978,11 @@ PMD 检查源码，分析源代码</p>
       </li>
     
       <li class="post">
-        <a href="/blog/20131025">docker安装</a>
+        <a href="/blog/20131025">在Centos 6.5上安装docker</a>
       </li>
     
       <li class="post">
-        <a href="/blog/20131024">CentOS 6.4 升级内核到 3.11.6</a>
+        <a href="/blog/20131025">docker安装</a>
       </li>
     
   </ul>
