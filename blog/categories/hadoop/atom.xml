@@ -4,7 +4,7 @@
   <title><![CDATA[Category: hadoop | 研究研究]]></title>
   <link href="http://www.yanjiuyanjiu.com/blog/categories/hadoop/atom.xml" rel="self"/>
   <link href="http://www.yanjiuyanjiu.com/"/>
-  <updated>2014-01-27T02:31:26+08:00</updated>
+  <updated>2014-01-27T02:36:17+08:00</updated>
   <id>http://www.yanjiuyanjiu.com/</id>
   <author>
     <name><![CDATA[soulmachine]]></name>
@@ -191,7 +191,7 @@ JobTracker - <a href="http://localhost:50030/">http://localhost:50030/</a></p>
 <h2 id="section-4">5. 分布式模式</h2>
 <p>如果有多台机器，就可以把Hadoop 配置成分布式模式(或称为集群模式)。参考官方文档<a href="http://hadoop.apache.org/docs/r1.1.2/cluster_setup.html">Cluster Setup</a>.</p>
 
-<h2 id="master-master">5.1 配置 master 无密码登陆到所有机器（<strong>包括master自己登陆自己</strong>）</h2>
+<h2 id="master-master">5.1 配置 master 无密码登陆到所有机器（包括master自己登陆自己）</h2>
 <p>首先在两台slave上修改sshd的配置文件，然后重启sshd服务。</p>
 
 <pre><code>$ sudo vim /etc/ssh/sshd_config  找到以下三行，并去掉注释符”#“
@@ -211,38 +211,7 @@ AuthorizedKeysFile      .ssh/authorized_keys
 <pre><code>$ mkdir ~/.ssh
 </code></pre>
 
-<p>在master机器上执行： </p>
-
-<pre><code>#生成公钥
-$ ssh-keygen -t dsa -P '' -f ~/.ssh/id_dsa
-</code></pre>
-
-<p>把公钥拷贝到所有机器上（包括自己）</p>
-
-<pre><code># 拷贝到自己
-$ cat ~/.ssh/id_dsa.pub &gt;&gt; ~/.ssh/authorized_keys
-# 拷贝到两台slaves机器上
-$ scp ~/.ssh/id_dsa.pub dev@slave01:~/.ssh/authorized_keys
-$ scp ~/.ssh/id_dsa.pub dev@slave02:~/.ssh/authorized_keys
-</code></pre>
-
-<p>测试，看看 master 是否可以无密码登陆两台slave</p>
-
-<pre><code>#在 master执行
-$ ssh slave01
-$ exit
-$ ssh slave02
-$ exit
-</code></pre>
-
-<p>如果不需要密码，则说明配置成功了。</p>
-
-<p>如果登陆不上，试试先关闭两台slaves的防火墙</p>
-
-<pre><code>$ sudo service iptables stop
-</code></pre>
-
-<p>参考资料，<a href="http://hortonworks.com/kb/generating-ssh-keys-for-passwordless-login/">HOWTO: Generating SSH Keys for Passwordless Login</a></p>
+<p>接着，参考我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20120102/">SSH无密码登录的配置</a></p>
 
 <h3 id="section-5">5.2 修改6个配置文件</h3>
 <p>在 master 上修改配置文件。</p>
@@ -498,7 +467,7 @@ ff02::2 ip6-allrouters
   </li>
 </ul>
 
-<h2 id="master-">4. 配置 master 无密码登陆到所有机器（<strong>包括本机</strong>）</h2>
+<h2 id="master-">4. 配置 master 无密码登陆到所有机器（包括本机）</h2>
 <p>参考我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20120102/">SSH无密码登录的配置</a></p>
 
 <h2 id="hadoop">5. 复制hadoop安装包到所有机器</h2>
