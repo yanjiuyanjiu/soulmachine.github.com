@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: sa | 研究研究]]></title>
+  <link href="http://www.yanjiuyanjiu.com/blog/categories/sa/atom.xml" rel="self"/>
+  <link href="http://www.yanjiuyanjiu.com/"/>
+  <updated>2014-01-27T02:31:26+08:00</updated>
+  <id>http://www.yanjiuyanjiu.com/</id>
+  <author>
+    <name><![CDATA[soulmachine]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[SSH无密码登录的配置]]></title>
+    <link href="http://www.yanjiuyanjiu.com/blog/20120102"/>
+    <updated>2012-01-02T02:16:00+08:00</updated>
+    <id>http://www.yanjiuyanjiu.com/blog/ssh-passwordless-login-configuration</id>
+    <content type="html"><![CDATA[<p>根据公钥加密的思想，如果机器A想无密码登录其他N台机器，只需要在自己机器上生成一对公钥和密钥，然后把密钥给这N台机器，这样，这N台机器，有了A的公钥，就可以解密A的数据包，跟A正常通信了。</p>
+
+<p>通常在一个集群中，我们会选择一台机器作为跳板机，在这台机器上登录其他机器，因此，无名需要在跳板机上生成一对公钥和密钥。一般的，我们也会把跳板板机作为整个集群的master，例如Hadoop的NameNode，因此最好选一台内存比较大的机器作为跳板机。</p>
+
+<p>下面详细讲解如何配置从跳板机SSH无密码登录到所有机器（包括自己）。</p>
+
+<p>根据公钥加密的思想，如果机器A想无密码登录其他N台机器，只需要在自己机器上生成一对公钥和密钥，然后把密钥给这N台机器，这样，这N台机器，有了A的公钥，就可以解密A的数据包，跟A正常通信了。</p>
+
+<p>通常在一个集群中，我们会选择一台机器作为跳板机，在这台机器上登录其他机器，因此，无名需要在跳板机上生成一对公钥和密钥。一般的，我们也会把跳板板机作为整个集群的master，例如Hadoop的NameNode，因此最好选一台内存比较大的机器作为跳板机。</p>
+
+<p>下面详细讲解如何配置从跳板机SSH无密码登录到所有机器（包括自己）。</p>
+
+<h2 id="hosts">前提： 修改hosts文件</h2>
+<p>假设有三台机器，<code>192.168.1.131, 192.168.1.132, 192.168.1.133</code>，hostname分别是master, slave01, slave02</p>
+
+<h2 id="master">1.在master上生成一对公钥和密钥</h2>
+
+<pre><code>dev@master:~$ ssh-keygen -t dsa -P '' -f ~/.ssh/id_dsa
+</code></pre>
+
+<h2 id="section">2. 将公钥拷贝到自己</h2>
+
+<pre><code>dev@master:~$ cat ~/.ssh/id_dsa.pub &gt;&gt; ~/.ssh/authorized_keys
+</code></pre>
+
+<h2 id="section-1">3. 将公钥拷贝到其他机器</h2>
+
+<pre><code>dev@master:~$ scp ~/.ssh/id_dsa.pub dev@slave01:~
+dev@master:~$ scp ~/.ssh/id_dsa.pub dev@slave02:~
+#追加到authorized_keys
+dev@slave01:~$ cat id_dsa.pub &gt;&gt; .ssh/authorized_keys
+dev@slave02:~$ cat id_dsa.pub &gt;&gt; .ssh/authorized_keys
+</code></pre>
+
+<h2 id="section-2">4. 测试一下</h2>
+
+<pre><code>#在 master执行
+dev@master:~$ ssh slave01
+</code></pre>
+
+<p>第一次还是需要密码的，<code>exit</code>退出再试一次，就不需要密码了。</p>
+
+<p>如果登陆不上，试试先关闭所有机器的防火墙，例如Ubuntu的命令是：</p>
+
+<pre><code>dev@slave01:~$ sudo ufw disable
+</code></pre>
+
+<h2 id="section-3">参考资料</h2>
+<p><a href="http://hortonworks.com/kb/generating-ssh-keys-for-passwordless-login/">HOWTO: Generating SSH Keys for Passwordless Login</a></p>
+]]></content>
+  </entry>
+  
+</feed>

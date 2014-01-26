@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>SSH无密码登录的配置 - 研究研究</title>
+  <title>Category: sa - 研究研究</title>
   <meta name="author" content="soulmachine">
 
   
-  <meta name="description" content="一个关于机器学习的技术博客">
+  <meta name="description" content="Category: sa">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://www.yanjiuyanjiu.com/blog/20120102">
+  <link rel="canonical" href="http://www.yanjiuyanjiu.comblog/categories/sa">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/bootstrap/bootstrap.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/stylesheets/bootstrap/responsive.css" media="screen, projection" rel="stylesheet" type="text/css">
@@ -107,173 +107,38 @@
   <div class="container">
     <div class="row-fluid">
       
-<article class="hentry span9" role="article">
+<article role="article" class="span9">
 
   
   <header class="page-header">
-    
-      <h1 class="entry-title">SSH无密码登录的配置</h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-01-02T02:16:00+08:00" pubdate data-updated="true">Jan 2<span>nd</span>, 2012</time>
-        
-		
-         | <a href="#duoshuo_thread">Comments</a>
-        
-      </p>
+    <h1 class="entry-title">Category: Sa</h1>
     
   </header>
+  
+  <div id="blog-archives" class="category">
 
 
-<div class="entry-content"><p>根据公钥加密的思想，如果机器A想无密码登录其他N台机器，只需要在自己机器上生成一对公钥和密钥，然后把密钥给这N台机器，这样，这N台机器，有了A的公钥，就可以解密A的数据包，跟A正常通信了。</p>
 
-<p>通常在一个集群中，我们会选择一台机器作为跳板机，在这台机器上登录其他机器，因此，无名需要在跳板机上生成一对公钥和密钥。一般的，我们也会把跳板板机作为整个集群的master，例如Hadoop的NameNode，因此最好选一台内存比较大的机器作为跳板机。</p>
+  
+  <h1>2012</h1>
 
-<p>下面详细讲解如何配置从跳板机SSH无密码登录到所有机器（包括自己）。</p>
+<article>
+  <div class="well">
 
-<p>根据公钥加密的思想，如果机器A想无密码登录其他N台机器，只需要在自己机器上生成一对公钥和密钥，然后把密钥给这N台机器，这样，这N台机器，有了A的公钥，就可以解密A的数据包，跟A正常通信了。</p>
+<h2><a href="/blog/20120102">SSH无密码登录的配置</a></h2>
+<time datetime="2012-01-02T02:16:00+08:00" pubdate><span class='month'>Jan</span> <span class='day'>02</span> <span class='year'>2012</span></time>
 
-<p>通常在一个集群中，我们会选择一台机器作为跳板机，在这台机器上登录其他机器，因此，无名需要在跳板机上生成一对公钥和密钥。一般的，我们也会把跳板板机作为整个集群的master，例如Hadoop的NameNode，因此最好选一台内存比较大的机器作为跳板机。</p>
+<footer>
+  <span class="categories">posted in <a class='category' href='/blog/categories/sa/'>sa</a></span>
+</footer>
 
-<p>下面详细讲解如何配置从跳板机SSH无密码登录到所有机器（包括自己）。</p>
-
-<h2 id="hosts">前提： 修改hosts文件</h2>
-<p>假设有三台机器，<code>192.168.1.131, 192.168.1.132, 192.168.1.133</code>，hostname分别是master, slave01, slave02</p>
-
-<h2 id="master">1.在master上生成一对公钥和密钥</h2>
-
-<pre><code>dev@master:~$ ssh-keygen -t dsa -P '' -f ~/.ssh/id_dsa
-</code></pre>
-
-<h2 id="section">2. 将公钥拷贝到自己</h2>
-
-<pre><code>dev@master:~$ cat ~/.ssh/id_dsa.pub &gt;&gt; ~/.ssh/authorized_keys
-</code></pre>
-
-<h2 id="section-1">3. 将公钥拷贝到其他机器</h2>
-
-<pre><code>dev@master:~$ scp ~/.ssh/id_dsa.pub dev@slave01:~
-dev@master:~$ scp ~/.ssh/id_dsa.pub dev@slave02:~
-#追加到authorized_keys
-dev@slave01:~$ cat id_dsa.pub &gt;&gt; .ssh/authorized_keys
-dev@slave02:~$ cat id_dsa.pub &gt;&gt; .ssh/authorized_keys
-</code></pre>
-
-<h2 id="section-2">4. 测试一下</h2>
-
-<pre><code>#在 master执行
-dev@master:~$ ssh slave01
-</code></pre>
-
-<p>第一次还是需要密码的，<code>exit</code>退出再试一次，就不需要密码了。</p>
-
-<p>如果登陆不上，试试先关闭所有机器的防火墙，例如Ubuntu的命令是：</p>
-
-<pre><code>dev@slave01:~$ sudo ufw disable
-</code></pre>
-
-<h2 id="section-3">参考资料</h2>
-<p><a href="http://hortonworks.com/kb/generating-ssh-keys-for-passwordless-login/">HOWTO: Generating SSH Keys for Passwordless Login</a></p>
 </div>
 
+</article>
 
-  <footer>
-    <p class="meta">
-      
-  
-
-<span class="byline author vcard">Posted by <span class="fn">soulmachine</span></span>
-
-      
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-01-02T02:16:00+08:00" pubdate data-updated="true">Jan 2<span>nd</span>, 2012</time>
-      
-
-<span class="categories">
-  
-    <a class='category' href='/blog/categories/sa/'>sa</a>
-  
-</span>
-
-
-    </p>
-    
-      <div class="sharing">
-  <!-- AddThis Button BEGIN -->
-  <div class="addthis_toolbox addthis_default_style addthis_32x32_style">
-    <a class="addthis_button_sinaweibo"></a>
-    <a class="addthis_button_facebook"></a>
-    <a class="addthis_button_twitter"></a>
-    <a class="addthis_button_google_plusone_share"></a>
-    <a class="addthis_button_delicious"></a>
-    <a class="addthis_button_digg"></a>
-    <a class="addthis_button_reddit"></a>
-    <a class="addthis_button_compact"></a><a class="addthis_counter addthis_bubble_style"></a>
-  </div>
-  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=undefined"></script>
-  <!-- AddThis Button END -->
-  
-  
-  
 </div>
 
-    
-    
-	
-    <section>
-      <div id="duoshuo_thread" aria-live="polite"><!-- Duoshuo Comment BEGIN -->
-<div class="ds-thread" data-thread-key="/blog/20120102" data-title="SSH无密码登录的配置"></div>
-<script type="text/javascript">
-var duoshuoQuery = {short_name:"yanjiuyanjiu"};
-	(function() {
-		var ds = document.createElement('script');
-		ds.type = 'text/javascript';ds.async = true;
-		ds.src = 'http://static.duoshuo.com/embed.js';
-		ds.charset = 'UTF-8';
-		(document.getElementsByTagName('head')[0] 
-		|| document.getElementsByTagName('body')[0]).appendChild(ds);
-	})();
-</script>
-<!-- Duoshuo Comment END --></div>
-    </section>
-    
-    <ul class="pager">
-      
-      <li class="previous"><a class="basic-alignment left"
-        href="/blog/20110623" title="Previous Post:
-        用javac命令行编译多个java文件">&laquo; 用javac命令行编译多个java文件</a></li>
-      
-      <li><a href="/blog/archives">Blog Archives</a></li>
-      
-      <li class="next"><a class="basic-alignment right" href="/blog/20120103"
-        title="Next Post: 在Ubuntu上安装Hadoop">在Ubuntu上安装Hadoop
-        &raquo;</a></li>
-      
-    </ul>
-  </footer>
+  
 </article>
 
 <aside class="sidebar-nav span3">
