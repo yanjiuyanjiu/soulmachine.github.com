@@ -218,29 +218,7 @@ ff02::2 ip6-allrouters
 </ul>
 
 <h2 id="master-">4. 配置 master 无密码登陆到所有机器（<strong>包括本机</strong>）</h2>
-
-<pre><code>dev@master:~$ ssh-keygen -t rsa
-
-dev@master:~$ cat .ssh/id_rsa.pub &gt;&gt; .ssh/authorized_keys
-
-dev@master:~$ scp .ssh/id_rsa.pub dev@192.168.1.132:~/
-
-dev@master:~$ scp .ssh/id_rsa.pub dev@192.168.1.133:~/
-
-dev@slave01:~$ cat id_rsa.pub &gt;&gt; .ssh/authorized_keys
-
-dev@slave02:~$ cat id_rsa.pub &gt;&gt; .ssh/authorized_keys
-</code></pre>
-
-<p>测试一下，</p>
-
-<pre><code>dev@master:~$ ssh slav01
-</code></pre>
-
-<p>如果登不上，试试先关闭slave01的防火墙，</p>
-
-<pre><code>dev@slave01:~$ sudo ufw disable
-</code></pre>
+<p>参考我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20120102/">SSH无密码登录的配置</a></p>
 
 <h2 id="hadoop">5. 复制hadoop安装包到所有机器</h2>
 <p>从hadoop.apache.org下载 hadoop-1.0.0-bin.tar.gz，上传到master中，解压，然后复制到其他机器，解压。</p>
@@ -477,8 +455,8 @@ var duoshuoQuery = {short_name:"yanjiuyanjiu"};
     <ul class="pager">
       
       <li class="previous"><a class="basic-alignment left"
-        href="/blog/20110623" title="Previous Post:
-        用javac命令行编译多个java文件">&laquo; 用javac命令行编译多个java文件</a></li>
+        href="/blog/20120102" title="Previous Post:
+        SSH无密码登录的配置">&laquo; SSH无密码登录的配置</a></li>
       
       <li><a href="/blog/archives">Blog Archives</a></li>
       
