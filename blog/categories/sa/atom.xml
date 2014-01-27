@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: sa | 研究研究]]></title>
+  <title><![CDATA[Category: SA | 研究研究]]></title>
   <link href="http://www.yanjiuyanjiu.com/blog/categories/sa/atom.xml" rel="self"/>
   <link href="http://www.yanjiuyanjiu.com/"/>
-  <updated>2014-01-27T02:36:17+08:00</updated>
+  <updated>2014-01-27T22:10:08+08:00</updated>
   <id>http://www.yanjiuyanjiu.com/</id>
   <author>
     <name><![CDATA[soulmachine]]></name>
@@ -14,59 +14,93 @@
 
   
   <entry>
-    <title type="html"><![CDATA[SSH无密码登录的配置]]></title>
-    <link href="http://www.yanjiuyanjiu.com/blog/20120102"/>
-    <updated>2012-01-02T02:16:00+08:00</updated>
-    <id>http://www.yanjiuyanjiu.com/blog/ssh-passwordless-login-configuration</id>
-    <content type="html"><![CDATA[<p>根据公钥加密的思想，如果机器A想无密码登录其他N台机器，只需要在自己机器上生成一对公钥和密钥，然后把密钥给这N台机器，这样，这N台机器，有了A的公钥，就可以解密A的数据包，跟A正常通信了。</p>
+    <title type="html"><![CDATA[boot-space-insufficient]]></title>
+    <link href="http://www.yanjiuyanjiu.com/blog/20140126"/>
+    <updated>2014-01-26T22:07:00+08:00</updated>
+    <id>http://www.yanjiuyanjiu.com/blog/boot-space-insufficient</id>
+    <content type="html"><![CDATA[<p>今天在服务器上执行 <code>sudo yum -y update</code>的时候报错：</p>
 
-<p>通常在一个集群中，我们会选择一台机器作为跳板机，在这台机器上登录其他机器，因此，无名需要在跳板机上生成一对公钥和密钥。一般的，我们也会把跳板板机作为整个集群的master，例如Hadoop的NameNode，因此最好选一台内存比较大的机器作为跳板机。</p>
+<blockquote>
+  <p>… needs 18MB on the /boot filesystem</p>
+</blockquote>
 
-<p>下面详细讲解如何配置从跳板机SSH无密码登录到所有机器（包括自己）。</p>
+<h2 id="section">1. 列出所有的内核文件</h2>
 
-<p>根据公钥加密的思想，如果机器A想无密码登录其他N台机器，只需要在自己机器上生成一对公钥和密钥，然后把密钥给这N台机器，这样，这N台机器，有了A的公钥，就可以解密A的数据包，跟A正常通信了。</p>
-
-<p>通常在一个集群中，我们会选择一台机器作为跳板机，在这台机器上登录其他机器，因此，无名需要在跳板机上生成一对公钥和密钥。一般的，我们也会把跳板板机作为整个集群的master，例如Hadoop的NameNode，因此最好选一台内存比较大的机器作为跳板机。</p>
-
-<p>下面详细讲解如何配置从跳板机SSH无密码登录到所有机器（包括自己）。</p>
-
-<h2 id="hosts">前提： 修改hosts文件</h2>
-<p>假设有三台机器，<code>192.168.1.131, 192.168.1.132, 192.168.1.133</code>，hostname分别是master, slave01, slave02</p>
-
-<h2 id="master">1.在master上生成一对公钥和密钥</h2>
-
-<pre><code>dev@master:~$ ssh-keygen -t dsa -P '' -f ~/.ssh/id_dsa
+<pre><code>rpm -q kernel
+kernel-2.6.32-431.el6.x86_64
+kernel-2.6.32-431.3.1.el6.x86_64
 </code></pre>
 
-<h2 id="section">2. 将公钥拷贝到自己</h2>
+<p>发现有多个内核，因此可以删除所有不再使用的内核文件，来释放空间。</p>
 
-<pre><code>dev@master:~$ cat ~/.ssh/id_dsa.pub &gt;&gt; ~/.ssh/authorized_keys
+<h2 id="section-1">2. 查看当前正在使用的内核</h2>
+
+<pre><code>uname -r
+2.6.32-431.3.1.el6.x86_64
 </code></pre>
 
-<h2 id="section-1">3. 将公钥拷贝到其他机器</h2>
+<p>注意，如果你是刚刚 <code>yum -y update</code>过，需要重启一下，内核才会更新，不重启的话<code>uname -r</code>还是显示的旧的。</p>
 
-<pre><code>dev@master:~$ scp ~/.ssh/id_dsa.pub dev@slave01:~
-dev@master:~$ scp ~/.ssh/id_dsa.pub dev@slave02:~
-#追加到authorized_keys
-dev@slave01:~$ cat id_dsa.pub &gt;&gt; .ssh/authorized_keys
-dev@slave02:~$ cat id_dsa.pub &gt;&gt; .ssh/authorized_keys
+<h2 id="section-2">3. 删除所有没有使用的内核</h2>
+
+<pre><code>rpm -e 2.6.32-431.el6.x86_64
+rpm -e xxx
 </code></pre>
 
-<h2 id="section-2">4. 测试一下</h2>
+<p>将<code>rpm -q kernel</code>显示的内核复制粘贴到<code>xxx</code>位置。</p>
 
-<pre><code>#在 master执行
-dev@master:~$ ssh slave01
+<h2 id="boot">4. 手动删除/boot下的其他文件</h2>
+<p>如果/boot下还有其他内核版本的文件，可以把他们全部删除。</p>
+
+<pre><code>cd /boot
+sudo rm initramfs-2.6.32-431.el6.x86_64.img 
+sudo rm initramfs-2.6.32-431.el6.x86_64.debug.img
+sudo rm config-2.6.32-431.el6.x86_64.debug 
+sudo rm System.map-2.6.32-431.el6.x86_64.debug
+sudo rm vmlinuz-2.6.32-431.el6.x86_64.debug
+sudo rm symvers-2.6.32-431.el6.x86_64.debug.gz
 </code></pre>
 
-<p>第一次还是需要密码的，<code>exit</code>退出再试一次，就不需要密码了。</p>
+<h2 id="yum-update">5. 再执行 yum update</h2>
 
-<p>如果登陆不上，试试先关闭所有机器的防火墙，例如Ubuntu的命令是：</p>
-
-<pre><code>dev@slave01:~$ sudo ufw disable
+<pre><code>sudo yum -y update
 </code></pre>
 
 <h2 id="section-3">参考资料</h2>
-<p><a href="http://hortonworks.com/kb/generating-ssh-keys-for-passwordless-login/">HOWTO: Generating SSH Keys for Passwordless Login</a></p>
+<p><a href="http://rajaruan.blog.51cto.com/2771737/868293">boot目录空间不足</a></p>
+
+<p><a href="http://www.xiaohuai.com/3301">yum update -y，提示/boot 空间不足的解决方法</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[rdesktop-tutorial]]></title>
+    <link href="http://www.yanjiuyanjiu.com/blog/20140125"/>
+    <updated>2014-01-25T22:05:00+08:00</updated>
+    <id>http://www.yanjiuyanjiu.com/blog/rdesktop-tutorial</id>
+    <content type="html"><![CDATA[<p>rdesktop是一款Linux下兼容Windows Remote Desktop Protocal(RDP)协议的客户端，可以用它连接开启了3389的windows机器。输入<code>rdesktop</code>可以看到该命令的所有选项，其中最常用的选项如下：
+&gt; -u: user name
+&gt; -p: password (- to prompt)
+&gt; -f: full-screen mode
+&gt; -g: desktop geometry (WxH)
+&gt; -x: RDP5 experience (m[odem 28.8], b[roadband], l[an] or hex nr.)</p>
+
+<p>举几个例子，</p>
+
+<pre><code>rdesktop -u feng -p 123456 -xl -f 192.168.1.250
+</code></pre>
+
+<p>这条命令表示，-xl表示客户端和win机器在同一个局域网，因此可以画质调节到最好，-f表示全屏，这条命令最好在局域网下使用。</p>
+
+<pre><code>rdesktop -u feng -p 123456 -xm -f 192.168.1.250
+</code></pre>
+
+<p>跟上一条命令相比，把-xl换成了-xm，画质调节到最差</p>
+
+<pre><code>rdesktop -u feng -p 123456 -xm -g 1024x768 192.168.1.250
+</code></pre>
+
+<p>跟上一条命令相比，将全屏改成了分辨率1024x768</p>
 ]]></content>
   </entry>
   

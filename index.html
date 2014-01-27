@@ -114,6 +114,236 @@
       
   <header class="page-header">
     
+      <h1 class="entry-title"><a href="/blog/20140127">我的Ansible Playbook</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-27T22:08:00+08:00" pubdate data-updated="true">Jan 27<span>th</span>, 2014</time>
+        
+		
+         | <a href="/blog/20140127#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><pre><code>---
+- hosts: all
+  sudo: True
+  remote_user: work     # 要根据自己的集群更改
+
+  tasks:
+  ########## for CentOS and RedHat ##########
+    # update YUM repositories
+    - shell: 'yum -y update'
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+    - name: Install OpenJDK
+      yum: name=java-1.7.0-openjdk state=present
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+    - name: install the 'Development tools' package group
+      yum: name="@Development tools" state=present
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+    # upgrade all packages
+    - shell: 'yum -y upgrade'
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+
+  ########## for Ubuntu and Debian ##########
+    - name: Run "apt-get update" to update the source list
+      apt: update_cache=yes
+      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+    - name: Install OpenJDK
+      apt: pkg=openjdk-7-jdk state=present
+      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+    - name: Install build-essential
+      apt: pkg=build-essential state=present
+      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+    - name: # Update all packages to the latest version
+      apt: upgrade=dist
+      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20140126">Boot-space-insufficient</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-26T22:07:00+08:00" pubdate data-updated="true">Jan 26<span>th</span>, 2014</time>
+        
+		
+         | <a href="/blog/20140126#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>今天在服务器上执行 <code>sudo yum -y update</code>的时候报错：</p>
+
+<blockquote>
+  <p>… needs 18MB on the /boot filesystem</p>
+</blockquote>
+
+<h2 id="section">1. 列出所有的内核文件</h2>
+
+<pre><code>rpm -q kernel
+kernel-2.6.32-431.el6.x86_64
+kernel-2.6.32-431.3.1.el6.x86_64
+</code></pre>
+
+<p>发现有多个内核，因此可以删除所有不再使用的内核文件，来释放空间。</p>
+
+<h2 id="section-1">2. 查看当前正在使用的内核</h2>
+
+<pre><code>uname -r
+2.6.32-431.3.1.el6.x86_64
+</code></pre>
+
+<p>注意，如果你是刚刚 <code>yum -y update</code>过，需要重启一下，内核才会更新，不重启的话<code>uname -r</code>还是显示的旧的。</p>
+
+<h2 id="section-2">3. 删除所有没有使用的内核</h2>
+
+<pre><code>rpm -e 2.6.32-431.el6.x86_64
+rpm -e xxx
+</code></pre>
+
+<p>将<code>rpm -q kernel</code>显示的内核复制粘贴到<code>xxx</code>位置。</p>
+
+<h2 id="boot">4. 手动删除/boot下的其他文件</h2>
+<p>如果/boot下还有其他内核版本的文件，可以把他们全部删除。</p>
+
+<pre><code>cd /boot
+sudo rm initramfs-2.6.32-431.el6.x86_64.img 
+sudo rm initramfs-2.6.32-431.el6.x86_64.debug.img
+sudo rm config-2.6.32-431.el6.x86_64.debug 
+sudo rm System.map-2.6.32-431.el6.x86_64.debug
+sudo rm vmlinuz-2.6.32-431.el6.x86_64.debug
+sudo rm symvers-2.6.32-431.el6.x86_64.debug.gz
+</code></pre>
+
+<h2 id="yum-update">5. 再执行 yum update</h2>
+
+<pre><code>sudo yum -y update
+</code></pre>
+
+<h2 id="section-3">参考资料</h2>
+<p><a href="http://rajaruan.blog.51cto.com/2771737/868293">boot目录空间不足</a></p>
+
+<p><a href="http://www.xiaohuai.com/3301">yum update -y，提示/boot 空间不足的解决方法</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20140125">Rdesktop-tutorial</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-25T22:05:00+08:00" pubdate data-updated="true">Jan 25<span>th</span>, 2014</time>
+        
+		
+         | <a href="/blog/20140125#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>rdesktop是一款Linux下兼容Windows Remote Desktop Protocal(RDP)协议的客户端，可以用它连接开启了3389的windows机器。输入<code>rdesktop</code>可以看到该命令的所有选项，其中最常用的选项如下：
+&gt; -u: user name
+&gt; -p: password (- to prompt)
+&gt; -f: full-screen mode
+&gt; -g: desktop geometry (WxH)
+&gt; -x: RDP5 experience (m[odem 28.8], b[roadband], l[an] or hex nr.)</p>
+
+<p>举几个例子，</p>
+
+<pre><code>rdesktop -u feng -p 123456 -xl -f 192.168.1.250
+</code></pre>
+
+<p>这条命令表示，-xl表示客户端和win机器在同一个局域网，因此可以画质调节到最好，-f表示全屏，这条命令最好在局域网下使用。</p>
+
+<pre><code>rdesktop -u feng -p 123456 -xm -f 192.168.1.250
+</code></pre>
+
+<p>跟上一条命令相比，把-xl换成了-xm，画质调节到最差</p>
+
+<pre><code>rdesktop -u feng -p 123456 -xm -g 1024x768 192.168.1.250
+</code></pre>
+
+<p>跟上一条命令相比，将全屏改成了分辨率1024x768</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
       <h1 class="entry-title"><a href="/blog/20140122">在Centos 6.5上安装docker</a></h1>
     
     
@@ -957,368 +1187,6 @@ $ ./run-example org.apache.spark.examples.SparkPi local
 
     </article>
   
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20130829">简洁的Scala</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-08-29T21:38:00+08:00" pubdate data-updated="true">Aug 29<span>th</span>, 2013</time>
-        
-		
-         | <a href="/blog/20130829#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Scala语言是很注重一致性(consistency)的，Scala的简洁性(concision)都是由其一致性带来的。</p>
-
-<p>Scala的看上去很复杂，但是它在概念上是非常一致的。弄清了几个概念后，也就不觉得复杂了，反倒是比Java的简单。</p>
-
-<h1 id="oo--fp">1. OO + FP</h1>
-
-<h2 id="section">1.1 一切都是对象</h2>
-
-<p>更精确地说，应该是“一切值都是对象”。</p>
-
-<ul>
-  <li>
-    <p>整数, 浮点数等基本类型(primitive type)是对象  </p>
-
-    <pre><code>  123.toByte
-  3.14.toInt
-</code></pre>
-
-    <p>在Java中，primitive type不是对象，打破了一致性。</p>
-  </li>
-  <li>
-    <p>函数是对象</p>
-
-    <pre><code>  val compare = (x: Int, y: Int) =&gt; x &gt; y
-  compare(1, 2)
-</code></pre>
-  </li>
-  <li>
-    <p>不再有静态方法(static method)和静态属性(static field)。Java中的静态方法(static method)和静态属性(static field)，有点打破了面向对象，因为它们不属于一个实例，而是属于类。在Scala中，静态方法和静态属性也属于对象，具体来说，属于Scala中的单例object。这样，静态成员和普通成员统一了起来，都附属于某个实例(instance)。</p>
-
-    <pre><code>  object Dog {
-    val sound = "wang wang" //static field
-  }
-</code></pre>
-  </li>
-</ul>
-
-<h2 id="section-1">1.2 函数是值</h2>
-
-<p>函数是一等公民，跟普通的值没区别</p>
-
-<ul>
-  <li>
-    <p>可以当作参数传递</p>
-
-    <pre><code>  val  compare = (x: Int , y: Int ) =&gt; x &gt;  y
-  list sortWith compare
-</code></pre>
-  </li>
-  <li>
-    <p>不管它是实例的方法</p>
-
-    <pre><code>  class AComparator  {
-    def  compare(x: Int , y: Int ) = x &gt;  y
-  }
-  list sortWith ( new  AComparator ).compare
-</code></pre>
-  </li>
-  <li>
-    <p>还是匿名子句</p>
-
-    <pre><code>  object  annonymous extends scala.Function2[Int , Int , Boolean] {
-    override  def  apply(x: Int , y: Int ) = x &gt;  y
-  }
-  list sortWith annonymous 
-</code></pre>
-  </li>
-</ul>
-
-<h2 id="section-2">1.3 一切操作都是函数调用</h2>
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/20130829">继续阅读 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20130617">安装Spark集群(在CentOS上)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-06-17T22:16:00+08:00" pubdate data-updated="true">Jun 17<span>th</span>, 2013</time>
-        
-		
-         | <a href="/blog/20130617#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><strong>环境</strong>:CentOS 6.4, Hadoop 1.1.2, JDK 1.7, Spark 0.7.2, Scala 2.9.3</p>
-
-<p>折腾了几天，终于把Spark 集群安装成功了，其实比hadoop要简单很多，由于网上搜索到的博客大部分都还停留在需要依赖mesos的版本，走了不少弯路。</p>
-
-<h1 id="jdk-17">1. 安装 JDK 1.7</h1>
-<pre><code>yum search openjdk-devel
-sudo yum install java-1.7.0-openjdk-devel.x86_64
-/usr/sbin/alternatives --config java
-/usr/sbin/alternatives --config javac
-sudo vim /etc/profile
-# add the following lines at the end
-export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.19.x86_64
-export JRE_HOME=$JAVA_HOME/jre
-export PATH=$PATH:$JAVA_HOME/bin
-export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
-# save and exit vim
-# make the bash profile take effect immediately
-$ source /etc/profile
-# test
-$ java -version
-</code></pre>
-
-<p>参考我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20120423/">安装和配置CentOS服务器的详细步骤</a>。</p>
-
-<h1 id="scala-293">2. 安装 Scala 2.9.3</h1>
-<p>Spark 0.7.2 依赖 Scala 2.9.3, 我们必须要安装Scala 2.9.3.</p>
-
-<p>下载 <a href="http://www.scala-lang.org/downloads/distrib/files/scala-2.9.3.tgz">scala-2.9.3.tgz</a> 并 保存到home目录.</p>
-
-<pre><code>$ tar -zxf scala-2.9.3.tgz
-$ sudo mv scala-2.9.3 /usr/lib
-$ sudo vim /etc/profile
-# add the following lines at the end
-export SCALA_HOME=/usr/lib/scala-2.9.3
-export PATH=$PATH:$SCALA_HOME/bin
-# save and exit vim
-#make the bash profile take effect immediately
-source /etc/profile
-# test
-$ scala -version
-</code></pre>
-
-<h1 id="spark">3. 下载预编译好的Spark</h1>
-<p>下载预编译好的Spark, <a href="http://www.spark-project.org/download-spark-0.7.2-prebuilt-hadoop1">spark-0.7.2-prebuilt-hadoop1.tgz</a>. </p>
-
-<p>如果你想从零开始编译，则下载源码包，但是我不建议你这么做，因为有一个Maven仓库，twitter4j.org, 被墙了，导致编译时需要翻墙，非常麻烦。如果你有DIY精神，并能顺利翻墙，则可以试试这种方式。</p>
-
-<h1 id="section">4. 本地模式</h1>
-
-<h2 id="section-1">4.1 解压</h2>
-
-<pre><code>$ tar -zxf spark-0.7.2-prebuilt-hadoop1.tgz
-</code></pre>
-
-<h2 id="sparkexamplesjar-">4.2 设置SPARK_EXAMPLES_JAR 环境变量</h2>
-
-<pre><code>$ vim ~/.bash_profile
-# add the following lines at the end
-export SPARK_EXAMPLES_JAR=$HOME/spark-0.7.2/examples/target/scala-2.9.3/spark-examples_2.9.3-0.7.2.jar
-# save and exit vim
-#make the bash profile take effect immediately
-$ source /etc/profile
-</code></pre>
-
-<p>这一步其实最关键，很不幸的是，官方文档和网上的博客，都没有提及这一点。我是偶然看到了这两篇帖子，<a href="https://groups.google.com/forum/?fromgroups#!topic/spark-users/nQ6wB2lcFN8">Running SparkPi</a>, <a href="https://groups.google.com/forum/#!msg/spark-users/x5UczgI-Xm8/wzMm3Mb77-oJ">Null pointer exception when running ./run spark.examples.SparkPi local</a>，才补上了这一步，之前死活都无法运行SparkPi。</p>
-
-<h2 id="sparkhomesparkhomebinpath">4.3 （可选）设置 SPARK_HOME环境变量，并将SPARK_HOME/bin加入PATH</h2>
-<pre><code>$ vim ~/.bash_profile
-# add the following lines at the end
-export SPARK_HOME=$HOME/spark-0.7.2
-export PATH=$PATH:$SPARK_HOME/bin
-# save and exit vim
-#make the bash profile take effect immediately
-$ source /etc/profile
-</code></pre>
-
-<h2 id="sparkpi">4.4 现在可以运行SparkPi了</h2>
-
-<pre><code>$ cd ~/spark-0.7.2
-$ ./run spark.examples.SparkPi local 
-</code></pre>
-
-<h1 id="section-2">5. 集群模式</h1>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/20130617">继续阅读 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20130614">Installing Spark on CentOS</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-06-14T19:06:00+08:00" pubdate data-updated="true">Jun 14<span>th</span>, 2013</time>
-        
-		
-         | <a href="/blog/20130614#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><strong>Environment</strong>:CentOS 6.4, Hadoop 1.1.2, JDK 1.7, Spark 0.7.2, Scala 2.9.3</p>
-
-<p>After a few days hacking , I have found that installing a Spark cluster is exteremely easy :)</p>
-
-<h1 id="install-jdk-17">1. Install JDK 1.7</h1>
-<pre><code>yum search openjdk-devel
-sudo yum install java-1.7.0-openjdk-devel.x86_64
-/usr/sbin/alternatives --config java
-/usr/sbin/alternatives --config javac
-sudo vim /etc/profile
-# add the following lines at the end
-export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.19.x86_64
-export JRE_HOME=$JAVA_HOME/jre
-export PATH=$PATH:$JAVA_HOME/bin
-export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
-# save and exit vim
-# make the bash profile take effect immediately
-$ source /etc/profile
-# test
-$ java -version
-</code></pre>
-
-<h1 id="install-scala-293">2. Install Scala 2.9.3</h1>
-<p>Spark 0.7.2 depends on Scala 2.9.3, So we must install Scala of version 2.9.3.</p>
-
-<p>Download <a href="http://www.scala-lang.org/downloads/distrib/files/scala-2.9.3.tgz">scala-2.9.3.tgz</a> and save it to home directory.</p>
-
-<pre><code>$ tar -zxf scala-2.9.3.tgz
-$ sudo mv scala-2.9.3 /usr/lib
-$ sudo vim /etc/profile
-# add the following lines at the end
-export SCALA_HOME=/usr/lib/scala-2.9.3
-export PATH=$PATH:$SCALA_HOME/bin
-# save and exit vim
-# make the bash profile take effect immediately
-source /etc/profile
-# test
-$ scala -version
-</code></pre>
-
-<h1 id="download-prebuilt-packages">3. Download prebuilt packages</h1>
-<p>Download prebuilt packages, <a href="http://www.spark-project.org/download-spark-0.7.2-prebuilt-hadoop1">spark-0.7.2-prebuilt-hadoop1.tgz</a>. </p>
-
-<p>If you want to compile it from scratch, download the source package, but I don’t recommend this way, because in Chinese Mainland the GFW has blocked one of maven repositories, twitter4j.org, which makes the compilation an impossible mission unless you can conquer GFW.</p>
-
-<h1 id="local-mode">4. Local Mode</h1>
-
-<h2 id="untar-the-tarball">4.1 Untar the tarball</h2>
-
-<pre><code>$ tar -zxf spark-0.7.2-prebuilt-hadoop1.tgz
-</code></pre>
-
-<h2 id="set-the-sparkexamplesjar-environment-variable">4.2 Set the SPARK_EXAMPLES_JAR environment variable</h2>
-<pre><code>$ vim ~/.bash_profile
-# add the following lines at the end
-export SPARK_EXAMPLES_JAR=$HOME/spark-0.7.2/examples/target/scala-2.9.3/spark-examples_2.9.3-0.7.2.jar
-# save and exit vim
-# make the bash profile take effect immediately
-$ source /etc/profile
-</code></pre>
-
-<p>This is the most important step that must be done , but unfortunately the official docs and most web blogs haven’t mentioned this. I found this step when I bumped into these posts, <a href="https://groups.google.com/forum/?fromgroups#!topic/spark-users/nQ6wB2lcFN8">Running SparkPi</a>, <a href="https://groups.google.com/forum/#!msg/spark-users/x5UczgI-Xm8/wzMm3Mb77-oJ">Null pointer exception when running ./run spark.examples.SparkPi local</a>.</p>
-
-<h2 id="optionalset-sparkhome-and-add-sparkhomebin-to-path">4.3 (Optional)Set SPARK_HOME and add SPARK_HOME/bin to PATH</h2>
-
-<pre><code>$ vim ~/.bash_profile
-# add the following lines at the end
-export SPARK_HOME=$HOME/spark-0.7.2
-export PATH=$PATH:$SPARK_HOME/bin
-# save and exit vim
-# make the bash profile take effect immediately
-$ source /etc/profile
-</code></pre>
-
-<h2 id="now-you-can-run-sparkpi">4.4 Now you can run SparkPi.</h2>
-
-<pre><code>$ cd ~/spark-0.7.2
-$ ./run spark.examples.SparkPi local 
-</code></pre>
-
-<h1 id="cluster-mode">5. Cluster Mode</h1>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/20130614">继续阅读 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <ul class="pager">
     
     <li class="previous"><a href="/blog/page/2/">&larr; Older</a></li>
@@ -1336,7 +1204,7 @@ $ ./run spark.examples.SparkPi local
 </section>
 <section>
   <h2>分类目录</h2>
-    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/docker/'>docker (3)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (5)</a></li><li><a href='/blog/categories/sa/'>sa (1)</a></li><li><a href='/blog/categories/spark/'>spark (5)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/docker/'>docker (3)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (5)</a></li><li><a href='/blog/categories/sa/'>sa (1)</a></li><li><a href='/blog/categories/sa/'>SA (2)</a></li><li><a href='/blog/categories/spark/'>spark (5)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
 </section>
 <section>
   <h2>友情链接</h2>
@@ -1382,23 +1250,23 @@ $ ./run spark.examples.SparkPi local
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/20140127">我的Ansible playbook</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20140126">boot-space-insufficient</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20140125">rdesktop-tutorial</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/20140122">在Centos 6.5上安装docker</a>
       </li>
     
       <li class="post">
         <a href="/blog/20131223">运行mahout的朴素贝叶斯分类器</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20131027">使用docker打造spark集群</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20131026">docker 快速入门</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20131025">docker安装</a>
       </li>
     
   </ul>

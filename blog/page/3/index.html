@@ -114,6 +114,166 @@
       
   <header class="page-header">
     
+      <h1 class="entry-title"><a href="/blog/20130226">数值计算库与科学计算库</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-26T23:15:00+08:00" pubdate data-updated="true">Feb 26<span>th</span>, 2013</time>
+        
+		
+         | <a href="/blog/20130226#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2 id="blas-">BLAS 接口</h2>
+<p><a href="http://www.netlib.org/blas/">BLAS</a>, <a href="http://www.netlib.org/lapack/">LAPACK</a>, <a href="http://math-atlas.sourceforge.net/">ATLAS</a> 这些数值计算库的名字很类似，他们之间有什么关系呢？BLAS是一组线性代数运算接口，目前是事实上的标准，很多数值计算/科学计算都实现了这套接口。</p>
+
+<p>BLAS定义了那些函数呢？可以查看<a href="http://www.netlib.org/blas/">官方文档</a>。</p>
+
+<p>LAPACK是BLAS的第一个实现，是最老牌的数值计算库，用FORTRAN 77语言写的。LAPACK实现了BLAS接口，并扩充了一些功能。很多数值计算库/科学计算库底层调用了LAPACK。</p>
+
+<p>很多硬件厂商都实现BLAS接口，例如<a href="http://software.intel.com/en-us/intel-mkl">Intel MKL</a>(Math Kernel Library), <a href="http://developer.amd.com/tools/cpu-development/amd-core-math-library-acml/">AMCL</a>(AMD Math Core Library)等。很多开源库也支持，例如ATLAS。</p>
+
+<p>还有非常多的库实现了BLAS接口，见<a href="http://en.wikipedia.org/wiki/Basic_Linear_Algebra_Subprograms">Wikipedia BLAS</a> 的Implementations小节。</p>
+
+<p>下面介绍一些各种语言常用的数值计算/科学计算库。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20130226">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20130225">KNN与K-Means的区别</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-25T23:41:00+08:00" pubdate data-updated="true">Feb 25<span>th</span>, 2013</time>
+        
+		
+         | <a href="/blog/20130225#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2 id="knnk-nearest-neighbor">KNN(K-Nearest Neighbor)介绍</h2>
+<p>Wikipedia上的<a href="http://en.wikipedia.org/wiki/K-nearest_neighbor_algorithm">KNN词条</a>中有一个比较经典的图如下：</p>
+
+<p><img src="http://yanjiuyanjiu-wordpress.stor.sinaapp.com/uploads/2013/02/022513_0955_KNNKMeans1.png" /></p>
+
+<p>KNN的算法过程是是这样的：</p>
+
+<p>从上图中我们可以看到，图中的数据集是良好的数据，即都打好了label，一类是蓝色的正方形，一类是红色的三角形，那个绿色的圆形是我们待分类的数据。</p>
+
+<p>如果K=3，那么离绿色点最近的有2个红色三角形和1个蓝色的正方形，这3个点投票，于是绿色的这个待分类点属于红色的三角形。</p>
+
+<p>如果K=5，那么离绿色点最近的有2个红色三角形和3个蓝色的正方形，这5个点投票，于是绿色的这个待分类点属于蓝色的正方形。（参考 <a href="http://coolshell.cn/articles/8052.html">酷壳的 K Nearest Neighbor 算法</a>）</p>
+
+<p>我们可以看到，KNN本质是基于一种数据统计的方法！其实很多机器学习算法也是基于数据统计的。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20130225">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20120811">用VisualVM连接 Tomcat 服务器时，如何配置tomcat启动JMX</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-08-11T21:37:00+08:00" pubdate data-updated="true">Aug 11<span>th</span>, 2012</time>
+        
+		
+         | <a href="/blog/20120811#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>用VisualVM连接 tomcat 服务器时，需要让tomcat启动JMX，在catalina.sh 中添加一行代码即可：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">JAVA_OPTS</span><span class="o">=</span>”<span class="nv">$JAVA_OPTS</span> -Djava.rmi.server.hostname<span class="o">=</span>192.168.0.123 -Dcom.sun.management.jmxremote<span class="o">=</span><span class="nb">true</span> -Dcom.sun.management.jmxremote.port<span class="o">=</span>8086 -Dcom.sun.management.jmxremote.ssl<span class="o">=</span><span class="nb">false</span> -Dcom.sun.management.jmxremote.authenticate<span class="o">=</span><span class="nb">false</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>注意，用hostname -i 查看是否为127.0.01，这步非常重要,否则会连接失败，如果是，必须要配置-Djava.rmi.server.hostname。</p>
+
+<p>参考： <br />
+<a href="http://blog.tty.nl/2010/09/03/using-visualvm-to-fix-live-tomcat-and-jvm-problems/">Using VisualVM to fix live Tomcat and JVM problems</a><br />
+<a href="http://blog.csdn.net/linghunhong/article/details/6438572">JVM内存监控:visualVM jconsole jstatd jmap</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
       <h1 class="entry-title"><a href="/blog/20120423">安装和配置CentOS服务器的详细步骤</a></h1>
     
     
@@ -625,308 +785,6 @@ dev@master:~$ ssh slave01
 
     </article>
   
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20100401">Java使用imageio 读写图像</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2010-04-01T16:53:00+08:00" pubdate data-updated="true">Apr 1<span>st</span>, 2010</time>
-        
-		
-         | <a href="/blog/20100401#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Java中进行图像I/O（即读图片和写图片，不涉及到复杂图像处理）有三个方法：</p>
-
-<ol>
-  <li>Java Image I/O API，支持常见图片，从Java 2 version 1.4.0开始就内置了。
-主页：<a href="http://java.sun.com/javase/6/docs/technotes/guides/imageio/index.html">http://java.sun.com/javase/6/docs/technotes/guides/imageio/index.html</a></li>
-  <li>JAI 中的 Image I/O Tools，支持更多图片类型，例如JPEG-LS, JPEG2000, 和 TIFF。
-主页：<a href="https://jai-imageio.dev.java.net/">https://jai-imageio.dev.java.net/</a>。JAI 是一个关于图像处理的框架，很庞大，
-其中仅仅jai-imageio是关于图像I/O的，其他的可以不看。</li>
-  <li>JAI的com.sun.media.jai.codec 也有一定的图像解码能力</li>
-</ol>
-
-<p>当然，还有众多的java开源工具包可以读写图像，例如JIMI, JMagic等，但JDK目前本身能
-够读写图片，就用JDK的，开发和部署方便，不需要额外下载jar包。</p>
-
-<p>由于JAI是Java新加入的，很多组件不是正式规范，JDK不自带，因此开发和部署需要额外
-安装，安装文件在官网<a href="https://jai.dev.java.net/">https://jai.dev.java.net/</a>下载得到。</p>
-
-<p>如果你仅仅想读取常见格式的图片，不需要用JAI这么高级这么庞大的东西，
-用Java Image I/O API即可。</p>
-
-<p>下面重点介绍 Java Image I/O API。</p>
-
-<p>Java Image I/O API 主要在 javax.imageio 下面。JDK已经内置了常见图片格式的插件，
-但它提供了插件体系结构，第三方也可以开发插件支持其他图片格式。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/20100401">继续阅读 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20100331">Java质量检测评估工具</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2010-03-31T16:45:00+08:00" pubdate data-updated="true">Mar 31<span>st</span>, 2010</time>
-        
-		
-         | <a href="/blog/20100331#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Java代码质量检测评估工具
-“五大” 代码分析领域：</p>
-
-<ul>
-  <li>编码风格</li>
-  <li>冗余代码</li>
-  <li>代码覆盖率</li>
-  <li>依赖项分析</li>
-  <li>复杂度监控</li>
-</ul>
-
-<p>一下列举了一些目前比较流行的工具。网址后面列出了其PR值，可以反映此工具的流行度。</p>
-
-<h2 id="section">1. 编码风格</h2>
-<p>CheckStyle
-Home page: <a href="http://checkstyle.sourceforge.net/">http://checkstyle.sourceforge.net/</a> (6)<br />
-对应的eclipse插件有多个，其中eclipsecs最常用<br />
-Home page: <a href="http://eclipse-cs.sourceforge.net/">http://eclipse-cs.sourceforge.net/</a> (6)<br />
-eclipse插件URL：<a href="http://eclipse-cs.sf.net/update/">http://eclipse-cs.sf.net/update/</a></p>
-
-<h2 id="section-1">2. 冗余代码</h2>
-<p>Simian <a href="http://www.redhillconsulting.com.au/products/simian/">http://www.redhillconsulting.com.au/products/simian/</a> (5)<br />
-PMD 的 CPD <a href="http://pmd.sourceforge.net/cpd.html">http://pmd.sourceforge.net/cpd.html</a> (5)</p>
-
-<h2 id="section-2">3. 代码覆盖率</h2>
-<p>EMMA  <a href="http://emma.sourceforge.net/">http://emma.sourceforge.net/</a> (6)<br />
-Cobertura  <a href="http://cobertura.sourceforge.net/">http://cobertura.sourceforge.net/</a> (6)<br />
-EclEmma <a href="http://update.eclemma.org/">http://update.eclemma.org/</a> (5)<br />
-Coverlipse <a href="http://coverlipse.sourceforge.net/">http://coverlipse.sourceforge.net/</a> (3)</p>
-
-<h2 id="section-3">4. 依赖项分析</h2>
-<p>JDepend <a href="http://clarkware.com/software/JDepend.html">http://clarkware.com/software/JDepend.html</a> (6)</p>
-
-<h2 id="section-4">5. 复杂度监控</h2>
-<p>Metrics <a href="http://metrics.sourceforge.net/">http://metrics.sourceforge.net/</a> (4)</p>
-
-<h2 id="section-5">6. 静态分析工具</h2>
-<p>具有以上两项或两项以上的综合工具（也称为静态分析工具）： </p>
-
-<h3 id="pmd">6.1 PMD</h3>
-<p>Home page: <a href="http://pmd.sourceforge.net/">http://pmd.sourceforge.net/</a> (6)<br />
-eclipse插件URL：<a href="http://sourceforge.net/projects/pmd/files/pmd-eclipse/update-site/">http://sourceforge.net/projects/pmd/files/pmd-eclipse/update-site/</a></p>
-
-<h3 id="findbugs-httpfindbugssourceforgenet-6">6.2 FindBugs <a href="http://findbugs.sourceforge.net/">http://findbugs.sourceforge.net/</a> (6)</h3>
-<p>eclipse插件URL：<a href="http://findbugs.cs.umd.edu/eclipse">http://findbugs.cs.umd.edu/eclipse</a></p>
-
-<p>FindBugs 检查程序生成的class文件，即分析字节码
-PMD 检查源码，分析源代码</p>
-
-<h3 id="jtest">6.3 Jtest</h3>
-<p><a href="http://www.parasoft.com/jtest">http://www.parasoft.com/jtest</a></p>
-
-<h3 id="jlint">6.4 Jlint</h3>
-<p><a href="http://artho.com/jlint/">http://artho.com/jlint/</a> (5)</p>
-
-<h3 id="lint4j">6.5 Lint4j</h3>
-<p><a href="http://www.jutils.com/">http://www.jutils.com/</a> (4)</p>
-
-<p>我个人平时最常用的是Checkstyle，其次是PMD，大家可以参考一下。</p>
-
-<h2 id="section-6">参考资料</h2>
-<p><a href="http://blog.csdn.net/cb_121/archive/2009/05/22/4208792.aspx">http://blog.csdn.net/cb_121/archive/2009/05/22/4208792.aspx</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20100328">使用pdfbox 抽取PDF文件中的文本</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2010-03-28T16:41:00+08:00" pubdate data-updated="true">Mar 28<span>th</span>, 2010</time>
-        
-		
-         | <a href="/blog/20100328#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-<span class="line-number">23</span>
-<span class="line-number">24</span>
-<span class="line-number">25</span>
-<span class="line-number">26</span>
-<span class="line-number">27</span>
-<span class="line-number">28</span>
-<span class="line-number">29</span>
-<span class="line-number">30</span>
-<span class="line-number">31</span>
-<span class="line-number">32</span>
-<span class="line-number">33</span>
-<span class="line-number">34</span>
-<span class="line-number">35</span>
-<span class="line-number">36</span>
-<span class="line-number">37</span>
-<span class="line-number">38</span>
-<span class="line-number">39</span>
-<span class="line-number">40</span>
-<span class="line-number">41</span>
-<span class="line-number">42</span>
-<span class="line-number">43</span>
-<span class="line-number">44</span>
-<span class="line-number">45</span>
-<span class="line-number">46</span>
-<span class="line-number">47</span>
-<span class="line-number">48</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">yanjiuyanjiu</span><span class="o">.</span><span class="na">search</span><span class="o">;</span>
-</span><span class="line">
-</span><span class="line"><span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
-</span><span class="line"><span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
-</span><span class="line">
-</span><span class="line"><span class="kn">import</span> <span class="nn">org.apache.pdfbox.pdmodel.PDDocument</span><span class="o">;</span>
-</span><span class="line"><span class="kn">import</span> <span class="nn">org.apache.pdfbox.util.PDFTextStripper</span><span class="o">;</span>
-</span><span class="line">
-</span><span class="line"><span class="cm">/**</span>
-</span><span class="line"><span class="cm"> * 抽去PDF文件中的文本.</span>
-</span><span class="line"><span class="cm"> * @author soulmachine</span>
-</span><span class="line"><span class="cm"> *</span>
-</span><span class="line"><span class="cm"> */</span>
-</span><span class="line"><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">PDFboxTest</span> <span class="o">{</span>
-</span><span class="line"> <span class="cm">/** 禁止创建对象. */</span>
-</span><span class="line"> <span class="kd">private</span> <span class="nf">PDFboxTest</span><span class="o">()</span> <span class="o">{</span>
-</span><span class="line"> <span class="o">}</span>
-</span><span class="line"> <span class="cm">/**</span>
-</span><span class="line"><span class="cm"> * 抽取PDF中的文本.</span>
-</span><span class="line"><span class="cm"> * @param f PDF文件</span>
-</span><span class="line"><span class="cm"> * @return PDF对应的文本字符串</span>
-</span><span class="line"><span class="cm"> */</span>
-</span><span class="line"> <span class="kd">public</span> <span class="kd">static</span> <span class="n">String</span> <span class="nf">getText</span><span class="o">(</span><span class="kd">final</span> <span class="n">File</span> <span class="n">f</span><span class="o">)</span> <span class="o">{</span>
-</span><span class="line"> <span class="n">String</span> <span class="n">text</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="o">;</span>
-</span><span class="line"> <span class="k">try</span> <span class="o">{</span>
-</span><span class="line"> <span class="n">PDDocument</span> <span class="n">pdfdocument</span> <span class="o">=</span> <span class="n">PDDocument</span><span class="o">.</span><span class="na">load</span><span class="o">(</span><span class="n">f</span><span class="o">);</span>
-</span><span class="line"> <span class="n">PDFTextStripper</span> <span class="n">stripper</span> <span class="o">=</span> <span class="k">new</span> <span class="n">PDFTextStripper</span><span class="o">();</span>
-</span><span class="line"> <span class="n">stripper</span><span class="o">.</span><span class="na">setStartPage</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span> <span class="c1">// 只抽取第1页和第2页</span>
-</span><span class="line"> <span class="n">stripper</span><span class="o">.</span><span class="na">setEndPage</span><span class="o">(</span><span class="mi">2</span><span class="o">);</span>
-</span><span class="line"> <span class="n">text</span> <span class="o">=</span> <span class="n">stripper</span><span class="o">.</span><span class="na">getText</span><span class="o">(</span><span class="n">pdfdocument</span><span class="o">);</span>
-</span><span class="line"> <span class="n">pdfdocument</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
-</span><span class="line">
-</span><span class="line"> <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
-</span><span class="line"> <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
-</span><span class="line"> <span class="o">}</span>
-</span><span class="line">
-</span><span class="line"> <span class="k">return</span> <span class="n">text</span><span class="o">;</span>
-</span><span class="line"> <span class="o">}</span>
-</span><span class="line">
-</span><span class="line"> <span class="cm">/** 测试.</span>
-</span><span class="line"><span class="cm"> *</span>
-</span><span class="line"><span class="cm"> * @param args PDF文件路径</span>
-</span><span class="line"><span class="cm"> */</span>
-</span><span class="line"> <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="kd">final</span> <span class="n">String</span><span class="o">[]</span>  <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
-</span><span class="line"> <span class="n">File</span> <span class="n">file</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">args</span><span class="o">[</span><span class="mi">0</span><span class="o">]);</span>
-</span><span class="line"> <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">PDFboxTest</span><span class="o">.</span><span class="na">getText</span><span class="o">(</span><span class="n">file</span><span class="o">));</span>
-</span><span class="line"> <span class="o">}</span>
-</span><span class="line"><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-</div>
-  
-  
-
-
-    </article>
-  
   <ul class="pager">
     
     <li class="previous"><a href="/blog/page/4/">&larr; Older</a></li>
@@ -946,7 +804,7 @@ PMD 检查源码，分析源代码</p>
 </section>
 <section>
   <h2>分类目录</h2>
-    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/docker/'>docker (3)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (5)</a></li><li><a href='/blog/categories/sa/'>sa (1)</a></li><li><a href='/blog/categories/spark/'>spark (5)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/docker/'>docker (3)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (5)</a></li><li><a href='/blog/categories/sa/'>sa (1)</a></li><li><a href='/blog/categories/sa/'>SA (2)</a></li><li><a href='/blog/categories/spark/'>spark (5)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
 </section>
 <section>
   <h2>友情链接</h2>
@@ -992,23 +850,23 @@ PMD 检查源码，分析源代码</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/20140127">我的Ansible playbook</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20140126">boot-space-insufficient</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20140125">rdesktop-tutorial</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/20140122">在Centos 6.5上安装docker</a>
       </li>
     
       <li class="post">
         <a href="/blog/20131223">运行mahout的朴素贝叶斯分类器</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20131027">使用docker打造spark集群</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20131026">docker 快速入门</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20131025">docker安装</a>
       </li>
     
   </ul>

@@ -114,6 +114,368 @@
       
   <header class="page-header">
     
+      <h1 class="entry-title"><a href="/blog/20130829">简洁的Scala</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-29T21:38:00+08:00" pubdate data-updated="true">Aug 29<span>th</span>, 2013</time>
+        
+		
+         | <a href="/blog/20130829#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Scala语言是很注重一致性(consistency)的，Scala的简洁性(concision)都是由其一致性带来的。</p>
+
+<p>Scala的看上去很复杂，但是它在概念上是非常一致的。弄清了几个概念后，也就不觉得复杂了，反倒是比Java的简单。</p>
+
+<h1 id="oo--fp">1. OO + FP</h1>
+
+<h2 id="section">1.1 一切都是对象</h2>
+
+<p>更精确地说，应该是“一切值都是对象”。</p>
+
+<ul>
+  <li>
+    <p>整数, 浮点数等基本类型(primitive type)是对象  </p>
+
+    <pre><code>  123.toByte
+  3.14.toInt
+</code></pre>
+
+    <p>在Java中，primitive type不是对象，打破了一致性。</p>
+  </li>
+  <li>
+    <p>函数是对象</p>
+
+    <pre><code>  val compare = (x: Int, y: Int) =&gt; x &gt; y
+  compare(1, 2)
+</code></pre>
+  </li>
+  <li>
+    <p>不再有静态方法(static method)和静态属性(static field)。Java中的静态方法(static method)和静态属性(static field)，有点打破了面向对象，因为它们不属于一个实例，而是属于类。在Scala中，静态方法和静态属性也属于对象，具体来说，属于Scala中的单例object。这样，静态成员和普通成员统一了起来，都附属于某个实例(instance)。</p>
+
+    <pre><code>  object Dog {
+    val sound = "wang wang" //static field
+  }
+</code></pre>
+  </li>
+</ul>
+
+<h2 id="section-1">1.2 函数是值</h2>
+
+<p>函数是一等公民，跟普通的值没区别</p>
+
+<ul>
+  <li>
+    <p>可以当作参数传递</p>
+
+    <pre><code>  val  compare = (x: Int , y: Int ) =&gt; x &gt;  y
+  list sortWith compare
+</code></pre>
+  </li>
+  <li>
+    <p>不管它是实例的方法</p>
+
+    <pre><code>  class AComparator  {
+    def  compare(x: Int , y: Int ) = x &gt;  y
+  }
+  list sortWith ( new  AComparator ).compare
+</code></pre>
+  </li>
+  <li>
+    <p>还是匿名子句</p>
+
+    <pre><code>  object  annonymous extends scala.Function2[Int , Int , Boolean] {
+    override  def  apply(x: Int , y: Int ) = x &gt;  y
+  }
+  list sortWith annonymous 
+</code></pre>
+  </li>
+</ul>
+
+<h2 id="section-2">1.3 一切操作都是函数调用</h2>
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20130829">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20130617">安装Spark集群(在CentOS上)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-17T22:16:00+08:00" pubdate data-updated="true">Jun 17<span>th</span>, 2013</time>
+        
+		
+         | <a href="/blog/20130617#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><strong>环境</strong>:CentOS 6.4, Hadoop 1.1.2, JDK 1.7, Spark 0.7.2, Scala 2.9.3</p>
+
+<p>折腾了几天，终于把Spark 集群安装成功了，其实比hadoop要简单很多，由于网上搜索到的博客大部分都还停留在需要依赖mesos的版本，走了不少弯路。</p>
+
+<h1 id="jdk-17">1. 安装 JDK 1.7</h1>
+<pre><code>yum search openjdk-devel
+sudo yum install java-1.7.0-openjdk-devel.x86_64
+/usr/sbin/alternatives --config java
+/usr/sbin/alternatives --config javac
+sudo vim /etc/profile
+# add the following lines at the end
+export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.19.x86_64
+export JRE_HOME=$JAVA_HOME/jre
+export PATH=$PATH:$JAVA_HOME/bin
+export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+# save and exit vim
+# make the bash profile take effect immediately
+$ source /etc/profile
+# test
+$ java -version
+</code></pre>
+
+<p>参考我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20120423/">安装和配置CentOS服务器的详细步骤</a>。</p>
+
+<h1 id="scala-293">2. 安装 Scala 2.9.3</h1>
+<p>Spark 0.7.2 依赖 Scala 2.9.3, 我们必须要安装Scala 2.9.3.</p>
+
+<p>下载 <a href="http://www.scala-lang.org/downloads/distrib/files/scala-2.9.3.tgz">scala-2.9.3.tgz</a> 并 保存到home目录.</p>
+
+<pre><code>$ tar -zxf scala-2.9.3.tgz
+$ sudo mv scala-2.9.3 /usr/lib
+$ sudo vim /etc/profile
+# add the following lines at the end
+export SCALA_HOME=/usr/lib/scala-2.9.3
+export PATH=$PATH:$SCALA_HOME/bin
+# save and exit vim
+#make the bash profile take effect immediately
+source /etc/profile
+# test
+$ scala -version
+</code></pre>
+
+<h1 id="spark">3. 下载预编译好的Spark</h1>
+<p>下载预编译好的Spark, <a href="http://www.spark-project.org/download-spark-0.7.2-prebuilt-hadoop1">spark-0.7.2-prebuilt-hadoop1.tgz</a>. </p>
+
+<p>如果你想从零开始编译，则下载源码包，但是我不建议你这么做，因为有一个Maven仓库，twitter4j.org, 被墙了，导致编译时需要翻墙，非常麻烦。如果你有DIY精神，并能顺利翻墙，则可以试试这种方式。</p>
+
+<h1 id="section">4. 本地模式</h1>
+
+<h2 id="section-1">4.1 解压</h2>
+
+<pre><code>$ tar -zxf spark-0.7.2-prebuilt-hadoop1.tgz
+</code></pre>
+
+<h2 id="sparkexamplesjar-">4.2 设置SPARK_EXAMPLES_JAR 环境变量</h2>
+
+<pre><code>$ vim ~/.bash_profile
+# add the following lines at the end
+export SPARK_EXAMPLES_JAR=$HOME/spark-0.7.2/examples/target/scala-2.9.3/spark-examples_2.9.3-0.7.2.jar
+# save and exit vim
+#make the bash profile take effect immediately
+$ source /etc/profile
+</code></pre>
+
+<p>这一步其实最关键，很不幸的是，官方文档和网上的博客，都没有提及这一点。我是偶然看到了这两篇帖子，<a href="https://groups.google.com/forum/?fromgroups#!topic/spark-users/nQ6wB2lcFN8">Running SparkPi</a>, <a href="https://groups.google.com/forum/#!msg/spark-users/x5UczgI-Xm8/wzMm3Mb77-oJ">Null pointer exception when running ./run spark.examples.SparkPi local</a>，才补上了这一步，之前死活都无法运行SparkPi。</p>
+
+<h2 id="sparkhomesparkhomebinpath">4.3 （可选）设置 SPARK_HOME环境变量，并将SPARK_HOME/bin加入PATH</h2>
+<pre><code>$ vim ~/.bash_profile
+# add the following lines at the end
+export SPARK_HOME=$HOME/spark-0.7.2
+export PATH=$PATH:$SPARK_HOME/bin
+# save and exit vim
+#make the bash profile take effect immediately
+$ source /etc/profile
+</code></pre>
+
+<h2 id="sparkpi">4.4 现在可以运行SparkPi了</h2>
+
+<pre><code>$ cd ~/spark-0.7.2
+$ ./run spark.examples.SparkPi local 
+</code></pre>
+
+<h1 id="section-2">5. 集群模式</h1>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20130617">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20130614">Installing Spark on CentOS</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-14T19:06:00+08:00" pubdate data-updated="true">Jun 14<span>th</span>, 2013</time>
+        
+		
+         | <a href="/blog/20130614#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><strong>Environment</strong>:CentOS 6.4, Hadoop 1.1.2, JDK 1.7, Spark 0.7.2, Scala 2.9.3</p>
+
+<p>After a few days hacking , I have found that installing a Spark cluster is exteremely easy :)</p>
+
+<h1 id="install-jdk-17">1. Install JDK 1.7</h1>
+<pre><code>yum search openjdk-devel
+sudo yum install java-1.7.0-openjdk-devel.x86_64
+/usr/sbin/alternatives --config java
+/usr/sbin/alternatives --config javac
+sudo vim /etc/profile
+# add the following lines at the end
+export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.19.x86_64
+export JRE_HOME=$JAVA_HOME/jre
+export PATH=$PATH:$JAVA_HOME/bin
+export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+# save and exit vim
+# make the bash profile take effect immediately
+$ source /etc/profile
+# test
+$ java -version
+</code></pre>
+
+<h1 id="install-scala-293">2. Install Scala 2.9.3</h1>
+<p>Spark 0.7.2 depends on Scala 2.9.3, So we must install Scala of version 2.9.3.</p>
+
+<p>Download <a href="http://www.scala-lang.org/downloads/distrib/files/scala-2.9.3.tgz">scala-2.9.3.tgz</a> and save it to home directory.</p>
+
+<pre><code>$ tar -zxf scala-2.9.3.tgz
+$ sudo mv scala-2.9.3 /usr/lib
+$ sudo vim /etc/profile
+# add the following lines at the end
+export SCALA_HOME=/usr/lib/scala-2.9.3
+export PATH=$PATH:$SCALA_HOME/bin
+# save and exit vim
+# make the bash profile take effect immediately
+source /etc/profile
+# test
+$ scala -version
+</code></pre>
+
+<h1 id="download-prebuilt-packages">3. Download prebuilt packages</h1>
+<p>Download prebuilt packages, <a href="http://www.spark-project.org/download-spark-0.7.2-prebuilt-hadoop1">spark-0.7.2-prebuilt-hadoop1.tgz</a>. </p>
+
+<p>If you want to compile it from scratch, download the source package, but I don’t recommend this way, because in Chinese Mainland the GFW has blocked one of maven repositories, twitter4j.org, which makes the compilation an impossible mission unless you can conquer GFW.</p>
+
+<h1 id="local-mode">4. Local Mode</h1>
+
+<h2 id="untar-the-tarball">4.1 Untar the tarball</h2>
+
+<pre><code>$ tar -zxf spark-0.7.2-prebuilt-hadoop1.tgz
+</code></pre>
+
+<h2 id="set-the-sparkexamplesjar-environment-variable">4.2 Set the SPARK_EXAMPLES_JAR environment variable</h2>
+<pre><code>$ vim ~/.bash_profile
+# add the following lines at the end
+export SPARK_EXAMPLES_JAR=$HOME/spark-0.7.2/examples/target/scala-2.9.3/spark-examples_2.9.3-0.7.2.jar
+# save and exit vim
+# make the bash profile take effect immediately
+$ source /etc/profile
+</code></pre>
+
+<p>This is the most important step that must be done , but unfortunately the official docs and most web blogs haven’t mentioned this. I found this step when I bumped into these posts, <a href="https://groups.google.com/forum/?fromgroups#!topic/spark-users/nQ6wB2lcFN8">Running SparkPi</a>, <a href="https://groups.google.com/forum/#!msg/spark-users/x5UczgI-Xm8/wzMm3Mb77-oJ">Null pointer exception when running ./run spark.examples.SparkPi local</a>.</p>
+
+<h2 id="optionalset-sparkhome-and-add-sparkhomebin-to-path">4.3 (Optional)Set SPARK_HOME and add SPARK_HOME/bin to PATH</h2>
+
+<pre><code>$ vim ~/.bash_profile
+# add the following lines at the end
+export SPARK_HOME=$HOME/spark-0.7.2
+export PATH=$PATH:$SPARK_HOME/bin
+# save and exit vim
+# make the bash profile take effect immediately
+$ source /etc/profile
+</code></pre>
+
+<h2 id="now-you-can-run-sparkpi">4.4 Now you can run SparkPi.</h2>
+
+<pre><code>$ cd ~/spark-0.7.2
+$ ./run spark.examples.SparkPi local 
+</code></pre>
+
+<h1 id="cluster-mode">5. Cluster Mode</h1>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20130614">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
       <h1 class="entry-title"><a href="/blog/20130612">在CentOS上安装Hadoop</a></h1>
     
     
@@ -1062,166 +1424,6 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
 
     </article>
   
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20130226">数值计算库与科学计算库</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-02-26T23:15:00+08:00" pubdate data-updated="true">Feb 26<span>th</span>, 2013</time>
-        
-		
-         | <a href="/blog/20130226#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2 id="blas-">BLAS 接口</h2>
-<p><a href="http://www.netlib.org/blas/">BLAS</a>, <a href="http://www.netlib.org/lapack/">LAPACK</a>, <a href="http://math-atlas.sourceforge.net/">ATLAS</a> 这些数值计算库的名字很类似，他们之间有什么关系呢？BLAS是一组线性代数运算接口，目前是事实上的标准，很多数值计算/科学计算都实现了这套接口。</p>
-
-<p>BLAS定义了那些函数呢？可以查看<a href="http://www.netlib.org/blas/">官方文档</a>。</p>
-
-<p>LAPACK是BLAS的第一个实现，是最老牌的数值计算库，用FORTRAN 77语言写的。LAPACK实现了BLAS接口，并扩充了一些功能。很多数值计算库/科学计算库底层调用了LAPACK。</p>
-
-<p>很多硬件厂商都实现BLAS接口，例如<a href="http://software.intel.com/en-us/intel-mkl">Intel MKL</a>(Math Kernel Library), <a href="http://developer.amd.com/tools/cpu-development/amd-core-math-library-acml/">AMCL</a>(AMD Math Core Library)等。很多开源库也支持，例如ATLAS。</p>
-
-<p>还有非常多的库实现了BLAS接口，见<a href="http://en.wikipedia.org/wiki/Basic_Linear_Algebra_Subprograms">Wikipedia BLAS</a> 的Implementations小节。</p>
-
-<p>下面介绍一些各种语言常用的数值计算/科学计算库。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/20130226">继续阅读 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20130225">KNN与K-Means的区别</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-02-25T23:41:00+08:00" pubdate data-updated="true">Feb 25<span>th</span>, 2013</time>
-        
-		
-         | <a href="/blog/20130225#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2 id="knnk-nearest-neighbor">KNN(K-Nearest Neighbor)介绍</h2>
-<p>Wikipedia上的<a href="http://en.wikipedia.org/wiki/K-nearest_neighbor_algorithm">KNN词条</a>中有一个比较经典的图如下：</p>
-
-<p><img src="http://yanjiuyanjiu-wordpress.stor.sinaapp.com/uploads/2013/02/022513_0955_KNNKMeans1.png" /></p>
-
-<p>KNN的算法过程是是这样的：</p>
-
-<p>从上图中我们可以看到，图中的数据集是良好的数据，即都打好了label，一类是蓝色的正方形，一类是红色的三角形，那个绿色的圆形是我们待分类的数据。</p>
-
-<p>如果K=3，那么离绿色点最近的有2个红色三角形和1个蓝色的正方形，这3个点投票，于是绿色的这个待分类点属于红色的三角形。</p>
-
-<p>如果K=5，那么离绿色点最近的有2个红色三角形和3个蓝色的正方形，这5个点投票，于是绿色的这个待分类点属于蓝色的正方形。（参考 <a href="http://coolshell.cn/articles/8052.html">酷壳的 K Nearest Neighbor 算法</a>）</p>
-
-<p>我们可以看到，KNN本质是基于一种数据统计的方法！其实很多机器学习算法也是基于数据统计的。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/20130225">继续阅读 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20120811">用VisualVM连接 Tomcat 服务器时，如何配置tomcat启动JMX</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-08-11T21:37:00+08:00" pubdate data-updated="true">Aug 11<span>th</span>, 2012</time>
-        
-		
-         | <a href="/blog/20120811#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>用VisualVM连接 tomcat 服务器时，需要让tomcat启动JMX，在catalina.sh 中添加一行代码即可：</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">JAVA_OPTS</span><span class="o">=</span>”<span class="nv">$JAVA_OPTS</span> -Djava.rmi.server.hostname<span class="o">=</span>192.168.0.123 -Dcom.sun.management.jmxremote<span class="o">=</span><span class="nb">true</span> -Dcom.sun.management.jmxremote.port<span class="o">=</span>8086 -Dcom.sun.management.jmxremote.ssl<span class="o">=</span><span class="nb">false</span> -Dcom.sun.management.jmxremote.authenticate<span class="o">=</span><span class="nb">false</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-<p>注意，用hostname -i 查看是否为127.0.01，这步非常重要,否则会连接失败，如果是，必须要配置-Djava.rmi.server.hostname。</p>
-
-<p>参考： <br />
-<a href="http://blog.tty.nl/2010/09/03/using-visualvm-to-fix-live-tomcat-and-jvm-problems/">Using VisualVM to fix live Tomcat and JVM problems</a><br />
-<a href="http://blog.csdn.net/linghunhong/article/details/6438572">JVM内存监控:visualVM jconsole jstatd jmap</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
   <ul class="pager">
     
     <li class="previous"><a href="/blog/page/3/">&larr; Older</a></li>
@@ -1241,7 +1443,7 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
 </section>
 <section>
   <h2>分类目录</h2>
-    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/docker/'>docker (3)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (5)</a></li><li><a href='/blog/categories/sa/'>sa (1)</a></li><li><a href='/blog/categories/spark/'>spark (5)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/docker/'>docker (3)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (5)</a></li><li><a href='/blog/categories/sa/'>sa (1)</a></li><li><a href='/blog/categories/sa/'>SA (2)</a></li><li><a href='/blog/categories/spark/'>spark (5)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
 </section>
 <section>
   <h2>友情链接</h2>
@@ -1287,23 +1489,23 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/20140127">我的Ansible playbook</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20140126">boot-space-insufficient</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20140125">rdesktop-tutorial</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/20140122">在Centos 6.5上安装docker</a>
       </li>
     
       <li class="post">
         <a href="/blog/20131223">运行mahout的朴素贝叶斯分类器</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20131027">使用docker打造spark集群</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20131026">docker 快速入门</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/20131025">docker安装</a>
       </li>
     
   </ul>
