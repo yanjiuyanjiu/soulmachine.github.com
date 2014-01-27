@@ -4,7 +4,7 @@
   <title><![CDATA[研究研究]]></title>
   <link href="http://www.yanjiuyanjiu.com/atom.xml" rel="self"/>
   <link href="http://www.yanjiuyanjiu.com/"/>
-  <updated>2014-01-27T22:10:08+08:00</updated>
+  <updated>2014-01-27T22:12:08+08:00</updated>
   <id>http://www.yanjiuyanjiu.com/</id>
   <author>
     <name><![CDATA[soulmachine]]></name>
@@ -63,7 +63,7 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[boot-space-insufficient]]></title>
+    <title type="html"><![CDATA[/boot 目录空间不足]]></title>
     <link href="http://www.yanjiuyanjiu.com/blog/20140126"/>
     <updated>2014-01-26T22:07:00+08:00</updated>
     <id>http://www.yanjiuyanjiu.com/blog/boot-space-insufficient</id>
@@ -123,7 +123,7 @@ sudo rm symvers-2.6.32-431.el6.x86_64.debug.gz
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[rdesktop-tutorial]]></title>
+    <title type="html"><![CDATA[Rdesktop 快速入门]]></title>
     <link href="http://www.yanjiuyanjiu.com/blog/20140125"/>
     <updated>2014-01-25T22:05:00+08:00</updated>
     <id>http://www.yanjiuyanjiu.com/blog/rdesktop-tutorial</id>
