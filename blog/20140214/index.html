@@ -1,0 +1,485 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>CentOS上编译 Hadoop 2.2.0 - 研究研究</title>
+  <meta name="author" content="soulmachine">
+
+  
+  <meta name="description" content="一个关于机器学习的技术博客">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://www.yanjiuyanjiu.com/blog/20140214">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/bootstrap/bootstrap.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/stylesheets/bootstrap/responsive.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/stylesheets/syntax/syntax.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <style type="text/css">
+    body {
+      padding-bottom: 40px;
+    }
+    h1 {
+      margin-bottom: 15px;
+    }
+    img {
+      max-width: 100%;
+    }
+    .sharing, .meta, .pager {
+      margin: 20px 0px 20px 0px;
+    }
+    .page-footer p {
+      text-align: center;
+    }
+  </style>
+  <script src="/javascripts/libs/jquery.js"></script>
+  <script src="/javascripts/libs/modernizr-2.0.js"></script>
+  <script src="/javascripts/libs/bootstrap.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="研究研究" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<!-- <link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css"> -->
+<!-- <link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css"> -->
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-7583537-4']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <nav role="navigation"><div class="navbar navbar-inverse">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </a>
+
+      <a class="brand" href="/">研究研究</a>
+
+      <div class="nav-collapse">
+        <ul class="nav">
+  <li><a href="/">Home</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about/">About</a></li>
+  <li><a href="/notes/">读书笔记</a></li>
+</ul>
+
+
+        <ul class="nav pull-right" data-subscription="rss">
+          <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+          
+        </ul>
+
+        
+          <form class="pull-right navbar-search" action="http://google.com/search" method="get">
+            <fieldset role="search">
+              <input type="hidden" name="q" value="site:www.yanjiuyanjiu.com" />
+              <input class="search-query" type="text" name="q" results="0" placeholder="Search"/>
+            </fieldset>
+          </form>
+        
+      </div>
+    </div>
+  </div>
+</div>
+</nav>
+  <div class="container">
+    <div class="row-fluid">
+      
+<article class="hentry span9" role="article">
+
+  
+  <header class="page-header">
+    
+      <h1 class="entry-title">CentOS上编译 Hadoop 2.2.0</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-02-14T11:56:00+08:00" pubdate data-updated="true">Feb 14<span>th</span>, 2014</time>
+        
+		
+         | <a href="#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>下载了Hadoop预编译好的二进制包，hadoop-2.2.0.tar.gz，启动起来后，总是出现这种警告：</p>
+
+<pre><code>WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+</code></pre>
+
+<p>原因是apache官网提供的二进制包，里面的native库，是32位的，坑跌啊，现在服务器谁还有32位的啊。</p>
+
+<pre><code>$ file $HADOOP_PREFIX/lib/native/libhadoop.so.1.0.0
+libhadoop.so.1.0.0: ELF 32-bit LSB shared object, Intel 80386, version 1 (SYSV), dynamically linked, BuildID[sha1]=0x9eb1d49b05f67d38454e42b216e053a27ae8bac9, not stripped
+</code></pre>
+
+<p>我们需要下载Hadoop 2.2.0源码，在 64 位Linux下重新编译，然后把32位的native库用64位的native库替换。</p>
+
+<!-- more -->
+
+<h2 id="hadoop-220-">1. 下载Hadoop 2.2.0 源码包，并解压</h2>
+
+<pre><code>$ wget http://mirrors.hust.edu.cn/apache/hadoop/common/hadoop-2.2.0/hadoop-2.2.0-src.tar.gz
+$ tar zxf hadoop-2.2.0-src.tar.gz
+</code></pre>
+
+<h2 id="section">2. 安装下面的软件</h2>
+
+<pre><code> $ sudo yum install lzo-devel  zlib-devel  gcc autoconf automake libtool   ncurses-devel openssl-deve
+</code></pre>
+
+<h2 id="maven">3. 安装Maven</h2>
+<p>不要使用最新的Maven 3.1.1。Hadoop 2.2.0的源码与Maven3.x存在兼容性问题，所以会出现</p>
+
+<pre><code>java.lang.NoClassDefFoundError: org/sonatype/aether/graph/DependencyFilter
+</code></pre>
+
+<p>之类的错误。</p>
+
+<p>安装 Maven 3.0.5</p>
+
+<pre><code>$ wget http://mirror.esocc.com/apache/maven/maven-3/3.0.5/binaries/apache-maven-3.0.5-bin.tar.gz
+$ sudo tar zxf apache-maven-3.0.5-bin.tar.gz -C /opt
+$ sudo vim /etc/profile
+export MAVEN_HOME=/opt/apache-maven-3.0.5
+export PATH=$PATH:$MAVEN_HOME/bin
+</code></pre>
+
+<p>注销并重新登录，让环境变量生效。</p>
+
+<h2 id="ant">4. 安装Ant</h2>
+
+<pre><code>$ wget http://apache.dataguru.cn//ant/binaries/apache-ant-1.9.3-bin.tar.gz
+$ sudo tar zxf apache-ant-1.9.3-bin.tar.gz -C /opt
+$ sudo vim /etc/profile
+export ANT_HOME=/opt/apache-ant-1.9.3
+export PATH=$PATH:$ANT_HOME/bin
+</code></pre>
+
+<h2 id="findbugs">5. 安装Findbugs</h2>
+
+<pre><code>$ wget http://prdownloads.sourceforge.net/findbugs/findbugs-2.0.3.tar.gz?download
+$ sudo tar zxf findbugs-2.0.3.tar.gz -C /opt
+$ sudo vim /etc/profile
+export FINDBUGS_HOME=/opt/findbugs-2.0.3
+export PATH=$PATH:$FINDBUGS_HOME/bin
+</code></pre>
+
+<h2 id="protobuf">6. 安装protobuf</h2>
+<p>编译Hadoop 2.2.0，需要protobuf的编译器protoc。一定需要protobuf 2.5.0以上，yum里的是2.3，太老了。因此下载源码，编译安装。</p>
+
+<pre><code>$ wget https://protobuf.googlecode.com/files/protobuf-2.5.0.tar.gz
+$ tar zxf protobuf-2.5.0.tar.gz
+$ cd protobuf-2.5.0
+$ ./configure
+$ make
+$ sudo make install
+</code></pre>
+
+<h2 id="hadooppatch">7. 给Hadoop源码打一个patch</h2>
+<p>最新的Hadoop 2.2.0 的Source Code 压缩包解压出来的code有个bug 需要patch后才能编译。否则编译hadoop-auth 会提示下面错误：</p>
+
+<pre><code>[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:2.5.1:testCompile (default-testCompile) on project hadoop-auth: Compilation failure: Compilation failure:
+[ERROR] /home/chuan/trunk/hadoop-common-project/hadoop-auth/src/test/java/org/apache/hadoop/security/authentication/client/AuthenticatorTestCase.java:[84,13] cannot access org.mortbay.component.AbstractLifeCycle
+[ERROR] class file for org.mortbay.component.AbstractLifeCycle not found
+</code></pre>
+
+<p>Patch: <a href="https://issues.apache.org/jira/browse/HADOOP-10110">https://issues.apache.org/jira/browse/HADOOP-10110</a></p>
+
+<h2 id="hadoop">8. 编译 Hadoop</h2>
+
+<pre><code>cd hadoop-2.2.0-src
+mvn package -DskipTests -Pdist,native -Dtar
+</code></pre>
+
+<h2 id="native">9. 替换掉32位的native库</h2>
+<p>用 <code>hadoop-2.2.0-src/hadoop-dist/target/hadoop-2.2.0/lib/native</code> 替换掉 <code>hadoop-2.2.0/lib/native</code>。</p>
+
+<pre><code>rm -rf ~/local/opt/hadoop-2.2.0/lib/native
+cp ./hadoop-dist/target/hadoop-2.2.0/lib/native ~/local/opt/hadoop-2.2.0/lib/
+</code></pre>
+
+<p>然后重启Hadoop集群，会看到控制台下不再有警告信息了。</p>
+
+<h2 id="ubuntu">10 解决Ubuntu下启动失败的问题</h2>
+<p>在Ubuntu上，那就不是一点WARN了，而是启动不起来，会出错，原因在于，在<code>./sbin/start-dfs.sh</code>第55行，</p>
+
+<pre><code>NAMENODES=$($HADOOP_PREFIX/bin/hdfs getconf -namenodes)
+</code></pre>
+
+<p>在shell里单独运行这样命令，</p>
+
+<pre><code>./bin/hdfs getconf -namenodes
+
+OpenJDK 64-Bit Server VM warning: You have loaded library /home/soulmachine/local/opt/hadoop-2.2.0/lib/native/libhadoop.so which might have disabled stack guard. The VM will try to fix the stack guard now.
+It's highly recommended that you fix the library with 'execstack -c &lt;libfile&gt;', or link it with '-z noexecstack'.
+14/02/14 13:14:50 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+localhost
+</code></pre>
+
+<p>最后一行的localhost，才是有效的namenode，但是由于前面有一大堆warning，脚本把这一大堆字符串，按空格隔开，每个单词都看作是namenode，接下来就错的稀里哗啦。</p>
+
+<p>根本原因，还是因为32位native库。</p>
+
+<p>把自带的32位native目录删除，用编译好的64位native目录拷贝过去，再运行</p>
+
+<pre><code>./bin/hdfs getconf -namenodes
+localhost
+</code></pre>
+
+<p>这下就对了！</p>
+
+<h2 id="section-1">参考资料</h2>
+
+<ol>
+  <li><a href="http://blog.csdn.net/lalaguozhe/article/details/10580727">YARN加载本地库抛出Unable to load native-hadoop library解决办法</a></li>
+  <li><a href="http://blog.csdn.net/zwj0403/article/details/16855555">CentOS编译Hadoop 2.2.0 Pass 总结</a></li>
+</ol>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">soulmachine</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-02-14T11:56:00+08:00" pubdate data-updated="true">Feb 14<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/hadoop/'>Hadoop</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  <!-- AddThis Button BEGIN -->
+  <div class="addthis_toolbox addthis_default_style addthis_32x32_style">
+    <a class="addthis_button_sinaweibo"></a>
+    <a class="addthis_button_facebook"></a>
+    <a class="addthis_button_twitter"></a>
+    <a class="addthis_button_google_plusone_share"></a>
+    <a class="addthis_button_delicious"></a>
+    <a class="addthis_button_digg"></a>
+    <a class="addthis_button_reddit"></a>
+    <a class="addthis_button_compact"></a><a class="addthis_counter addthis_bubble_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=undefined"></script>
+  <!-- AddThis Button END -->
+  
+  
+  
+</div>
+
+    
+    
+	
+    <section>
+      <div id="duoshuo_thread" aria-live="polite"><!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-thread-key="/blog/20140214" data-title="CentOS上编译 Hadoop 2.2.0"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"yanjiuyanjiu"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = 'http://static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		|| document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+</script>
+<!-- Duoshuo Comment END --></div>
+    </section>
+    
+    <ul class="pager">
+      
+      <li class="previous"><a class="basic-alignment left"
+        href="/blog/20140208" title="Previous Post:
+        在CentOS上安装HBase 0.96">&laquo; 在CentOS上安装HBase 0.96</a></li>
+      
+      <li><a href="/blog/archives">Blog Archives</a></li>
+      
+      <li class="next"><a class="basic-alignment right" href="/blog/20140220"
+        title="Next Post: 编写Nutch插件">编写Nutch插件
+        &raquo;</a></li>
+      
+    </ul>
+  </footer>
+</article>
+
+<aside class="sidebar-nav span3">
+  
+    <section>
+  <h2>公告</h2>
+  <p>独学而无友，则孤陋而寡闻，我每周在清华举办机器学习读书会，欢迎大家前来交流切磋。</p>
+  <p>详情请见<a href="http://q.weibo.com/1644133">读书会微博群</a></p>
+</section>
+<section>
+  <h2>分类目录</h2>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>Algorithm (1)</a></li><li><a href='/blog/categories/devops/'>DevOps (8)</a></li><li><a href='/blog/categories/docker/'>Docker (3)</a></li><li><a href='/blog/categories/hadoop/'>Hadoop (8)</a></li><li><a href='/blog/categories/language/'>Language (3)</a></li><li><a href='/blog/categories/machine-learning/'>Machine-Learning (5)</a></li><li><a href='/blog/categories/search-engine/'>Search-Engine (5)</a></li><li><a href='/blog/categories/spark/'>Spark (6)</a></li><li><a href='/blog/categories/tools/'>Tools (11)</a></li></ul>
+</section>
+<section>
+  <h2>友情链接</h2>
+  <ul>
+    <li>
+      <a href="http://yewen.us/" title="大学同学，ACM高手，曾在百度，现在人人网">笨狗随手留下</a>
+    </li>
+	<li>
+      <a href="http://blog.liancheng.info/" title="网易，百度，技术高手">连城</a>
+    </li>
+    <li>
+      <a href="http://www.rational.so/" title="系统方向的清华博士">阎栋</a>
+    </li>
+	<li>
+      <a href="http://www.parallellabs.com/" title="冠诚，IBM研究院研究员">并行实验室</a>
+    </li>
+	<li>
+      <a href="http://shenfeng.me/" title="http-kit, clojure">沈峰</a>
+    </li>
+	<li>
+      <a href="http://www.lihaipeng.info/" title="百度商业产品高级研发工程师">李海鹏</a>
+    </li>
+	<li>
+      <a href="http://www.chioka.in/" title="Google工程师">Eric</a>
+    </li>
+    <li>
+      <a href="http://blog.csdn.net/lgnlgn" title="好朋友，曾在赶集网，现在老家的猫扑">梁兄的技术博客</a>
+    </li>
+    <li>
+      <a href="http://www.doesbetter.com/" title="机器学习，北邮">王孝舒的博客</a>
+    </li>
+    <li>
+      <a href="http://www.foreverlee.net/" title="机器学习，中科院计算所">ForeverLee</a>
+    </li>
+  </ul>
+</section>
+
+
+
+
+<section>
+  <h2>最新文章</h2>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/20140220">编写Nutch插件</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20140214">CentOS上编译 Hadoop 2.2.0</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20140208">在CentOS上安装HBase 0.96</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20140207">在CentOS上安装ZooKeeper集群</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20140206">Hadoop多用户的配置(Hadoop 2.x)</a>
+      </li>
+    
+  </ul>
+</section><section>
+<h2>最新评论</h2>
+<ul class="ds-recent-comments" data-num-items="5" data-show-avatars="1" data-show-time="1" data-show-title="1" data-show-admin="0" data-excerpt-length="32"></ul>
+
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo" class="page-footer"><!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX", "output/HTML-CSS"],
+  tex2jax: {
+    inlineMath: [ ['$', '$'] ],
+    displayMath: [ ['$$', '$$']],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  messageStyle: "none",
+  "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] }
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+<p>
+  Copyright &copy; 2014 - soulmachine -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

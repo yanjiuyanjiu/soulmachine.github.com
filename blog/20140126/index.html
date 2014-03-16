@@ -161,7 +161,7 @@ kernel-2.6.32-431.3.1.el6.x86_64
 
 <p>注意，如果你是刚刚 <code>yum -y update</code>过，需要重启一下，内核才会更新，不重启的话<code>uname -r</code>还是显示的旧的。</p>
 
-<h2 id="section-2">3. 删除所有没有使用的内核</h2>
+<h2 id="section-2">3. 删除没有使用的内核</h2>
 
 <pre><code>rpm -e 2.6.32-431.el6.x86_64
 rpm -e xxx
@@ -169,27 +169,29 @@ rpm -e xxx
 
 <p>将<code>rpm -q kernel</code>显示的内核复制粘贴到<code>xxx</code>位置。</p>
 
-<h2 id="boot">4. 手动删除/boot下的其他文件</h2>
-<p>如果/boot下还有其他内核版本的文件，可以把他们全部删除。</p>
+<h2 id="section-3">4. 手动删除其他文件</h2>
+<p>把所有未使用的版本全部删除。</p>
 
-<pre><code>cd /boot
-sudo rm initramfs-2.6.32-431.el6.x86_64.img 
-sudo rm initramfs-2.6.32-431.el6.x86_64.debug.img
-sudo rm config-2.6.32-431.el6.x86_64.debug 
-sudo rm System.map-2.6.32-431.el6.x86_64.debug
-sudo rm vmlinuz-2.6.32-431.el6.x86_64.debug
-sudo rm symvers-2.6.32-431.el6.x86_64.debug.gz
+<pre><code>sudo rm -rf /lib/modules/2.6.32-431.el6.x86_64
+sudo rm -rf /usr/src/kernels/2.6.32-431.el6.x86_64
+sudo rm -rf /usr/src/kernels/2.6.32-431.el6.x86_64.debug
+sudo rm /boot/*2.6.32-431*
 </code></pre>
 
-<h2 id="yum-update">5. 再执行 yum update</h2>
+<h2 id="grub">5. 删除grub里的条目</h2>
+<p>上面的步骤做完了后，最后，把grub里未使用的内核删掉，条目序号是从0开始编号的，删除条目后，记得把<code>default</code>设置为正确的序号。</p>
+
+<h2 id="yum-update">6. 再执行 yum update</h2>
 
 <pre><code>sudo yum -y update
 </code></pre>
 
-<h2 id="section-3">参考资料</h2>
+<h2 id="section-4">参考资料</h2>
 <p><a href="http://rajaruan.blog.51cto.com/2771737/868293">boot目录空间不足</a></p>
 
 <p><a href="http://www.xiaohuai.com/3301">yum update -y，提示/boot 空间不足的解决方法</a></p>
+
+<p><a href="http://forum.ubuntu.org.cn/viewtopic.php?f=97&amp;t=334647">如何卸载自己编译的内核？【已解决，方法见6L】</a></p>
 </div>
 
 
@@ -217,7 +219,7 @@ sudo rm symvers-2.6.32-431.el6.x86_64.debug.gz
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/sa/'>SA</a>
+    <a class='category' href='/blog/categories/devops/'>DevOps</a>
   
 </span>
 
@@ -272,7 +274,7 @@ var duoshuoQuery = {short_name:"yanjiuyanjiu"};
       <li><a href="/blog/archives">Blog Archives</a></li>
       
       <li class="next"><a class="basic-alignment right" href="/blog/20140127"
-        title="Next Post: 我的Ansible playbook">我的Ansible playbook
+        title="Next Post: Ansible 快速入门">Ansible 快速入门
         &raquo;</a></li>
       
     </ul>
@@ -288,7 +290,7 @@ var duoshuoQuery = {short_name:"yanjiuyanjiu"};
 </section>
 <section>
   <h2>分类目录</h2>
-    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/docker/'>docker (3)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (5)</a></li><li><a href='/blog/categories/sa/'>SA (3)</a></li><li><a href='/blog/categories/spark/'>spark (5)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>Algorithm (1)</a></li><li><a href='/blog/categories/devops/'>DevOps (8)</a></li><li><a href='/blog/categories/docker/'>Docker (3)</a></li><li><a href='/blog/categories/hadoop/'>Hadoop (8)</a></li><li><a href='/blog/categories/language/'>Language (3)</a></li><li><a href='/blog/categories/machine-learning/'>Machine-Learning (5)</a></li><li><a href='/blog/categories/search-engine/'>Search-Engine (5)</a></li><li><a href='/blog/categories/spark/'>Spark (6)</a></li><li><a href='/blog/categories/tools/'>Tools (11)</a></li></ul>
 </section>
 <section>
   <h2>友情链接</h2>
@@ -334,23 +336,23 @@ var duoshuoQuery = {short_name:"yanjiuyanjiu"};
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/20140127">我的Ansible playbook</a>
+        <a href="/blog/20140220">编写Nutch插件</a>
       </li>
     
       <li class="post">
-        <a href="/blog/20140126">/boot 目录空间不足</a>
+        <a href="/blog/20140214">CentOS上编译 Hadoop 2.2.0</a>
       </li>
     
       <li class="post">
-        <a href="/blog/20140125">Rdesktop 快速入门</a>
+        <a href="/blog/20140208">在CentOS上安装HBase 0.96</a>
       </li>
     
       <li class="post">
-        <a href="/blog/20140122">在Centos 6.5上安装docker</a>
+        <a href="/blog/20140207">在CentOS上安装ZooKeeper集群</a>
       </li>
     
       <li class="post">
-        <a href="/blog/20131223">运行mahout的朴素贝叶斯分类器</a>
+        <a href="/blog/20140206">Hadoop多用户的配置(Hadoop 2.x)</a>
       </li>
     
   </ul>

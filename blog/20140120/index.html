@@ -1,0 +1,522 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>在Eclipse里运行Nutch - 研究研究</title>
+  <meta name="author" content="soulmachine">
+
+  
+  <meta name="description" content="一个关于机器学习的技术博客">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://www.yanjiuyanjiu.com/blog/20140120">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/bootstrap/bootstrap.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/stylesheets/bootstrap/responsive.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/stylesheets/syntax/syntax.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <style type="text/css">
+    body {
+      padding-bottom: 40px;
+    }
+    h1 {
+      margin-bottom: 15px;
+    }
+    img {
+      max-width: 100%;
+    }
+    .sharing, .meta, .pager {
+      margin: 20px 0px 20px 0px;
+    }
+    .page-footer p {
+      text-align: center;
+    }
+  </style>
+  <script src="/javascripts/libs/jquery.js"></script>
+  <script src="/javascripts/libs/modernizr-2.0.js"></script>
+  <script src="/javascripts/libs/bootstrap.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="研究研究" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<!-- <link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css"> -->
+<!-- <link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css"> -->
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-7583537-4']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <nav role="navigation"><div class="navbar navbar-inverse">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </a>
+
+      <a class="brand" href="/">研究研究</a>
+
+      <div class="nav-collapse">
+        <ul class="nav">
+  <li><a href="/">Home</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about/">About</a></li>
+  <li><a href="/notes/">读书笔记</a></li>
+</ul>
+
+
+        <ul class="nav pull-right" data-subscription="rss">
+          <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+          
+        </ul>
+
+        
+          <form class="pull-right navbar-search" action="http://google.com/search" method="get">
+            <fieldset role="search">
+              <input type="hidden" name="q" value="site:www.yanjiuyanjiu.com" />
+              <input class="search-query" type="text" name="q" results="0" placeholder="Search"/>
+            </fieldset>
+          </form>
+        
+      </div>
+    </div>
+  </div>
+</div>
+</nav>
+  <div class="container">
+    <div class="row-fluid">
+      
+<article class="hentry span9" role="article">
+
+  
+  <header class="page-header">
+    
+      <h1 class="entry-title">在Eclipse里运行Nutch</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-20T04:11:00+08:00" pubdate data-updated="true">Jan 20<span>th</span>, 2014</time>
+        
+		
+         | <a href="#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>环境：Ubuntu Desktop 12.04，JDK 1.7, Nutch 1.7</p>
+
+<p>本文主要参考<a href="http://wiki.apache.org/nutch/RunNutchInEclipse">Running Nutch in Eclipse</a></p>
+
+<h2 id="section">前提</h2>
+
+<ul>
+  <li>机器上安装了Ant, Eclipse</li>
+  <li>Eclipse安装了subclipse, update site 是 <a href="http://subclipse.tigris.org/update_1.10.x">http://subclipse.tigris.org/update_1.10.x</a></li>
+  <li>Eclipse安装了IvyDE, update site 是 <a href="http://www.apache.org/dist/ant/ivyde/updatesite">http://www.apache.org/dist/ant/ivyde/updatesite</a></li>
+  <li>Eclipse安装了m2e插件，update site 是 <a href="http://download.eclipse.org/technology/m2e/releases">http://download.eclipse.org/technology/m2e/releases</a></li>
+</ul>
+
+<h2 id="section-1">1 下载源码</h2>
+<p>有两种方法，</p>
+
+<ol>
+  <li>去官网首页下载apache-nutch-1.7-src.tar.gz</li>
+  <li>
+    <p>用svn checkout</p>
+
+    <pre><code> $ svn co https://svn.apache.org/repos/asf/nutch/tags/release-1.7
+</code></pre>
+  </li>
+</ol>
+
+<p>推荐用第2种方法，因为用SVN checkout出来的有<code>pom.xml</code>文件，即maven文件，但是压缩包里没有，只有ant的<code>build.xml</code>文件。</p>
+
+<h2 id="section-2">2 配置</h2>
+<p>把 conf/ 下的 <code>nutch-site.xml.template</code>复制一份，命名为<code>nutch-site.xml</code>，在里面添加如下配置：</p>
+
+<pre><code>&lt;property&gt;
+  &lt;name&gt;http.agent.name&lt;/name&gt;
+  &lt;value&gt;My Nutch Spider&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+  &lt;name&gt;plugin.folders&lt;/name&gt;
+  &lt;value&gt;$NUTCH_HOME/build/plugins&lt;/value&gt;
+&lt;/property&gt;
+</code></pre>
+
+<p><code>$NUTCH_HOME</code>是指nutch源码的根目录，例如我的是<code>/home/soulmachine/local/opt/apache-nutch-1.7</code>.</p>
+
+<h2 id="eclipseproject">3 生成Eclipse项目文件，即.project文件</h2>
+
+<pre><code>$ ant eclipse
+</code></pre>
+
+<!--more-->
+
+<p>如果发现一直卡在 <code>ivy:resolve .....</code>这里，原因很有可能是 <a href="http://repo1.maven.org">http://repo1.maven.org</a>被墙，参考<a href="http://blog.csdn.net/majian_1987/article/details/17004531">这里</a>，这时候要设置HTTP代理，</p>
+
+<pre><code>$ Ctrl+C
+$ export HTTP_PROXY=localhost:8087    #我用的goagent
+$ ant runtime
+</code></pre>
+
+<h2 id="eclipse">4 加载到Eclipse</h2>
+<p>启动Eclipse，点击”File-&gt;Import-&gt;General-&gt;Existing projects into workspace”，浏览到<code>$NUTCH_DIR</code>，点击”Finish”。</p>
+
+<p><img src="http://wiki.apache.org/nutch/RunNutchInEclipse?action=AttachFile&amp;do=get&amp;target=importproject.png" alt="" /></p>
+
+<p>请等待一会儿，让Eclipse解析该项目，可以在右下角看到状态。</p>
+
+<h2 id="confclass-folder">5 把conf/目录加入到class folder</h2>
+<p>在Package Explorer里右击项目，选择”Build Path-&gt;Configure Build Path-&gt;Order and Export”，下拉滚动条，找到conf/目录，打上勾，点击”Top”按钮。</p>
+
+<p><img src="http://wiki.apache.org/nutch/RunNutchInEclipse?action=AttachFile&amp;do=get&amp;target=order_and_export.png" alt="" /></p>
+
+<h2 id="eclipseorgapachenutchcrawlcrawl">6 在Eclipse里运行org.apache.nutch.crawl.Crawl来抓取网页</h2>
+<p>在Package Explorer里找到<code>org.apache.nutch.crawl.Crawl</code>，右击，选择”Run as -&gt; Java Application”，发现输出如下：</p>
+
+<pre><code>Usage: Crawl &lt;urlDir&gt; -solr &lt;solrURL&gt; [-dir d] [-threads n] [-depth i] [-topN N]
+</code></pre>
+
+<p>因为我们没有给main()函数提供必要的参数。</p>
+
+<h3 id="url">6.1 添加种子URL</h3>
+
+<pre><code>$ cd PROJECT_DIR
+$ mkdir urls
+$ vim ./urls/seed.txt
+http://movie.douban.com/subject/5323968/
+</code></pre>
+
+<h3 id="url-1">6.2 设置URL过滤规则</h3>
+<p>如果只想抓取某种类型的URL，可以在 <code>conf/regex-urlfilter.txt</code>设置正则表达式，于是，只有匹配这些正则表达式的URL才会被抓取。</p>
+
+<p>例如，我只想抓取豆瓣电影的数据，可以这样设置：</p>
+
+<pre><code>#注释掉这一行
+# skip URLs containing certain characters as probable queries, etc.
+#-[?*!@=]
+# accept anything else
+#注释掉这行
+#+.
++^http:\/\/movie\.douban\.com\/subject\/[0-9]+\/(\?.+)?$
+</code></pre>
+
+<p><strong>注意</strong>，每次修改了conf目录中的配置文件，必须重新编译，修改才能生效，原因是ant里有拷贝文件的任务，将conf/下的xml文件拷贝到<code>runtie/local/conf</code>和<code>runtime/deploy/conf</code>下。</p>
+
+<p>这里，我们不再使用命令行编译，而是在eclipse里右击build.xml，选择<code>Run as -&gt; Ant Build</code>.</p>
+
+<h3 id="solr">6.3 安装Solr</h3>
+<p>见我的这篇文章，<a href="http://www.yanjiuyanjiu.com/blog/20140121/">Nutch 快速入门(Nutch 1.7)</a> 第6节。</p>
+
+<h3 id="main">6.4 给main()函数提供参数</h3>
+<p>右击<code>org.apache.nutch.crawl.Crawl</code>，选择”Run as -&gt; Run Configurations”，在<code>Program arguments</code>里填写：</p>
+
+<pre><code>urls -solr http://localhost:8983/solr/ -dir TestCrawl -depth 2 -topN 5
+</code></pre>
+
+<p>在”VM Arguments”里填写<code>-Dhadoop.log.dir=logs -Dhadoop.log.file=hadoop.log</code></p>
+
+<h3 id="section-3">6.5 运行</h3>
+<p>最后点击”Apply”, “Run”，就开始抓取了。</p>
+
+<h3 id="section-4">6.6 查看结果</h3>
+
+<h4 id="segments">6.6.1 查看segments目录</h4>
+<p>右击<code>org.apache.nutch.segment.SegmentReader</code>，选择”Run as -&gt; Run Configurations”，在<code>Program arguments</code>里填写：</p>
+
+<pre><code>-dump TestCrawl/segments/* TestCrawl/segments/dump
+</code></pre>
+
+<p>然后点击”Run”。</p>
+
+<p>用文本编辑器打开文件 <code>TestCrawl/segments/dump/dump</code>查看segments中存储的信息。</p>
+
+<h4 id="crawldb">6.6.2 查看crawldb目录</h4>
+<p>右击<code>org.apache.nutch.crawl.CrawlDbReader</code>，选择”Run as -&gt; Run Configurations”，在<code>Program arguments</code>里填写：</p>
+
+<pre><code>TestCrawl/crawldb -stats
+</code></pre>
+
+<p>然后点击”Run”，控制台会输出 crawldb统计信息。</p>
+
+<h4 id="linkdb">6.6.3 查看linkdb目录</h4>
+<p>右击<code>org.apache.nutch.crawl.LinkDbReader</code>，选择”Run as -&gt; Run Configurations”，在<code>Program arguments</code>里填写：</p>
+
+<pre><code>TestCrawl/linkdb -dump TestCrawl/linkdb_dump
+</code></pre>
+
+<p>然后点击”Run”。</p>
+
+<p>用文本编辑器打开文件 <code>TestCrawl/linkdb_dump/part-00000</code>查看linkdb中存储的信息</p>
+
+<h3 id="nutchjava">6.7 每个nutch命令对应的java类</h3>
+<p>怎么知道每个nutch命令对应的java类呢？打开<code>src/bin/nutch</code>并滚动到底部，就会找到每个命令对应的java类。</p>
+
+<h2 id="eclipse-1">7 在Eclipse里单步调试</h2>
+<p>以上费了这么大劲，为的是什么？就是为了利用Eclipse这个强大的IDE，能够进行单步调试。写代码其实不花时间，调试才是最花时间的，因此一定要有好的调试工具，磨刀不误砍柴功。</p>
+
+<p>如果想调试某一个类的代码，在Eclipse里下断点，然后”Debug as …“就可以了。</p>
+
+<p>由于有Hadoop job的关系，比较难以难以在哪些地方下断点好。下面给出了Nutch 1.x 的代码中，一些比较好的断点位置：</p>
+
+<ul>
+  <li>Fetcher [line: 1115] - run</li>
+  <li>Fetcher [line: 530] - fetch</li>
+  <li>Fetcher$FetcherThread [line: 560] - run()</li>
+  <li>Generator [line: 443] - generate</li>
+  <li>Generator$Selector [line: 108] - map</li>
+  <li>OutlinkExtractor [line: 71 &amp; 74] - getOutlinks</li>
+</ul>
+
+<h2 id="section-5">相关文章</h2>
+<p><a href="http://www.yanjiuyanjiu.com/blog/20140121/">Nutch 快速入门(Nutch 1.7)</a></p>
+
+<p><a href="http://www.yanjiuyanjiu.com/blog/20140201/">Nutch 快速入门(Nutch 2.2.1)</a></p>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">soulmachine</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-20T04:11:00+08:00" pubdate data-updated="true">Jan 20<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/search-engine/'>Search-Engine</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  <!-- AddThis Button BEGIN -->
+  <div class="addthis_toolbox addthis_default_style addthis_32x32_style">
+    <a class="addthis_button_sinaweibo"></a>
+    <a class="addthis_button_facebook"></a>
+    <a class="addthis_button_twitter"></a>
+    <a class="addthis_button_google_plusone_share"></a>
+    <a class="addthis_button_delicious"></a>
+    <a class="addthis_button_digg"></a>
+    <a class="addthis_button_reddit"></a>
+    <a class="addthis_button_compact"></a><a class="addthis_counter addthis_bubble_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=undefined"></script>
+  <!-- AddThis Button END -->
+  
+  
+  
+</div>
+
+    
+    
+	
+    <section>
+      <div id="duoshuo_thread" aria-live="polite"><!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-thread-key="/blog/20140120" data-title="在Eclipse里运行Nutch"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"yanjiuyanjiu"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = 'http://static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		|| document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+</script>
+<!-- Duoshuo Comment END --></div>
+    </section>
+    
+    <ul class="pager">
+      
+      <li class="previous"><a class="basic-alignment left"
+        href="/blog/20131223" title="Previous Post:
+        运行mahout的朴素贝叶斯分类器">&laquo; 运行mahout的朴素贝叶斯分类器</a></li>
+      
+      <li><a href="/blog/archives">Blog Archives</a></li>
+      
+      <li class="next"><a class="basic-alignment right" href="/blog/20140121"
+        title="Next Post: Nutch 快速入门(Nutch 1.7)">Nutch 快速入门(Nutch 1.7)
+        &raquo;</a></li>
+      
+    </ul>
+  </footer>
+</article>
+
+<aside class="sidebar-nav span3">
+  
+    <section>
+  <h2>公告</h2>
+  <p>独学而无友，则孤陋而寡闻，我每周在清华举办机器学习读书会，欢迎大家前来交流切磋。</p>
+  <p>详情请见<a href="http://q.weibo.com/1644133">读书会微博群</a></p>
+</section>
+<section>
+  <h2>分类目录</h2>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>Algorithm (1)</a></li><li><a href='/blog/categories/devops/'>DevOps (8)</a></li><li><a href='/blog/categories/docker/'>Docker (3)</a></li><li><a href='/blog/categories/hadoop/'>Hadoop (8)</a></li><li><a href='/blog/categories/language/'>Language (3)</a></li><li><a href='/blog/categories/machine-learning/'>Machine-Learning (5)</a></li><li><a href='/blog/categories/search-engine/'>Search-Engine (5)</a></li><li><a href='/blog/categories/spark/'>Spark (6)</a></li><li><a href='/blog/categories/tools/'>Tools (11)</a></li></ul>
+</section>
+<section>
+  <h2>友情链接</h2>
+  <ul>
+    <li>
+      <a href="http://yewen.us/" title="大学同学，ACM高手，曾在百度，现在人人网">笨狗随手留下</a>
+    </li>
+	<li>
+      <a href="http://blog.liancheng.info/" title="网易，百度，技术高手">连城</a>
+    </li>
+    <li>
+      <a href="http://www.rational.so/" title="系统方向的清华博士">阎栋</a>
+    </li>
+	<li>
+      <a href="http://www.parallellabs.com/" title="冠诚，IBM研究院研究员">并行实验室</a>
+    </li>
+	<li>
+      <a href="http://shenfeng.me/" title="http-kit, clojure">沈峰</a>
+    </li>
+	<li>
+      <a href="http://www.lihaipeng.info/" title="百度商业产品高级研发工程师">李海鹏</a>
+    </li>
+	<li>
+      <a href="http://www.chioka.in/" title="Google工程师">Eric</a>
+    </li>
+    <li>
+      <a href="http://blog.csdn.net/lgnlgn" title="好朋友，曾在赶集网，现在老家的猫扑">梁兄的技术博客</a>
+    </li>
+    <li>
+      <a href="http://www.doesbetter.com/" title="机器学习，北邮">王孝舒的博客</a>
+    </li>
+    <li>
+      <a href="http://www.foreverlee.net/" title="机器学习，中科院计算所">ForeverLee</a>
+    </li>
+  </ul>
+</section>
+
+
+
+
+<section>
+  <h2>最新文章</h2>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/20140220">编写Nutch插件</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20140214">CentOS上编译 Hadoop 2.2.0</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20140208">在CentOS上安装HBase 0.96</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20140207">在CentOS上安装ZooKeeper集群</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20140206">Hadoop多用户的配置(Hadoop 2.x)</a>
+      </li>
+    
+  </ul>
+</section><section>
+<h2>最新评论</h2>
+<ul class="ds-recent-comments" data-num-items="5" data-show-avatars="1" data-show-time="1" data-show-title="1" data-show-admin="0" data-excerpt-length="32"></ul>
+
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo" class="page-footer"><!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX", "output/HTML-CSS"],
+  tex2jax: {
+    inlineMath: [ ['$', '$'] ],
+    displayMath: [ ['$$', '$$']],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  messageStyle: "none",
+  "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] }
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+<p>
+  Copyright &copy; 2014 - soulmachine -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

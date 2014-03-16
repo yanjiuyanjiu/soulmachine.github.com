@@ -114,7 +114,7 @@
       
   <header class="page-header">
     
-      <h1 class="entry-title"><a href="/blog/20140127">我的Ansible Playbook</a></h1>
+      <h1 class="entry-title"><a href="/blog/20140220">编写Nutch插件</a></h1>
     
     
       <p class="meta">
@@ -130,57 +130,58 @@
   
 
 
-<time datetime="2014-01-27T22:08:00+08:00" pubdate data-updated="true">Jan 27<span>th</span>, 2014</time>
+<time datetime="2014-02-20T16:53:00+08:00" pubdate data-updated="true">Feb 20<span>th</span>, 2014</time>
         
 		
-         | <a href="/blog/20140127#duoshuo_thread">Comments</a>
+         | <a href="/blog/20140220#duoshuo_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><pre><code>---
-- hosts: all
-  sudo: True
-  remote_user: work     # 要根据自己的集群更改
+  <div class="entry-content"><p>软件版本：Nutch 1.7</p>
 
-  tasks:
-  ########## for CentOS and RedHat ##########
-    # update YUM repositories
-    - shell: 'yum -y update'
-      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+<p>Nutch Plugin的所有资料，都在官网这里, <a href="http://wiki.apache.org/nutch/PluginCentral">PluginCentral</a></p>
 
-    - name: Install OpenJDK
-      yum: name=java-1.7.0-openjdk state=present
-      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+<h2 id="section">前提</h2>
+<p><a href="http://www.yanjiuyanjiu.com/blog/20140120">在Eclipse里运行Nutch</a></p>
 
-    - name: install the 'Development tools' package group
-      yum: name="@Development tools" state=present
-      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+<h2 id="extension--extension-point">Extension 和 Extension-point的关系</h2>
+<p>Extension point类似与Java语言里的接口(interface), extension 则是具体的实现(implementation)。</p>
 
-    # upgrade all packages
-    - shell: 'yum -y upgrade'
-      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+<p><a href="http://wiki.apache.org/nutch/AboutPlugins">About Plugins</a>里有一句话，<strong>Each extension-point defines an interface that must be implemented by the extension.</strong></p>
 
+<h2 id="nutch">Nutch里的各种概念</h2>
+<p>Extension point, extension, plugin, 这些概念是什么意思？见 <a href="http://wiki.apache.org/nutch/WhichTechnicalConceptsAreBehindTheNutchPluginSystem">Technical Concepts Behind the Nutch Plugin System</a></p>
 
-  ########## for Ubuntu and Debian ##########
-    - name: Run "apt-get update" to update the source list
-      apt: update_cache=yes
-      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+<h2 id="nutch-17--extension-point">Nutch 1.7 有哪些 Extension-point</h2>
+<p><img src="/images/extension-points.png" alt="" /></p>
 
-    - name: Install OpenJDK
-      apt: pkg=openjdk-7-jdk state=present
-      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+<p>ExtensionPoint 这个东西，本身也是一个插件，可以看看 <code>src/plugin/nutch-extensionpoints/plugin.xml</code>，里面定义了所有的扩展点，跟上图基本一致。</p>
 
-    - name: Install build-essential
-      apt: pkg=build-essential state=present
-      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+<p><a href="http://wiki.apache.org/nutch/AboutPlugins">AboutPlugins</a>这里列出来的是 Nuch 1.4的扩展点，有点过时了。</p>
 
-    - name: # Update all packages to the latest version
-      apt: upgrade=dist
-      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
-</code></pre>
+<h2 id="nutch-1">一个Nutch的组成文件</h2>
+<p>build.xml, plugins.xml 等等</p>
+
+<h2 id="nutch-">Nutch 插件例子</h2>
+
+<ol>
+  <li><a href="http://wiki.apache.org/nutch/WritingPluginExample">WritingPluginExample</a></li>
+  <li><a href="http://wiki.apache.org/nutch/WritingPluginExample-1.2">WritingPluginExample-1.2</a>，针对Nutch 1.2的，有点老，但是值得一看</li>
+  <li><a href="http://www.ryanpfister.com/2009/04/how-to-sort-by-date-with-nutch/">Writing a plugin to add dates by Ryan Pfister</a></li>
+</ol>
+
+<p>看来这3个例子，你应该就知道怎么开发插件了。</p>
+
+<h2 id="nutch--1">Nutch 的缺点</h2>
+<p>在抓取的过程中，真正的难度在于, ip limit 和 user limit，可惜 Nutch 对这两个问题都没有解决方案。</p>
+
+<ol>
+  <li>Nutch 的 <a href="http://wiki.apache.org/nutch/HttpPostAuthentication">HttpPostAuthentication</a> 现在还没有开发完，导致无法抓取需要登录的网站，例如新浪微波，豆瓣等UGC网站，都是需要登录的。没有这个<code>HttpPostAuthentication</code>，Nutch其实只能抓取不需要登录的网页，适用范围大打折扣，现在是web 2.0时代，真正优质的内容，几乎都是需要登录的。</li>
+  <li>多个代理的管理。Nutch 没有提供多个代理的管理功能，只能在<code>nutch-site.xml</code>里配置一个代理。比如我在网上抓取了几百个免费的http代理，怎么让Nutch的各个线程均匀的使用这些代理，平能自动判断代理的速度，优先选择速度高的代理呢？</li>
+</ol>
 </div>
   
   
@@ -193,7 +194,7 @@
       
   <header class="page-header">
     
-      <h1 class="entry-title"><a href="/blog/20140126">/boot 目录空间不足</a></h1>
+      <h1 class="entry-title"><a href="/blog/20140214">CentOS上编译 Hadoop 2.2.0</a></h1>
     
     
       <p class="meta">
@@ -209,595 +210,34 @@
   
 
 
-<time datetime="2014-01-26T22:07:00+08:00" pubdate data-updated="true">Jan 26<span>th</span>, 2014</time>
+<time datetime="2014-02-14T11:56:00+08:00" pubdate data-updated="true">Feb 14<span>th</span>, 2014</time>
         
 		
-         | <a href="/blog/20140126#duoshuo_thread">Comments</a>
+         | <a href="/blog/20140214#duoshuo_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>今天在服务器上执行 <code>sudo yum -y update</code>的时候报错：</p>
+  <div class="entry-content"><p>下载了Hadoop预编译好的二进制包，hadoop-2.2.0.tar.gz，启动起来后，总是出现这种警告：</p>
 
-<blockquote>
-  <p>… needs 18MB on the /boot filesystem</p>
-</blockquote>
-
-<h2 id="section">1. 列出所有的内核文件</h2>
-
-<pre><code>rpm -q kernel
-kernel-2.6.32-431.el6.x86_64
-kernel-2.6.32-431.3.1.el6.x86_64
+<pre><code>WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
 </code></pre>
 
-<p>发现有多个内核，因此可以删除所有不再使用的内核文件，来释放空间。</p>
+<p>原因是apache官网提供的二进制包，里面的native库，是32位的，坑跌啊，现在服务器谁还有32位的啊。</p>
 
-<h2 id="section-1">2. 查看当前正在使用的内核</h2>
-
-<pre><code>uname -r
-2.6.32-431.3.1.el6.x86_64
+<pre><code>$ file $HADOOP_PREFIX/lib/native/libhadoop.so.1.0.0
+libhadoop.so.1.0.0: ELF 32-bit LSB shared object, Intel 80386, version 1 (SYSV), dynamically linked, BuildID[sha1]=0x9eb1d49b05f67d38454e42b216e053a27ae8bac9, not stripped
 </code></pre>
 
-<p>注意，如果你是刚刚 <code>yum -y update</code>过，需要重启一下，内核才会更新，不重启的话<code>uname -r</code>还是显示的旧的。</p>
-
-<h2 id="section-2">3. 删除所有没有使用的内核</h2>
-
-<pre><code>rpm -e 2.6.32-431.el6.x86_64
-rpm -e xxx
-</code></pre>
-
-<p>将<code>rpm -q kernel</code>显示的内核复制粘贴到<code>xxx</code>位置。</p>
-
-<h2 id="boot">4. 手动删除/boot下的其他文件</h2>
-<p>如果/boot下还有其他内核版本的文件，可以把他们全部删除。</p>
-
-<pre><code>cd /boot
-sudo rm initramfs-2.6.32-431.el6.x86_64.img 
-sudo rm initramfs-2.6.32-431.el6.x86_64.debug.img
-sudo rm config-2.6.32-431.el6.x86_64.debug 
-sudo rm System.map-2.6.32-431.el6.x86_64.debug
-sudo rm vmlinuz-2.6.32-431.el6.x86_64.debug
-sudo rm symvers-2.6.32-431.el6.x86_64.debug.gz
-</code></pre>
-
-<h2 id="yum-update">5. 再执行 yum update</h2>
-
-<pre><code>sudo yum -y update
-</code></pre>
-
-<h2 id="section-3">参考资料</h2>
-<p><a href="http://rajaruan.blog.51cto.com/2771737/868293">boot目录空间不足</a></p>
-
-<p><a href="http://www.xiaohuai.com/3301">yum update -y，提示/boot 空间不足的解决方法</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20140125">Rdesktop 快速入门</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-01-25T22:05:00+08:00" pubdate data-updated="true">Jan 25<span>th</span>, 2014</time>
-        
-		
-         | <a href="/blog/20140125#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>rdesktop是一款Linux下兼容Windows Remote Desktop Protocal(RDP)协议的客户端，可以用它连接开启了3389的windows机器。输入<code>rdesktop</code>可以看到该命令的所有选项，其中最常用的选项如下：
-&gt; -u: user name
-&gt; -p: password (- to prompt)
-&gt; -f: full-screen mode
-&gt; -g: desktop geometry (WxH)
-&gt; -x: RDP5 experience (m[odem 28.8], b[roadband], l[an] or hex nr.)</p>
-
-<p>举几个例子，</p>
-
-<pre><code>rdesktop -u feng -p 123456 -xl -f 192.168.1.250
-</code></pre>
-
-<p>这条命令表示，-xl表示客户端和win机器在同一个局域网，因此可以画质调节到最好，-f表示全屏，这条命令最好在局域网下使用。</p>
-
-<pre><code>rdesktop -u feng -p 123456 -xm -f 192.168.1.250
-</code></pre>
-
-<p>跟上一条命令相比，把-xl换成了-xm，画质调节到最差</p>
-
-<pre><code>rdesktop -u feng -p 123456 -xm -g 1024x768 192.168.1.250
-</code></pre>
-
-<p>跟上一条命令相比，将全屏改成了分辨率1024x768</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20140122">在Centos 6.5上安装docker</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-01-22T15:25:00+08:00" pubdate data-updated="true">Jan 22<span>nd</span>, 2014</time>
-        
-		
-         | <a href="/blog/20140122#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2 id="enable-epel-repo-on-centos">1 Enable EPEL Repo on CentOS</h2>
-
-<p>参考 <a href="http://www.centosblog.com/enable-epel-repo-on-centos-5-and-centos-6/">Enable EPEL Repo on CentOS 5 and CentOS 6</a></p>
-
-<pre><code>rpm -Uvh http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
-</code></pre>
-
-<h2 id="install-docker">2 Install docker</h2>
-
-<pre><code>yum install docker-io --enablerepo=epel
-</code></pre>
-
-<h2 id="docker-daemon-">3 启动 docker daemon 进程</h2>
-
-<pre><code>sudo docker -d &amp;
-</code></pre>
-
-<p>这时，有警告，说内核版本过低，</p>
-
-<blockquote>
-  <p>WARNING: You are running linux kernel version 2.6.32-431.el6.x86_64, which might be unstable running docker. Please upgrade your kernel to 3.8.0.</p>
-</blockquote>
-
-<p>如果你在公司，且公司内部都是通过代理上网，则可以把代理服务器告诉docker，用如下命令(参考<a href="https://github.com/dotcloud/docker/issues/402">这里</a>)：</p>
-
-<pre><code>sudo HTTP_PROXY=http://xxx:port docker -d &amp;
-</code></pre>
-
-<h2 id="section">4 升级内核</h2>
-
-<p>见我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20131024">CentOS 6.4 升级内核到 3.11.6</a></p>
-
-<h2 id="ubuntu-">5 下载 ubuntu 镜像</h2>
-
-<pre><code>sudo docker pull ubuntu
-</code></pre>
-
-<h2 id="hello-world">6 运行 hello world</h2>
-
-<pre><code>sudo docker run ubuntu /bin/echo hello world
-hello world
-</code></pre>
-
-<p>安装成功了！！</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20131223">运行mahout的朴素贝叶斯分类器</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-12-23T17:20:00+08:00" pubdate data-updated="true">Dec 23<span>rd</span>, 2013</time>
-        
-		
-         | <a href="/blog/20131223#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2 id="section">1.准备数据</h2>
-
-<h3 id="section-1">1.1 下载数据集，并解压</h3>
-
-<pre><code>wget http://people.csail.mit.edu/jrennie/20Newsgroups/20news-bydate.tar.gz
-tar -xf 20news-bydate.tar.gz
-#上传到hdfs
-hadoop fs -put 20news-bydate-test .
-hadoop fs -put 20news-bydate-train .
-</code></pre>
-
-<h3 id="section-2">1.2 转换格式</h3>
-
-<pre><code>#转换为序列文件(sequence files)
-mahout seqdirectory -i 20news-bydate-train -o 20news-bydate-train-seq
-mahout seqdirectory -i 20news-bydate-test -o 20news-bydate-test-seq
-#转换为tf-idf向量
-mahout seq2sparse -i 20news-bydate-train-seq -o 20news-bydate-train-vector -lnorm -nv -wt tfidf
-mahout seq2sparse -i 20news-bydate-test-seq -o 20news-bydate-test-vector -lnorm -nv -wt tfidf
-</code></pre>
-
-<h2 id="section-3">2. 训练朴素贝叶斯模型</h2>
-
-<pre><code>mahout trainnb -i 20news-bydate-train-vectors/tfidf-vectors -el -o model -li labelindex -ow
-</code></pre>
-
-<h2 id="section-4">3. 测试朴素贝叶斯模型</h2>
-
-<pre><code>mahout testnb -i 20news-bydate-train-vectors/tfidf-vectors -m model -l labelindex -ow -o test-result
-</code></pre>
-
-<h2 id="section-5">4. 查看训练后的结构</h2>
-
-<pre><code>mahout seqdumper -i labelindex 
-
-Input Path: labelindex
-Key class: class org.apache.hadoop.io.Text Value Class: class org.apache.hadoop.io.IntWritable
-Key: alt.atheism: Value: 0
-Key: comp.graphics: Value: 1
-Key: comp.os.ms-windows.misc: Value: 2
-Key: comp.sys.ibm.pc.hardware: Value: 3
-Key: comp.sys.mac.hardware: Value: 4
-Key: comp.windows.x: Value: 5
-Key: misc.forsale: Value: 6
-Key: rec.autos: Value: 7
-Key: rec.motorcycles: Value: 8
-Key: rec.sport.baseball: Value: 9
-Key: rec.sport.hockey: Value: 10
-Key: sci.crypt: Value: 11
-Key: sci.electronics: Value: 12
-Key: sci.med: Value: 13
-Key: sci.space: Value: 14
-Key: soc.religion.christian: Value: 15
-Key: talk.politics.guns: Value: 16
-Key: talk.politics.mideast: Value: 17
-Key: talk.politics.misc: Value: 18
-Key: talk.religion.misc: Value: 19
-Count: 20
-</code></pre>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20131027">使用docker打造spark集群</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-10-27T20:30:00+08:00" pubdate data-updated="true">Oct 27<span>th</span>, 2013</time>
-        
-		
-         | <a href="/blog/20131027#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><strong>前提条件：</strong>安装好了docker，见我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20131025">Docker安装</a></p>
-
-<p>有两种方式，</p>
-
-<ul>
-  <li><a href="https://github.com/apache/incubator-spark">Spark官方repo</a>里，docker文件夹下的脚本。官方的这个脚本封装很薄，尽可能把必要的信息展示出来。</li>
-  <li><a href="https://github.com/amplab/docker-scripts">AMPLab开源的这个独立小项目</a>，来打造一个spark集群。这个脚本封装很深，自带了一个DNS服务器，还有hadoop，非常自动化，缺点是很多信息看不到了。</li>
-</ul>
-
-<h1 id="section">1. 第1种方式</h1>
-
-<h2 id="git-clone-">git clone 源码</h2>
-<p>首先要把官方repo的代码下载下来</p>
-
-<pre><code>git clone git@github.com:apache/incubator-spark.git
-</code></pre>
-
-<h2 id="apt">（可选）修改apt源</h2>
-<p>在国内，将apt源修改国内源，例如163的源，速度会快很多。将<code>base/Dockerfile</code>里的</p>
-
-<pre><code>RUN echo "deb http://archive.ubuntu.com/ubuntu precise main universe" &gt; /etc/apt/sources.list
-</code></pre>
-
-<p>替换为</p>
-
-<pre><code>RUN echo "deb http://mirrors.163.com/ubuntu/ precise main restricted universe multiverse" &gt; /etc/apt/sources.list
-RUN echo "deb http://mirrors.163.com/ubuntu/ precise-security main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
-RUN echo "deb http://mirrors.163.com/ubuntu/ precise-updates main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
-RUN echo "deb http://mirrors.163.com/ubuntu/ precise-proposed main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
-RUN echo "deb http://mirrors.163.com/ubuntu/ precise-backports main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
-RUN echo "deb-src http://mirrors.163.com/ubuntu/ precise main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
-RUN echo "deb-src http://mirrors.163.com/ubuntu/ precise-security main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
-RUN echo "deb-src http://mirrors.163.com/ubuntu/ precise-updates main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
-RUN echo "deb-src http://mirrors.163.com/ubuntu/ precise-proposed main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
-RUN echo "deb-src http://mirrors.163.com/ubuntu/ precise-backports main restricted universe multiverse" &gt;&gt; /etc/apt/sources.list
-</code></pre>
-
-<h2 id="build">build镜像</h2>
-<p>将<code>build</code>和<code>spark-test/build</code>里的<code>docker</code>命令前，添加<code>sudo</code>，然后执行<code>docker</code>下的<code>build</code></p>
-
-<pre><code>cd docker
-./build
-</code></pre>
-
-<h2 id="master">启动master</h2>
-
-<pre><code>sudo docker run -v $SPARK_HOME:/opt/spark spark-test-master
-</code></pre>
-
-<h2 id="worker">启动worker</h2>
-<p>新开一个终端窗口（强烈推荐tmux），启动一个worker</p>
-
-<pre><code>sudo docker run -v $SPARK_HOME:/opt/spark spark-test-worker &lt;master_ip&gt;
-</code></pre>
-
-<p>可以在master终端窗口看到worker注册上来了。</p>
-
-<p>可以再开多个终端窗口，启动多个worker。</p>
-
-<h1 id="section-1">2. 第2种方式</h1>
-
-<h2 id="wget">升级wget</h2>
-<p>如果发现wget不识别<code>--no-proxy</code>选项，需要升级wget。</p>
-
-<h2 id="section-2">下载镜像</h2>
-<p>为了让脚本第一次执行的时候更快，还是手动下载所有的镜像吧，amplab在index.docker.io上有一个官方账号，把这个账号有关spark的repo都pull下来。</p>
-
-<pre><code>sudo docker pull amplab/apache-hadoop-hdfs-precise
-sudo docker pull amplab/dnsmasq-precise
-sudo docker pull amplab/spark-worker
-sudo docker pull amplab/spark-master
-sudo docker pull amplab/spark-shell
-</code></pre>
-
-<h2 id="git-clone--1">git clone 脚本</h2>
-
-<pre><code>git@github.com:amplab/docker-scripts.git
-</code></pre>
-
-<p>这个脚本可以一键启动集群，爽啊哈哈哈！</p>
-
-<h2 id="spark">一键启动spark集群</h2>
-
-<pre><code>sudo ./deploy/deploy.sh -i amplab/spark:0.8.0 -w 3 
-</code></pre>
-
-<h2 id="spark-shell">启动 Spark shell</h2>
-<p>启动一个交互式shell吧，IP为上一步输出的Master的IP</p>
-
-<pre><code>sudo docker run -i -t -dns 172.17.0.90 amplab/spark-shell:0.8.0
-</code></pre>
-
-<h2 id="section-3">运行一个简单的的例子</h2>
-
-<pre><code>scala&gt; val textFile = sc.textFile("hdfs://master:9000/user/hdfs/test.txt")
-scala&gt; textFile.count()
-scala&gt; textFile.map({line =&gt; line}).collect()
-</code></pre>
-
-<h2 id="section-4">关闭集群</h2>
-
-<pre><code>$ sudo ./deploy/kill_all.sh spark
-$ sudo ./deploy/kill_all.sh nameserver
-</code></pre>
-
-<h2 id="section-5">更多详情请参考项目主页的文档</h2>
-
-<p><a href="https://github.com/amplab/docker-scripts">https://github.com/amplab/docker-scripts</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20131026">Docker 快速入门</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-10-26T23:41:00+08:00" pubdate data-updated="true">Oct 26<span>th</span>, 2013</time>
-        
-		
-         | <a href="/blog/20131026#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><strong>前提条件：</strong>要安装好 docker，见我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20131025">docker 安装</a></p>
-
-<h2 id="section">交互式命令行入门教程</h2>
-<p>首先强烈建议玩一遍官方的一个交互式命令行入门教程，<a href="http://www.docker.io/gettingstarted/">Interactive commandline tutorial</a>。甚至要多玩几遍，加深印象。</p>
-
-<p>初次过完这个教程，感觉docker用起来跟git很类似。</p>
-
-<p>玩完了后，在自己的真实机器上，把上面的命令重新敲一遍，感受一下。</p>
-
-<h2 id="hello-world">Hello World</h2>
-<p>参考官方文档<a href="http://docs.docker.io/en/latest/examples/hello_world/#running-examples">Hello World</a></p>
-
-<p>首先下载官方的ubuntu image:</p>
-
-<pre><code>sudo docker pull ubuntu
-</code></pre>
-
-<p>然后运行 hello world：</p>
-
-<pre><code>sudo docker run ubuntu /bin/echo hello world
-</code></pre>
-
-<h2 id="section-1">三种运行命令的模式</h2>
-<p>docker 有三种运行命令的方式，短暂方式，交互方式，daemon方式。</p>
-
-<p><strong>短暂方式</strong>，就是刚刚的那个”hello world”，命令执行完后，container就终止了，不过并没有消失，可以用 <code>sudo docker ps -a</code> 看一下所有的container，第一个就是刚刚执行过的container，可以再次执行一遍：</p>
-
-<pre><code>sudo docker start container_id
-</code></pre>
-
-<p>不过这次看不到”hello world”了，只能看到ID，用<code>logs</code>命令才能看得到，</p>
-
-<pre><code>sudo docker logs container_id
-</code></pre>
-
-<p>可以看到两个”hello world”，因为这个container运行了两次。</p>
-
-<p><strong>交互方式</strong>，</p>
-
-<pre><code>sudo docker run -i -t image_name /bin/bash
-</code></pre>
-
-<p><strong>daemon方式</strong>，即让软件作为长时间服务运行，这就是SAAS啊！</p>
-
-<p>例如，一个无限循环打印的脚本（替换为memcached, apache等，操作方法仍然不变！）：</p>
-
-<pre><code>CONTAINER_ID=$(sudo docker run -d ubuntu /bin/sh -c "while true; do echo hello world; sleep 1; done")
-</code></pre>
-
-<p>在container外面查看它的输出</p>
-
-<pre><code>sudo docker logs $CONTAINER_ID
-</code></pre>
-
-<p>或者连接上容器实时查看</p>
-
-<pre><code>sudo docker attach $CONTAINER_ID
-</code></pre>
-
-<p>终止容器</p>
-
-<pre><code>sudo docker stop $CONTAINER_ID
-</code></pre>
-
-<p><code>sudo docker ps</code>看一下，已经没了</p>
-
-<h2 id="docker-ps-">docker ps 命令详解</h2>
-<p><code>sudo docker ps</code>，列出当前所有正在运行的container</p>
-
-<p><code>sudo docker ps -l</code>，列出最近一次启动的，且正在运行的container</p>
-
-<p><code>sudo docker ps -a</code>，列出所有的container</p>
-
-<p>其他用法请参考 <code>sudo docker ps -h</code></p>
-
-<p>还有一种方式可以让程序在daemon模式下运行，就是在Dockerfile里设置USER为daemon，见<a href="http://www.docker.io/learn/dockerfile/level2/">Dockerfile tutorial Level2</a>。</p>
-
-<h2 id="http">添加http代理</h2>
-<p>在国内，pull或push的时候经常连不上docker.com（原因你懂的，或者在公司内部统一用一个代理上网的时候），可以在docker daemon进程启动的时候加个代理，例如</p>
-
-<pre><code>sudo HTTP_PROXY=proxy_server:port docker -d &amp;
-</code></pre>
-
-<p>docker貌似是不识别<code>http_proxy</code>, <code>https_proxy</code>和<code>no_proxy</code>环境变量的，因此要在命令行里指定，参考 <a href="https://github.com/dotcloud/docker/issues/402">Github Issue #402 Using Docker behind a firewall</a>。</p>
-
-<p>如果在命令行里指定了<code>HTTP_PROXY</code>，则要unset掉<code>http_proxy</code>和<code>https_proxy</code>环境变量。原因是：</p>
-
-<ul>
-  <li>首先， docker daemon进程是通过http协议与docker.com通信的</li>
-  <li>其次，docker的各种命令（例如 <code>run</code>, <code>login</code>等）也是通过http协议与docker daemon进程通信的（发送jasn字符串，daemon进程返回的也是json字符串），有时候docker客户端命令貌似能识别http_proxy变量，这时，客户端发送一个命令，路径是<code>localhost-&gt;http_proxy-&gt;daemon进程</code>，daemon进程返回的数据，路径是 <code>daemon进程-&gt;proxy-&gt;proxy-&gt;localhost</code>，其中，从<code>proxy-&gt;localhost</code>的路径是不通的，因为proxy连接不了内网IP。</li>
-</ul>
-
-<p>之所以把这一步放在本文开始，是因为这一步不做的话，后面很多命令会出错，让人摸不着头脑，我在这里就掉进坑了，花了很长时间才搞明白，原来是网络连接不稳定。</p>
-
-<h2 id="dockerfile">熟悉一下 Dockerfile</h2>
-<p>完了几遍交互式入门教程后，你会好奇，怎么自己定制一个 image，例如把常用的软件装好后打包 ? 这时候该 Dockfile 登场了。Dockerfile 实质上是一个脚本文件，用于自动化创建image。</p>
+<p>我们需要下载Hadoop 2.2.0源码，在 64 位Linux下重新编译，然后把32位的native库用64位的native库替换。</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/20131026">继续阅读 &rarr;</a>
+      <a rel="full-article" href="/blog/20140214">继续阅读 &rarr;</a>
     </footer>
   
 
@@ -809,7 +249,7 @@ $ sudo ./deploy/kill_all.sh nameserver
       
   <header class="page-header">
     
-      <h1 class="entry-title"><a href="/blog/20131025">Docker安装</a></h1>
+      <h1 class="entry-title"><a href="/blog/20140208">在CentOS上安装HBase 0.96</a></h1>
     
     
       <p class="meta">
@@ -825,107 +265,87 @@ $ sudo ./deploy/kill_all.sh nameserver
   
 
 
-<time datetime="2013-10-25T23:41:00+08:00" pubdate data-updated="true">Oct 25<span>th</span>, 2013</time>
+<time datetime="2014-02-08T16:42:00+08:00" pubdate data-updated="true">Feb 8<span>th</span>, 2014</time>
         
 		
-         | <a href="/blog/20131025#duoshuo_thread">Comments</a>
+         | <a href="/blog/20140208#duoshuo_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h2 id="centos-64--docker">1 在 CentOS 6.4 上安装 docker</h2>
+  <div class="entry-content"><p>环境：CentOS 6.5, jdk 1.7, HBase 0.96.1.1</p>
 
-<p>docker当前官方只支持Ubuntu，所以在 CentOS 安装Docker比较麻烦(<a href="https://github.com/dotcloud/docker/issues/172">Issue #172</a>)。</p>
+<h2 id="ssh">（可选）创建新用户，并配置好SSH无密码登录</h2>
+<p>一般我倾向于把需要启动daemon进程，对外提供服务的程序，即服务器类的程序，安装在单独的用户下面。这样可以做到隔离，运维方面，安全性也提高了。</p>
 
-<p>docker官方文档说要求Linux kernel至少3.8以上，CentOS 6.4是2.6的内核，于是我哼哧哼哧的<a href="http://www.yanjiuyanjiu.com/blog/20131024">编译安装了最新的kernel 3.11.6</a>，重启后运行docker还是失败，最后找到原因，是因为编译时忘记集成aufs模块了。aufs 需要和 kernel 一起编译，很麻烦。</p>
+<p>创建一个新的group,</p>
 
-<p>不过不需要这么麻烦，有强人已经编译好了带aufs模块的内核，见这里<a href="http://nareshv.blogspot.com/2013/08/installing-dockerio-on-centos-64-64-bit.html">Installing docker.io on centos 6.4 (64-bit)</a></p>
-
-<h3 id="selinuxlxc">1.1 取消selinux，因为它会干扰lxc的正常功能</h3>
-
-<pre><code>sudo vim /etc/selinux/config 
-SELINUX=disabled
-SELINUXTYPE=targeted
+<pre><code>$ sudo groupadd hbase
 </code></pre>
 
-<h3 id="fedora-epel">1.2 安装 Fedora EPEL</h3>
+<p>创建一个新的用户，并加入group,</p>
 
-<pre><code>sudo yum install http://ftp.riken.jp/Linux/fedora/epel/6/x86_64/epel-release-6-8.noarch.rpm
+<pre><code>$ sudo useradd -g hbase hbase
 </code></pre>
 
-<h3 id="hop5-repo">1.3 添加 hop5 repo地址</h3>
+<p>给新用户设置密码，</p>
 
-<pre><code>cd /etc/yum.repos.d
-sudo wget http://www.hop5.in/yum/el6/hop5.repo
+<pre><code>$ sudo passwd hbase
 </code></pre>
 
-<h3 id="docker-io">1.4 安装 docker-io</h3>
+<p>在每台机器上创建hbase新用户，并配置好SSH无密码，参考我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20120102/">SSH无密码登录的配置</a></p>
 
-<pre><code>sudo yum install docker-io
+<h2 id="standalone-mode">1. 单机模式(Standalone mode)</h2>
+
+<h3 id="section">1.1 下载，解压</h3>
+
+<pre><code>$ wget wget http://mirror.esocc.com/apache/hbase/hbase-0.96.1.1/hbase-0.96.1.1-hadoop2-bin.tar.gz
+$ tar zxf hbase-0.96.1.1-hadoop2-bin.tar.gz -C ~/local/opt
 </code></pre>
 
-<p>会自动安装带aufs模块的3.10内核，以及docker-io包。</p>
+<h3 id="hbase-envsh">1.2 hbase-env.sh</h3>
+<p>在这个文件中要指明JDK 安装在了哪里</p>
 
-<h3 id="cgroup--etcfstab--docker">1.5 将 cgroup 文件系统添加到 <code>/etc/fstab</code> , 只有这样docker才能正常工作</h3>
-
-<pre><code>sudo echo "none                    /sys/fs/cgroup          cgroup  defaults        0 0" &gt;&gt; /etc/fstab
+<pre><code>$ echo $JAVA_HOME
+/usr/lib/jvm/java
+$ vim conf/hbase-env.sh
 </code></pre>
 
-<h3 id="grub">1.6 修改grub引导顺序</h3>
+<p>取消<code>JAVA_HOME</code>那一行的注释，设置正确的JDK位置</p>
 
-<pre><code>sudo vim /etc/grub.conf
-default=0
+<pre><code>export JAVA_HOME=/usr/lib/jvm/java
 </code></pre>
 
-<p>设置default为新安装的内核的位置，一般是0</p>
+<h3 id="confhbase-sitexml">1.3 修改 conf/hbase-site.xml</h3>
+<p>内容如下</p>
 
-<h3 id="section">1.7 重启</h3>
-
-<pre><code>sudo reboot
+<pre><code>&lt;configuration&gt;
+  &lt;property&gt;
+    &lt;name&gt;hbase.rootdir&lt;/name&gt;
+    &lt;value&gt;/home/hbase/local/var/hbase&lt;/value&gt;
+  &lt;/property&gt;
+  &lt;property&gt;
+    &lt;name&gt;hbase.zookeeper.property.dataDir&lt;/name&gt;
+    &lt;value&gt;/home/hbase/local/var/zookeeper&lt;/value&gt;
+  &lt;/property&gt;
+&lt;/configuration&gt;
 </code></pre>
 
-<h3 id="section-1">1.8 检查新内核是否引导成功</h3>
+<p><code>hbase.rootdir</code>目录是用来存放HBase的相关信息的，默认值是<code>/tmp/hbase-${user.name}/hbase</code>； <code>hbase.zookeeper.property.dataDir</code>目录是用来存放zookeeper（HBase内置了zookeeper）的相关信息的，默认值是<code>/tmp/hbase-${user.name}/zookeeper</code>。</p>
 
-<p>重启后，检查一下新内核是否引导起来了</p>
+<h3 id="section-1">1.4 启动</h3>
 
-<pre><code>uname -r
-3.10.5-3.el6.x86_64
+<pre><code>$ ./bin/start-hbase.sh
+starting Master, logging to logs/hbase-user-master-example.org.out
 </code></pre>
-
-<p>说明成功了</p>
-
-<p>看一下 aufs是否存在</p>
-
-<pre><code>grep aufs /proc/filesystems 
-nodev   aufs
-</code></pre>
-
-<p>说明存在</p>
-
-<h3 id="docker-daemon-">1.9 启动 docker daemon 进程</h3>
-
-<pre><code>sudo docker -d &amp;
-</code></pre>
-
-<p>如果你在公司，且公司内部都是通过代理上网，则可以把代理服务器告诉docker，用如下命令(参考<a href="https://github.com/dotcloud/docker/issues/402">这里</a>)：</p>
-
-<pre><code>sudo HTTP_PROXY=http://xxx:port docker -d &amp;
-</code></pre>
-
-<h3 id="ubuntu-">1.10 下载 ubuntu 镜像</h3>
-
-<pre><code>sudo docker pull ubuntu
-</code></pre>
-
-<h3 id="hello-world">1.11 运行 hello world</h3>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/20131025">继续阅读 &rarr;</a>
+      <a rel="full-article" href="/blog/20140208">继续阅读 &rarr;</a>
     </footer>
   
 
@@ -937,7 +357,7 @@ nodev   aufs
       
   <header class="page-header">
     
-      <h1 class="entry-title"><a href="/blog/20131024">CentOS 6.4 升级内核到 3.11.6</a></h1>
+      <h1 class="entry-title"><a href="/blog/20140207">在CentOS上安装ZooKeeper集群</a></h1>
     
     
       <p class="meta">
@@ -953,119 +373,75 @@ nodev   aufs
   
 
 
-<time datetime="2013-10-24T00:02:00+08:00" pubdate data-updated="true">Oct 24<span>th</span>, 2013</time>
+<time datetime="2014-02-07T23:40:00+08:00" pubdate data-updated="true">Feb 7<span>th</span>, 2014</time>
         
 		
-         | <a href="/blog/20131024#duoshuo_thread">Comments</a>
+         | <a href="/blog/20140207#duoshuo_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h2 id="section">1. 准备工作</h2>
+  <div class="entry-content"><p>环境：CentOS 6.5, jdk 1.7, ZooKeeper 3.4.5</p>
 
-<h3 id="section-1">1.1 下载源码包</h3>
-<p>去 <a href="http://www.kernel.org">http://www.kernel.org</a> 首页，下载源码包</p>
+<p>本文主要参考官网的<a href="http://zookeeper.apache.org/doc/trunk/zookeeperStarted.html">Getting Started</a></p>
 
-<pre><code>wget  https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.11.6.tar.xz
+<h2 id="section">（可选）创建新用户</h2>
+<p>一般我倾向于把需要启动daemon进程，对外提供服务的程序，即服务器类的程序，安装在单独的用户下面。这样可以做到隔离，运维方面，安全性也提高了。</p>
+
+<p>创建一个新的group,</p>
+
+<pre><code>$ sudo groupadd zookeeper
 </code></pre>
 
-<h3 id="section-2">1.2 解压</h3>
+<p>创建一个新的用户，并加入group,</p>
 
-<pre><code>tar xf linux-3.11.6.tar.xz
+<pre><code>$ sudo useradd -g zookeeper zookeeper
 </code></pre>
 
-<h3 id="section-3">1.3 更新当前系统</h3>
+<p>给新用户设置密码，</p>
 
-<pre><code>sudo yum update
-sudo yum upgrade
+<pre><code>$ sudo passwd zookeeper
 </code></pre>
 
-<h3 id="section-4">1.4 安装必要软件</h3>
+<h2 id="standalone-mode">1. 单机模式(Standalone mode)</h2>
+<p>单机模式在开发和调试阶段很有用。</p>
 
-<pre><code>sudo yum groupinstall "Development Tools" # 一口气安装编译时所需的一切工具
-sudo yum install ncurses-devel #必须这样才能让 make *config 这个指令正确地执行。
-sudo yum install qt-devel #如果你没有 X 环境，这一条可以不用
-sudo yum install hmaccalc zlib-devel binutils-devel elfutils-libelf-devel #创建 CentOS-6 内核时需要它们
+<h3 id="section-1">1.1 下载，解压</h3>
+
+<pre><code>$ wget http://mirror.bit.edu.cn/apache/zookeeper/zookeeper-3.4.5/zookeeper-3.4.5.tar.gz
+$ tar zxf zookeeper-3.4.5.tar.gz -C ~/local/opt
 </code></pre>
 
-<h2 id="section-5">2 配置文件</h2>
+<h3 id="section-2">1.2 启动</h3>
+<p>默认就是单机模式，</p>
 
-<h3 id="section-6">2.1 查看当前系统内核</h3>
-
-<pre><code>uname -r
-2.6.32-358.11.1.el6.x86_64
+<pre><code>$ mv conf/zoo_sample.cfg conf/zoo.cfg
+$ ./bin/zdServer.sh start
 </code></pre>
 
-<h3 id="section-7">2.2 将当前系统的配置文件拷贝到当前目录</h3>
+<h3 id="java-zookeeper">1.3 使用java 客户端连接ZooKeeper</h3>
 
-<pre><code>cp /boot/config-2.6.32-358.11.1.el6.x86_64 .config
+<pre><code>$ ./bin/zkCli.sh -server 127.0.0.1:2181
 </code></pre>
 
-<h3 id="section-8">2.3 使用旧内核配置，并自动接受每个新增选项的默认设置</h3>
+<p>然后就可以使用各种命令了，跟文件操作命令很类似，输入<code>help</code>可以看到所有命令。</p>
 
-<pre><code>sh -c 'yes "" | make oldconfig'
+<h4 id="section-3">1.4 关闭</h4>
+
+<pre><code>$ ./bin/zdServer.sh stop
 </code></pre>
 
-<p><code>make oldconfig</code>会读取当前目录下的<code>.config</code>文件，在<code>.config</code>文件里没有找到的选项则提示用户填写，然后备份<code>.config</code>文件为<code>.config.old</code>，并生成新的<code>.config</code>文件，参考 <a href="http://stackoverflow.com/questions/4178526/what-does-make-oldconfig-do-exactly-linux-kernel-makefile">http://stackoverflow.com/questions/4178526/what-does-make-oldconfig-do-exactly-linux-kernel-makefile</a></p>
+<h2 id="replicated-mode">2. 分布式模式(Replicated mode)</h2>
+<p>在生产环境中，要配置成分布式模式，才能发挥威力。</p>
 
-<h2 id="section-9">3 编译</h2>
-
-<pre><code>sudo make -j200 bzImage #生成内核文件
-sudo make -j200 modules #编译模块
-sudo make -j200 modules_install #编译安装模块
-</code></pre>
-
-<p>要严格按照这个先后顺序进行编译</p>
-
-<p><code>-j</code>后面的数字是线程数，用于加快编译速度，一般的经验是，有多少G内存，就填写那个数字，例如有8G内存，则为<code>-j8</code>。</p>
-
-<h2 id="section-10">4 安装</h2>
-
-<pre><code>sudo make install
-</code></pre>
-
-<p>如果出现了 <code>ERROR: modinfo: could not find module xxx</code>，数量少的话，可以忽略。</p>
-
-<h2 id="grub">5 修改Grub引导顺序</h2>
-
-<p>安装完成后，需要修改Grub引导顺序，让新安装的内核作为默认内核。</p>
-
-<p>编辑 <code>grub.conf</code>文件，</p>
-
-<pre><code>sudo vim /etc/grub.conf
-</code></pre>
-
-<p>数一下刚刚新安装的内核在哪个位置，从0开始，然后设置default为那个数字，一般新安装的内核在第一个位置，所以设置<code>default=0</code>。</p>
-
-<h2 id="section-11">6 重启</h2>
-
-<p>重启后，看一下当前内核版本号，</p>
-
-<pre><code>uname -r
-3.11.6
-</code></pre>
-
-<p>成功啦！！</p>
-
-<h2 id="section-12">7 如果失败，则重新循环</h2>
-
-<p>如果失败，重新开始的话，要清理上次编译的现场 </p>
-
-<pre><code>make mrproper #清理上次编译的现场 
-</code></pre>
-
-<p>然后转到第2步，重新开始。</p>
-
-<h2 id="section-13">参考资料</h2>
-<ul>
-  <li><a href="http://xmodulo.com/2013/07/how-to-upgrade-the-kernel-on-centos.html">How to upgrade the kernel on CentOS</a></li>
-  <li><a href="http://winotes.net/centos-64-upgrade-to-kernel-3x.html">CentOS 6.4 升级到 3.x Kernel</a></li>
-  <li><a href="http://my.oschina.net/qichang/blog/101542">CentOS Linux 升级内核步骤和方法</a></li>
-</ul>
 </div>
   
+  
+    <footer>
+      <a rel="full-article" href="/blog/20140207">继续阅读 &rarr;</a>
+    </footer>
   
 
 
@@ -1076,7 +452,7 @@ sudo make -j200 modules_install #编译安装模块
       
   <header class="page-header">
     
-      <h1 class="entry-title"><a href="/blog/20131017">安装Spark 0.8 集群(在CentOS上)</a></h1>
+      <h1 class="entry-title"><a href="/blog/20140206">Hadoop多用户的配置(Hadoop 2.x)</a></h1>
     
     
       <p class="meta">
@@ -1092,95 +468,477 @@ sudo make -j200 modules_install #编译安装模块
   
 
 
-<time datetime="2013-10-17T11:58:00+08:00" pubdate data-updated="true">Oct 17<span>th</span>, 2013</time>
+<time datetime="2014-02-06T10:05:00+08:00" pubdate data-updated="true">Feb 6<span>th</span>, 2014</time>
         
 		
-         | <a href="/blog/20131017#duoshuo_thread">Comments</a>
+         | <a href="/blog/20140206#duoshuo_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p><strong>环境</strong>:CentOS 6.4, Hadoop 1.1.2, JDK 1.7, Spark 0.8.0, Scala 2.9.3</p>
+  <div class="entry-content"><p>假设我们以名为hadoop的用户，建好了集群，见<a href="http://www.yanjiuyanjiu.com/blog/20140205/">在CentOS上安装Hadoop 2.x 集群</a>。通常，我们会把这个集群共享给多个用户，而不是让大家都登录为hadoop，这样做有几个好处：</p>
 
-<p>Spark 0.7.2 的安装请看之前的一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20130617/">安装Spark集群(在CentOS上)</a> 。</p>
+<ul>
+  <li>一个用户不能修改另一个用户的的文件</li>
+  <li>在hadoop web管理页面，可以很方便的看到不同的用户的job</li>
+</ul>
 
-<p>Spark的安装很简单，总结起来一句话：下载，解压，然后拷贝到所有机器，完毕，无需任何配置。</p>
+<p>现在集群中有一台机器，上面有一个用户名为 hbase 的用户，他想要使用hadoop集群，怎么配置呢？</p>
 
-<h1 id="jdk-17">1. 安装 JDK 1.7</h1>
-<pre><code>yum search openjdk-devel
-sudo yum install java-1.7.0-openjdk-devel.x86_64
-/usr/sbin/alternatives --config java
-/usr/sbin/alternatives --config javac
-sudo vim /etc/profile
-# add the following lines at the end
-export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.19.x86_64
-export JRE_HOME=$JAVA_HOME/jre
-export PATH=$PATH:$JAVA_HOME/bin
-export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
-# save and exit vim
-# make the bash profile take effect immediately
-$ source /etc/profile
-# test
-$ java -version
+<h2 id="hadoop">1. 安装hadoop客户端</h2>
+
+<h3 id="section">1.1 下载，解压</h3>
+<p>下载跟hadoop集群一样的hadoop软件包，并解压，</p>
+
+<pre><code>$ wget http://mirrors.hust.edu.cn/apache/hadoop/common/hadoop-2.2.0/hadoop-2.2.0.tar.gz
+$ tar -zxf hadoop-2.2.0.tar.gz -C ~/local/opt
+$ cd ~/local/opt/hadoop-2.2.0
 </code></pre>
 
-<p>参考我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20120423/">安装和配置CentOS服务器的详细步骤</a>。</p>
+<h3 id="hadoop-1">1.2 拷贝Hadoop集群的配置文件</h3>
+<p>将Hadoop集群的配置文件全部拷贝到客户端，相当与把集群的信息告诉客户端。</p>
 
-<h1 id="scala-293">2. 安装 Scala 2.9.3</h1>
-<p>Spark 0.8.0 依赖 Scala 2.9.3, 我们必须要安装Scala 2.9.3.</p>
-
-<p>下载 <a href="http://www.scala-lang.org/downloads/distrib/files/scala-2.9.3.tgz">scala-2.9.3.tgz</a> 并 保存到home目录.</p>
-
-<pre><code>$ tar -zxf scala-2.9.3.tgz
-$ sudo mv scala-2.9.3 /usr/lib
-$ sudo vim /etc/profile
-# add the following lines at the end
-export SCALA_HOME=/usr/lib/scala-2.9.3
-export PATH=$PATH:$SCALA_HOME/bin
-# save and exit vim
-#make the bash profile take effect immediately
-source /etc/profile
-# test
-$ scala -version
+<pre><code>$ scp -r hadoop@localhost:~/local/opt/hadoop-2.2.0/etc/hadoop ./etc/
 </code></pre>
 
-<h1 id="spark">3. 下载预编译好的Spark</h1>
-<p>下载预编译好的Spark, <a href="http://spark-project.org/download/spark-0.8.0-incubating-bin-hadoop1.tgz">spark-0.8.0-incubating-bin-hadoop1.tgz</a>. </p>
+<p>修改conf/mapred-site.xml中的<code>mapreduce.cluster.local.dir</code>，改为本机上的某个目录，确保这个目录存在且有写权限。因为这个目录是本地目录，每台机器都可以不同。例如我的是：</p>
 
-<p>如果你想从零开始编译，则下载源码包，但是我不建议你这么做，因为有一个Maven仓库，twitter4j.org, 被墙了，导致编译时需要翻墙，非常麻烦。如果你有DIY精神，并能顺利翻墙，则可以试试这种方式。</p>
-
-<h1 id="local">4. Local模式</h1>
-
-<h2 id="section">4.1 解压</h2>
-
-<pre><code>$ tar -zxf spark-0.8.0-incubating-bin-hadoop1.tgz
+<pre><code>&lt;property&gt;
+  &lt;name&gt;mapreduce.cluster.local.dir&lt;/name&gt;
+  &lt;value&gt;/home/soulmachine/local/var/hadoop/mapred/local&lt;/value&gt;
+&lt;/property&gt;
 </code></pre>
 
-<h2 id="sparkhome">4.2 （可选）设置 SPARK_HOME环境变量</h2>
+<p>确保这个目录存在，</p>
 
-<pre><code>$ vim ~/.bash_profile
-# add the following lines at the end
-export SPARK_HOME=$HOME/spark-0.8.0
-# save and exit vim
-#make the bash profile take effect immediately
-$ source /etc/profile
+<pre><code>$ mkdir -p ~/local/var/hadoop/mapred/local
 </code></pre>
-
-<h2 id="sparkpi">4.3 现在可以运行SparkPi了</h2>
-
-<pre><code>$ cd $SPARK_HOME
-$ ./run-example org.apache.spark.examples.SparkPi local
-</code></pre>
-
-<h1 id="cluster">5. Cluster模式</h1>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/20131017">继续阅读 &rarr;</a>
+      <a rel="full-article" href="/blog/20140206">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20140205">在CentOS上安装Hadoop 2.x 集群</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-02-05T12:39:00+08:00" pubdate data-updated="true">Feb 5<span>th</span>, 2014</time>
+        
+		
+         | <a href="/blog/20140205#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><strong>环境</strong>：CentOS 6.5, OPenJDK 1.7, Hadoop 2.2.0</p>
+
+<p>本文主要参考官网的文档，<a href="http://hadoop.apache.org/docs/r2.2.0/hadoop-project-dist/hadoop-common/SingleCluster.html">Hadoop 2.2.0 Single Node Setup</a>， <a href="http://hadoop.apache.org/docs/r2.2.0/hadoop-project-dist/hadoop-common/ClusterSetup.html">Hadoop 2.2.0  Cluster Setup</a></p>
+
+<h2 id="section">（可选）创建新用户</h2>
+<p>一般我倾向于把需要启动daemon进程，对外提供服务的程序，简单的说，就是服务器类程序，安装在单独的用户下面。这样可以做到隔离，运维方面，安全性也提高了。</p>
+
+<p>创建一个新的group,</p>
+
+<pre><code>$ sudo groupadd hadoop
+</code></pre>
+
+<p>创建一个新的用户，并加入group,</p>
+
+<pre><code>$ sudo useradd -g hadoop hadoop
+</code></pre>
+
+<p>给新用户设置密码，</p>
+
+<pre><code>$ sudo passwd hadoop
+</code></pre>
+
+<h2 id="pseudo-distributed-mode">1 伪分布式模式(Pseudo-Distributed Mode)</h2>
+<p>Hadoop能在单台机器上以伪分布式模式运行，即每个Hadoop模块运行在单独的java进程里。</p>
+
+<h3 id="sshlocalhost">1.1 设置SSH无密码登录localhost</h3>
+<p>先检查一下是能够无密码登录本机，</p>
+
+<pre><code>ssh localhost
+</code></pre>
+
+<p>如果提示输入密码，说明不能，按如下步骤设置。</p>
+
+<pre><code>$ ssh-keygen -t dsa -P '' -f ~/.ssh/id_dsa 
+$ cat ~/.ssh/id_dsa.pub &gt;&gt; ~/.ssh/authorized_keys
+</code></pre>
+
+<h3 id="section-1">1.2 下载已经编译好的二进制包，解压</h3>
+<p>用浏览器下载或wget,</p>
+
+<pre><code>$ wget http://mirrors.hust.edu.cn/apache/hadoop/common/hadoop-2.2.0/hadoop-2.2.0.tar.gz
+$ tar -zxf hadoop-2.2.0.tar.gz -C ~/local/opt
+$ cd ~/local/opt/hadoop-2.2.0
+</code></pre>
+
+<h3 id="section-2">1.3 设置环境变量</h3>
+
+<pre><code>$ vim ~/.bashrc
+export HADOOP_PREFIX=$HOME/local/opt/hadoop-2.2.0
+export HADOOP_COMMON_HOME=$HADOOP_PREFIX
+export HADOOP_HDFS_HOME=$HADOOP_PREFIX
+export HADOOP_MAPRED_HOME=$HADOOP_PREFIX
+export HADOOP_YARN_HOME=$HADOOP_PREFIX
+export HADOOP_CONF_DIR=$HADOOP_PREFIX/etc/hadoop
+export PATH=$PATH:$HADOOP_PREFIX/bin:$HADOOP_PREFIX/sbin
+</code></pre>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20140205">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20140204">把Nutch爬虫部署到Hadoop集群上</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-02-04T22:36:00+08:00" pubdate data-updated="true">Feb 4<span>th</span>, 2014</time>
+        
+		
+         | <a href="/blog/20140204#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>软件版本：Nutch 1.7, Hadoop 1.2.1, CentOS 6.5, JDK 1.7</p>
+
+<p>前面的3篇文章中，<a href="http://www.yanjiuyanjiu.com/blog/20140121">Nutch 快速入门(Nutch 1.7)</a>，<a href="http://www.yanjiuyanjiu.com/blog/20140201">Nutch 快速入门(Nutch 2.2.1)</a>，<a href="http://www.yanjiuyanjiu.com/blog/20140120">在Eclipse里运行Nutch</a>，Nutch都是跑在单机上，本文把Nutch部署到Hadoop集群上，在真正的分布式Hadoop集群上跑。</p>
+
+<h2 id="section">前提</h2>
+
+<ul>
+  <li>学会了搭建一个分布式Hadoop集群，见<a href="http://www.yanjiuyanjiu.com/blog/20140202">在CentOS上安装Hadoop集群</a></li>
+  <li>学会了单机跑Nutch，见<a href="http://www.yanjiuyanjiu.com/blog/20140121">Nutch 快速入门(Nutch 1.7)</a></li>
+</ul>
+
+<h2 id="hadoop">1 启动Hadoop集群</h2>
+<p>伪分布式或真分布式的Hadoop集群都可以，无所谓。</p>
+
+<p>选择一台配置好了的Hadoop客户端的机器（见<a href="http://www.yanjiuyanjiu.com/blog/20140203">Hadoop多用户的配置</a>），作为客户机，以下操作均在这台客户机上进行。</p>
+
+<h2 id="nutch">2 下载Nutch源码</h2>
+<p>有两种方法，</p>
+
+<ol>
+  <li>去官网首页下载apache-nutch-1.7-src.tar.gz</li>
+  <li>
+    <p>用svn checkout</p>
+
+    <pre><code> $ svn co https://svn.apache.org/repos/asf/nutch/tags/release-1.7
+</code></pre>
+  </li>
+</ol>
+
+<h2 id="hadoop6nutchconf">3 把Hadoop的6个配置文件拷贝到Nutch的conf/目录</h2>
+<p>将Hadoop的六个配置文件，拷贝到Nutch的conf/目录，相当于把Hadoop集群的配置信息告诉Nutch，</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20140204">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20140203">Hadoop多用户的配置(Hadoop 1.x)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-02-03T10:05:00+08:00" pubdate data-updated="true">Feb 3<span>rd</span>, 2014</time>
+        
+		
+         | <a href="/blog/20140203#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>假设我们以名为hadoop的用户，建好了集群，见<a href="http://www.yanjiuyanjiu.com/blog/20140202">在CentOS上安装Hadoop集群</a>。通常，我们会把这个集群共享给多个用户，而不是让大家都登录为hadoop，这样做有几个好处：</p>
+
+<ul>
+  <li>一个用户不能修改另一个用户的的文件</li>
+  <li>在hadoop web管理页面，可以很方便的看到不同的用户的job</li>
+</ul>
+
+<p>现在集群中有一台机器，上面有一个用户名为 hbase 的用户，他想要使用hadoop集群，怎么配置呢？</p>
+
+<h2 id="hadoop">1. 安装hadoop客户端</h2>
+
+<h3 id="section">1.1 下载，解压</h3>
+<p>下载跟hadoop集群一样的hadoop软件包，并解压，</p>
+
+<pre><code>$ wget http://mirror.olnevhost.net/pub/apache/hadoop/common/stable1/hadoop-1.2.1-bin.tar.gz
+$ tar -zxf hadoop-1.2.1-bin.tar.gz -C ~/local/opt
+$ cd ~/local/opt/hadoop-1.2.1
+</code></pre>
+
+<h3 id="section-1">1.2 配置</h3>
+<p>在客户端只需配置集群namenode 和 jobtracker 的相关信息, 把namenode和jobtracker的信息告诉客户端即可。</p>
+
+<p>把hadoop用户下的<code>conf/core-site.xml</code>和<code>conf/mapred-site.xml</code>拷贝到本用户的conf/目录下</p>
+
+<pre><code>$ scp hadoop@localhost:~/local/opt/hadoop-1.2.1/conf/core-site.xml ./conf/
+$ scp hadoop@localhost:~/local/opt/hadoop-1.2.1/conf/mapred-site.xml ./conf/
+</code></pre>
+
+<p>修改conf/mapred-site.xml中的<code>mapred.local.dir</code>，改为本机上的某个目录，确保这个目录存在且有写入。因为这个目录是本地目录，每台机器都可以不同。例如我的是：</p>
+
+<pre><code>&lt;property&gt;
+  &lt;name&gt;mapred.local.dir&lt;/name&gt;
+  &lt;value&gt;/home/soulmachine/local/var/hadoop/mapred/local&lt;/value&gt;
+&lt;/property&gt;
+</code></pre>
+
+<p>确保这个目录存在，</p>
+
+<pre><code>$ mkdir -p ~/local/var/hadoop/mapred/local
+</code></pre>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20140203">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20140202">在CentOS上安装Hadoop集群</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-02-02T12:39:00+08:00" pubdate data-updated="true">Feb 2<span>nd</span>, 2014</time>
+        
+		
+         | <a href="/blog/20140202#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Ubuntu上安装，请参考我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20120103/">在Ubuntu上安装Hadoop</a>。</p>
+
+<p><strong>环境</strong>：CentOS 6.5, OPenJDK 1.7, Hadoop 1.2.1</p>
+
+<p>本文主要参考官网的文档，<a href="http://hadoop.apache.org/docs/r1.2.1/#Getting+Started">Hadoop 1.2.1 Getting Started</a></p>
+
+<h2 id="standalone-mode">1 单机模式(Standalone Mode)</h2>
+<p>为了能顺利安装成功，我们先练习在单台机器上安装Hadoop。在单台机器上，可以配置成单机模式(Standalone Mode)和伪分布式模式(Pseudo-Distributed Mode)，参考官方文档<a href="http://hadoop.apache.org/docs/r1.2.1/single_node_setup.html">Single Node Setup</a>。</p>
+
+<h3 id="hadoop-121">1.1 下载Hadoop 1.2.1，解压</h3>
+<p>用浏览器下载或wget,</p>
+
+<pre><code>$ wget http://mirror.olnevhost.net/pub/apache/hadoop/common/stable1/hadoop-1.2.1-bin.tar.gz
+$ tar -zxf hadoop-1.2.1-bin.tar.gz -C ~/local/opt
+$ cd ~/local/opt/hadoop-1.2.1
+</code></pre>
+
+<h3 id="confhadoop-envsh-javahome">1.2 编辑 conf/hadoop-env.sh，设置 <code>JAVA_HOME</code></h3>
+
+<pre><code>$ echo $JAVA_HOME
+/usr/lib/jvm/java
+$ vim conf/hadoop-env.sh
+</code></pre>
+
+<p>取消<code>JAVA_HOME</code>那一行的注释，设置正确的JDK位置</p>
+
+<pre><code>export JAVA_HOME=/usr/lib/jvm/java
+</code></pre>
+
+<h3 id="job">1.3 运行一个job</h3>
+<p>默认情况下，Hadoop就被配置为Standalone模式了，此时Hadoop的所有模块都运行在一个java进程里。</p>
+
+<p>我们运行一个例子测试一下。下面的几行命令，把 <code>conf</code>下的所有xml文件作为输入，在文件中查找指定的正则表达式，把匹配的结果输出到<code>output</code>目录。</p>
+
+<pre><code>$ mkdir input 
+$ cp conf/*.xml input 
+$ bin/hadoop jar hadoop-examples-*.jar grep input output 'dfs[a-z.]+' 
+$ cat output/*
+</code></pre>
+
+<p>可以看到正常的结果，说明单机模式运行成功了，下面开始配置伪分布式模式。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20140202">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20140201">Nutch 快速入门(Nutch 2.2.1)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-02-01T04:11:00+08:00" pubdate data-updated="true">Feb 1<span>st</span>, 2014</time>
+        
+		
+         | <a href="/blog/20140201#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>本文主要参考<a href="http://wiki.apache.org/nutch/Nutch2Tutorial">Nutch 2.x Tutorial</a></p>
+
+<p>Nutch 2.x 与 Nutch 1.x 相比，剥离出了存储层，放到了gora中，可以使用多种数据库，例如HBase, Cassandra, MySql来存储数据了。Nutch 1.7 则是把数据直接存储在HDFS上。</p>
+
+<h2 id="hbase">1. 安装并运行HBase</h2>
+<p>为了简单起见，使用Standalone模式，参考 <a href="http://hbase.apache.org/book/quickstart.html">HBase Quick start</a></p>
+
+<h3 id="section">1.1 下载，解压</h3>
+
+<pre><code>wget http://archive.apache.org/dist/hbase/hbase-0.90.4/hbase-0.90.4.tar.gz
+tar zxf hbase-0.90.4.tar.gz
+</code></pre>
+
+<h3 id="confhbase-sitexml">1.2 修改 conf/hbase-site.xml</h3>
+<p>内容如下</p>
+
+<pre><code>&lt;configuration&gt;
+  &lt;property&gt;
+    &lt;name&gt;hbase.rootdir&lt;/name&gt;
+    &lt;value&gt;file:///DIRECTORY/hbase&lt;/value&gt;
+  &lt;/property&gt;
+  &lt;property&gt;
+    &lt;name&gt;hbase.zookeeper.property.dataDir&lt;/name&gt;
+    &lt;value&gt;/DIRECTORY/zookeeper&lt;/value&gt;
+  &lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre>
+
+<p><code>hbase.rootdir</code>目录是用来存放HBase的相关信息的，默认值是<code>/tmp/hbase-${user.name}/hbase</code>； <code>hbase.zookeeper.property.dataDir</code>目录是用来存放zookeeper（HBase内置了zookeeper）的相关信息的，默认值是<code>/tmp/hbase-${user.name}/zookeeper</code>。</p>
+
+<h3 id="section-1">1.3 启动</h3>
+
+<pre><code>$ ./bin/start-hbase.sh
+starting Master, logging to logs/hbase-user-master-example.org.out
+</code></pre>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20140201">继续阅读 &rarr;</a>
     </footer>
   
 
@@ -1204,7 +962,7 @@ $ ./run-example org.apache.spark.examples.SparkPi local
 </section>
 <section>
   <h2>分类目录</h2>
-    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/docker/'>docker (3)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (5)</a></li><li><a href='/blog/categories/sa/'>SA (3)</a></li><li><a href='/blog/categories/spark/'>spark (5)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>Algorithm (1)</a></li><li><a href='/blog/categories/devops/'>DevOps (8)</a></li><li><a href='/blog/categories/docker/'>Docker (3)</a></li><li><a href='/blog/categories/hadoop/'>Hadoop (8)</a></li><li><a href='/blog/categories/language/'>Language (3)</a></li><li><a href='/blog/categories/machine-learning/'>Machine-Learning (5)</a></li><li><a href='/blog/categories/search-engine/'>Search-Engine (5)</a></li><li><a href='/blog/categories/spark/'>Spark (6)</a></li><li><a href='/blog/categories/tools/'>Tools (11)</a></li></ul>
 </section>
 <section>
   <h2>友情链接</h2>
@@ -1250,23 +1008,23 @@ $ ./run-example org.apache.spark.examples.SparkPi local
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/20140127">我的Ansible playbook</a>
+        <a href="/blog/20140220">编写Nutch插件</a>
       </li>
     
       <li class="post">
-        <a href="/blog/20140126">/boot 目录空间不足</a>
+        <a href="/blog/20140214">CentOS上编译 Hadoop 2.2.0</a>
       </li>
     
       <li class="post">
-        <a href="/blog/20140125">Rdesktop 快速入门</a>
+        <a href="/blog/20140208">在CentOS上安装HBase 0.96</a>
       </li>
     
       <li class="post">
-        <a href="/blog/20140122">在Centos 6.5上安装docker</a>
+        <a href="/blog/20140207">在CentOS上安装ZooKeeper集群</a>
       </li>
     
       <li class="post">
-        <a href="/blog/20131223">运行mahout的朴素贝叶斯分类器</a>
+        <a href="/blog/20140206">Hadoop多用户的配置(Hadoop 2.x)</a>
       </li>
     
   </ul>

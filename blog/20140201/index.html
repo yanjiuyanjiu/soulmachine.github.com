@@ -1,0 +1,630 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Nutch 快速入门(Nutch 2.2.1) - 研究研究</title>
+  <meta name="author" content="soulmachine">
+
+  
+  <meta name="description" content="一个关于机器学习的技术博客">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://www.yanjiuyanjiu.com/blog/20140201">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/bootstrap/bootstrap.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/stylesheets/bootstrap/responsive.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/stylesheets/syntax/syntax.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <style type="text/css">
+    body {
+      padding-bottom: 40px;
+    }
+    h1 {
+      margin-bottom: 15px;
+    }
+    img {
+      max-width: 100%;
+    }
+    .sharing, .meta, .pager {
+      margin: 20px 0px 20px 0px;
+    }
+    .page-footer p {
+      text-align: center;
+    }
+  </style>
+  <script src="/javascripts/libs/jquery.js"></script>
+  <script src="/javascripts/libs/modernizr-2.0.js"></script>
+  <script src="/javascripts/libs/bootstrap.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="研究研究" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<!-- <link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css"> -->
+<!-- <link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css"> -->
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-7583537-4']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <nav role="navigation"><div class="navbar navbar-inverse">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </a>
+
+      <a class="brand" href="/">研究研究</a>
+
+      <div class="nav-collapse">
+        <ul class="nav">
+  <li><a href="/">Home</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about/">About</a></li>
+  <li><a href="/notes/">读书笔记</a></li>
+</ul>
+
+
+        <ul class="nav pull-right" data-subscription="rss">
+          <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+          
+        </ul>
+
+        
+          <form class="pull-right navbar-search" action="http://google.com/search" method="get">
+            <fieldset role="search">
+              <input type="hidden" name="q" value="site:www.yanjiuyanjiu.com" />
+              <input class="search-query" type="text" name="q" results="0" placeholder="Search"/>
+            </fieldset>
+          </form>
+        
+      </div>
+    </div>
+  </div>
+</div>
+</nav>
+  <div class="container">
+    <div class="row-fluid">
+      
+<article class="hentry span9" role="article">
+
+  
+  <header class="page-header">
+    
+      <h1 class="entry-title">Nutch 快速入门(Nutch 2.2.1)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-02-01T04:11:00+08:00" pubdate data-updated="true">Feb 1<span>st</span>, 2014</time>
+        
+		
+         | <a href="#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>本文主要参考<a href="http://wiki.apache.org/nutch/Nutch2Tutorial">Nutch 2.x Tutorial</a></p>
+
+<p>Nutch 2.x 与 Nutch 1.x 相比，剥离出了存储层，放到了gora中，可以使用多种数据库，例如HBase, Cassandra, MySql来存储数据了。Nutch 1.7 则是把数据直接存储在HDFS上。</p>
+
+<h2 id="hbase">1. 安装并运行HBase</h2>
+<p>为了简单起见，使用Standalone模式，参考 <a href="http://hbase.apache.org/book/quickstart.html">HBase Quick start</a></p>
+
+<h3 id="section">1.1 下载，解压</h3>
+
+<pre><code>wget http://archive.apache.org/dist/hbase/hbase-0.90.4/hbase-0.90.4.tar.gz
+tar zxf hbase-0.90.4.tar.gz
+</code></pre>
+
+<h3 id="confhbase-sitexml">1.2 修改 conf/hbase-site.xml</h3>
+<p>内容如下</p>
+
+<pre><code>&lt;configuration&gt;
+  &lt;property&gt;
+    &lt;name&gt;hbase.rootdir&lt;/name&gt;
+    &lt;value&gt;file:///DIRECTORY/hbase&lt;/value&gt;
+  &lt;/property&gt;
+  &lt;property&gt;
+    &lt;name&gt;hbase.zookeeper.property.dataDir&lt;/name&gt;
+    &lt;value&gt;/DIRECTORY/zookeeper&lt;/value&gt;
+  &lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre>
+
+<p><code>hbase.rootdir</code>目录是用来存放HBase的相关信息的，默认值是<code>/tmp/hbase-${user.name}/hbase</code>； <code>hbase.zookeeper.property.dataDir</code>目录是用来存放zookeeper（HBase内置了zookeeper）的相关信息的，默认值是<code>/tmp/hbase-${user.name}/zookeeper</code>。</p>
+
+<h3 id="section-1">1.3 启动</h3>
+
+<pre><code>$ ./bin/start-hbase.sh
+starting Master, logging to logs/hbase-user-master-example.org.out
+</code></pre>
+
+<!-- more -->
+
+<h3 id="shell">1.4 试用一下shell</h3>
+<p>$ ./bin/hbase shell
+HBase Shell; enter ‘help<return>&#8217; for list of supported commands.
+Type &#8220;exit<return>&#8221; to leave the HBase Shell
+Version 0.90.4, r1150278, Sun Jul 24 15:53:29 PDT 2011</return></return></p>
+
+<p>hbase(main):001:0&gt;</p>
+
+<p>创建一张名字为<code>test</code>的表，只有一个列，名为<code>cf</code>。为了验证创建是否成功，用<code>list</code>命令查看所有的table，并用<code>put</code>命令插入一些值。</p>
+
+<pre><code>hbase(main):003:0&gt; create 'test', 'cf'
+0 row(s) in 1.2200 seconds
+hbase(main):003:0&gt; list 'test'
+..
+1 row(s) in 0.0550 seconds
+hbase(main):004:0&gt; put 'test', 'row1', 'cf:a', 'value1'
+0 row(s) in 0.0560 seconds
+hbase(main):005:0&gt; put 'test', 'row2', 'cf:b', 'value2'
+0 row(s) in 0.0370 seconds
+hbase(main):006:0&gt; put 'test', 'row3', 'cf:c', 'value3'
+0 row(s) in 0.0450 seconds
+</code></pre>
+
+<p>用<code>scan</code>命令扫描table，验证一下刚才的插入是否成功。</p>
+
+<pre><code>hbase(main):007:0&gt; scan 'test'
+ROW        COLUMN+CELL
+row1       column=cf:a, timestamp=1288380727188, value=value1
+row2       column=cf:b, timestamp=1288380738440, value=value2
+row3       column=cf:c, timestamp=1288380747365, value=value3
+3 row(s) in 0.0590 seconds
+</code></pre>
+
+<p>现在，disable并drop掉你的表，这会把上面的所有操作清零。</p>
+
+<pre><code>hbase(main):012:0&gt; disable 'test'
+0 row(s) in 1.0930 seconds
+hbase(main):013:0&gt; drop 'test'
+0 row(s) in 0.0770 seconds 
+</code></pre>
+
+<p>退出shell，</p>
+
+<pre><code>hbase(main):014:0&gt; exit
+</code></pre>
+
+<h3 id="section-2">1.5 停止</h3>
+
+<pre><code>$ ./bin/stop-hbase.sh
+stopping hbase...............
+</code></pre>
+
+<h3 id="section-3">1.6 再次启动</h3>
+<p>后面运行Nutch，需要把数据存储到HBase，因此需要启动HBase。</p>
+
+<pre><code>$ ./bin/start-hbase.sh
+starting Master, logging to logs/hbase-user-master-example.org.out
+</code></pre>
+
+<h2 id="nutch-221">2 编译Nutch 2.2.1</h2>
+
+<h3 id="section-4">2.1 下载，解压</h3>
+<pre><code>wget http://www.apache.org/dyn/closer.cgi/nutch/2.2.1/apache-nutch-2.2.1-src.tar.gz
+tar zxf apache-nutch-2.2.1-src.tar.gz
+</code></pre>
+
+<h3 id="section-5">2.2 修改配置文件</h3>
+<p>参考<a href="http://wiki.apache.org/nutch/Nutch2Tutorial">Nutch 2.0 Tutorial</a></p>
+
+<p>修改 <code>conf/nutch-site.xml</code></p>
+
+<pre><code>&lt;property&gt;
+  &lt;name&gt;storage.data.store.class&lt;/name&gt;
+  &lt;value&gt;org.apache.gora.hbase.store.HBaseStore&lt;/value&gt;
+  &lt;description&gt;Default class for storing data&lt;/description&gt;
+&lt;/property&gt;
+</code></pre>
+
+<p>修改<code>ivy/ivy.xml</code></p>
+
+<pre><code>&lt;!-- Uncomment this to use HBase as Gora backend. --&gt;
+&lt;dependency org="org.apache.gora" name="gora-hbase" rev="0.3" conf="*-&gt;default" /&gt;
+</code></pre>
+
+<p>修改 <code>conf/gora.properties</code>，确保<code>HBaseStore</code>被设置为默认的存储，</p>
+
+<pre><code>gora.datastore.default=org.apache.gora.hbase.store.HBaseStore
+</code></pre>
+
+<h3 id="section-6">2.3 编译</h3>
+
+<pre><code>ant runtime
+</code></pre>
+
+<p>刚开始会下载很多jar，需要等待一段时间。</p>
+
+<p>有可能你会得到如下错误：</p>
+
+<pre><code>Trying to override old definition of task javac
+  [taskdef] Could not load definitions from resource org/sonar/ant/antlib.xml. It could not be found.
+
+ivy-probe-antlib:
+
+ivy-download:
+  [taskdef] Could not load definitions from resource org/sonar/ant/antlib.xml. It could not be found.
+</code></pre>
+
+<p>无所谓，不用管它。</p>
+
+<p>要等一会儿才能编译结束。编译完后，多出来了 build 和 runtime两个文件夹。</p>
+
+<p>第3、4、5、6步与另一篇博客<a href="">Nutch 快速入门(Nutch 1.7)</a>中的第3、4、5、6步骤一模一样。</p>
+
+<h2 id="url">3 添加种子URL</h2>
+
+<pre><code>mkdir ~/urls
+vim ～/urls/seed.txt
+http://movie.douban.com/subject/5323968/
+</code></pre>
+
+<h2 id="url-1">4 设置URL过滤规则</h2>
+<p>如果只想抓取某种类型的URL，可以在 <code>conf/regex-urlfilter.txt</code>设置正则表达式，于是，只有匹配这些正则表达式的URL才会被抓取。</p>
+
+<p>例如，我只想抓取豆瓣电影的数据，可以这样设置：</p>
+
+<pre><code>#注释掉这一行
+# skip URLs containing certain characters as probable queries, etc.
+#-[?*!@=]
+# accept anything else
+#注释掉这行
+#+.
++^http:\/\/movie\.douban\.com\/subject\/[0-9]+\/(\?.+)?$
+</code></pre>
+
+<h2 id="agent">5 设置agent名字</h2>
+
+<p>conf/nutch-site.xml:</p>
+
+<pre><code>&lt;property&gt;
+  &lt;name&gt;http.agent.name&lt;/name&gt;
+  &lt;value&gt;My Nutch Spider&lt;/value&gt;
+&lt;/property&gt;
+</code></pre>
+
+<p>这一步是从这本书上看到的，<a href="http://www.packtpub.com/web-crawling-and-data-mining-with-apache-nutch/book">Web Crawling and Data Mining with Apache Nutch</a>，第14页。</p>
+
+<h2 id="solr">6 安装Solr</h2>
+<p>由于建索引的时候需要使用Solr，因此我们需要安装并启动一个Solr服务器。</p>
+
+<p>参考<a href="http://wiki.apache.org/nutch/NutchTutorial">Nutch Tutorial</a> 第4、5、6步，以及<a href="http://lucene.apache.org/solr/4_6_1/tutorial.html">Solr Tutorial</a>。</p>
+
+<h3 id="section-7">6.1 下载，解压</h3>
+
+<p>wget http://mirrors.cnnic.cn/apache/lucene/solr/4.6.1/solr-4.6.1.tgz
+tar -zxf solr-4.6.1.tgz</p>
+
+<h3 id="solr-1">6.2 运行Solr</h3>
+
+<pre><code>cd example
+java -jar start.jar
+</code></pre>
+
+<p>验证是否启动成功</p>
+
+<p>用浏览器打开 <a href="http://localhost:8983/solr/admin/">http://localhost:8983/solr/admin/</a>，如果能看到页面，说明启动成功。</p>
+
+<h3 id="nutchsolr">6.3 将Nutch与Solr集成在一起</h3>
+
+<p>将<code>NUTCH_DIR/conf/schema-solr4.xml</code>拷贝到<code>SOLR_DIR/solr/collection1/conf/</code>，重命名为schema.xml，并在<code>&lt;fields&gt;...&lt;/fields&gt;</code>最后添加一行(具体解释见<a href="http://stackoverflow.com/questions/15527380/solr-4-2-what-is-version-field">Solr 4.2 - what is _version_field?</a>)，</p>
+
+<pre><code>&lt;field name="_version_" type="long" indexed="true" stored="true" multiValued="false"/&gt;
+</code></pre>
+
+<p>重启Solr，</p>
+
+<pre><code># Ctrl+C to stop Solr
+java -jar start.jar
+</code></pre>
+
+<p>第7步和第8步也和Nutch 1.7那篇博客中的7、8步很类似。主要区别在于，Nutch 2.x的所有数据，不再以文件和目录的形式存放在硬盘上，而是存放到HBase里。</p>
+
+<h2 id="section-8">7 一步一步使用单个命令抓取网页</h2>
+<p>TODO</p>
+
+<h2 id="crawl">8 使用crawl脚本一键抓取</h2>
+<p>刚才我们是手工敲入多个命令，一个一个步骤，来完成抓取的，其实Nutch自带了一个脚本，<code>./bin/crawl</code>，把抓取的各个步骤合并成一个命令，看一下它的用法</p>
+
+<pre><code>$ ./bin/crawl 
+Missing seedDir : crawl &lt;seedDir&gt; &lt;crawlID&gt; &lt;solrURL&gt; &lt;numberOfRounds&gt;
+</code></pre>
+
+<p><strong>注意</strong>，这里是<code>crawlId</code>，不再是<code>crawlDir</code>。</p>
+
+<p>先删除第7节产生的数据，使用HBase shell，用<code>disable</code>删除表。</p>
+
+<h3 id="section-9">8.1 抓取网页</h3>
+
+<pre><code>$ ./bin/crawl ~/urls/ TestCrawl http://localhost:8983/solr/ 2
+</code></pre>
+
+<ul>
+  <li><code>～/urls</code> 是存放了种子url的目录</li>
+  <li>TestCrawl 是crawlId，这会在HBase中创建一张以crawlId为前缀的表，例如TestCrawl_Webpage。</li>
+  <li>http://localhost:8983/solr/ , 这是Solr服务器</li>
+  <li>2，numberOfRounds，迭代的次数</li>
+</ul>
+
+<p>过了一会儿，屏幕上出现了一大堆url，可以看到爬虫正在抓取！</p>
+
+<pre><code>fetching http://music.douban.com/subject/25811077/ (queue crawl delay=5000ms)
+fetching http://read.douban.com/ebook/1919781 (queue crawl delay=5000ms)
+fetching http://www.douban.com/online/11670861/ (queue crawl delay=5000ms)
+fetching http://book.douban.com/tag/绘本 (queue crawl delay=5000ms)
+fetching http://movie.douban.com/tag/科幻 (queue crawl delay=5000ms)
+49/50 spinwaiting/active, 56 pages, 0 errors, 0.9 1 pages/s, 332 245 kb/s, 131 URLs in 5 queues
+fetching http://music.douban.com/subject/25762454/ (queue crawl delay=5000ms)
+fetching http://read.douban.com/reader/ebook/1951242/ (queue crawl delay=5000ms)
+fetching http://www.douban.com/mobile/read-notes (queue crawl delay=5000ms)
+fetching http://book.douban.com/tag/诗歌 (queue crawl delay=5000ms)
+50/50 spinwaiting/active, 61 pages, 0 errors, 0.9 1 pages/s, 334 366 kb/s, 127 URLs in 5 queues
+</code></pre>
+
+<h3 id="section-10">8.2 查看结果</h3>
+
+<pre><code>./bin/nutch readdb -crawlId TestCrawl -stats
+</code></pre>
+
+<p>也可以进HBase shell 查看，</p>
+
+<pre><code>cd ~/hbase-0.90.4
+./bin/hbase shell
+hbase(main):001:0&gt; scan 'TestCrawl_webpage'
+</code></pre>
+
+<p>屏幕开始不断输出内容，可以用Ctrl+C 结束。</p>
+
+<p>在运行scan查看表中内容时，对于列的含义不确定时可以查看<code>conf/gora-hbase-mapping.xml</code>文件，该文件定义了列族及列的含义。</p>
+
+<h2 id="section-11">相关文章</h2>
+<p><a href="http://www.yanjiuyanjiu.com/blog/20140121/">Nutch 快速入门(Nutch 1.7)</a></p>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">soulmachine</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-02-01T04:11:00+08:00" pubdate data-updated="true">Feb 1<span>st</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/search-engine/'>Search-Engine</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  <!-- AddThis Button BEGIN -->
+  <div class="addthis_toolbox addthis_default_style addthis_32x32_style">
+    <a class="addthis_button_sinaweibo"></a>
+    <a class="addthis_button_facebook"></a>
+    <a class="addthis_button_twitter"></a>
+    <a class="addthis_button_google_plusone_share"></a>
+    <a class="addthis_button_delicious"></a>
+    <a class="addthis_button_digg"></a>
+    <a class="addthis_button_reddit"></a>
+    <a class="addthis_button_compact"></a><a class="addthis_counter addthis_bubble_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=undefined"></script>
+  <!-- AddThis Button END -->
+  
+  
+  
+</div>
+
+    
+    
+	
+    <section>
+      <div id="duoshuo_thread" aria-live="polite"><!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-thread-key="/blog/20140201" data-title="Nutch 快速入门(Nutch 2.2.1)"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"yanjiuyanjiu"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = 'http://static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		|| document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+</script>
+<!-- Duoshuo Comment END --></div>
+    </section>
+    
+    <ul class="pager">
+      
+      <li class="previous"><a class="basic-alignment left"
+        href="/blog/20140131" title="Previous Post:
+        给CentOS安装UEK内核">&laquo; 给CentOS安装UEK内核</a></li>
+      
+      <li><a href="/blog/archives">Blog Archives</a></li>
+      
+      <li class="next"><a class="basic-alignment right" href="/blog/20140202"
+        title="Next Post: 在CentOS上安装Hadoop集群">在CentOS上安装Hadoop集群
+        &raquo;</a></li>
+      
+    </ul>
+  </footer>
+</article>
+
+<aside class="sidebar-nav span3">
+  
+    <section>
+  <h2>公告</h2>
+  <p>独学而无友，则孤陋而寡闻，我每周在清华举办机器学习读书会，欢迎大家前来交流切磋。</p>
+  <p>详情请见<a href="http://q.weibo.com/1644133">读书会微博群</a></p>
+</section>
+<section>
+  <h2>分类目录</h2>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>Algorithm (1)</a></li><li><a href='/blog/categories/devops/'>DevOps (8)</a></li><li><a href='/blog/categories/docker/'>Docker (3)</a></li><li><a href='/blog/categories/hadoop/'>Hadoop (8)</a></li><li><a href='/blog/categories/language/'>Language (3)</a></li><li><a href='/blog/categories/machine-learning/'>Machine-Learning (5)</a></li><li><a href='/blog/categories/search-engine/'>Search-Engine (5)</a></li><li><a href='/blog/categories/spark/'>Spark (6)</a></li><li><a href='/blog/categories/tools/'>Tools (11)</a></li></ul>
+</section>
+<section>
+  <h2>友情链接</h2>
+  <ul>
+    <li>
+      <a href="http://yewen.us/" title="大学同学，ACM高手，曾在百度，现在人人网">笨狗随手留下</a>
+    </li>
+	<li>
+      <a href="http://blog.liancheng.info/" title="网易，百度，技术高手">连城</a>
+    </li>
+    <li>
+      <a href="http://www.rational.so/" title="系统方向的清华博士">阎栋</a>
+    </li>
+	<li>
+      <a href="http://www.parallellabs.com/" title="冠诚，IBM研究院研究员">并行实验室</a>
+    </li>
+	<li>
+      <a href="http://shenfeng.me/" title="http-kit, clojure">沈峰</a>
+    </li>
+	<li>
+      <a href="http://www.lihaipeng.info/" title="百度商业产品高级研发工程师">李海鹏</a>
+    </li>
+	<li>
+      <a href="http://www.chioka.in/" title="Google工程师">Eric</a>
+    </li>
+    <li>
+      <a href="http://blog.csdn.net/lgnlgn" title="好朋友，曾在赶集网，现在老家的猫扑">梁兄的技术博客</a>
+    </li>
+    <li>
+      <a href="http://www.doesbetter.com/" title="机器学习，北邮">王孝舒的博客</a>
+    </li>
+    <li>
+      <a href="http://www.foreverlee.net/" title="机器学习，中科院计算所">ForeverLee</a>
+    </li>
+  </ul>
+</section>
+
+
+
+
+<section>
+  <h2>最新文章</h2>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/20140220">编写Nutch插件</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20140214">CentOS上编译 Hadoop 2.2.0</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20140208">在CentOS上安装HBase 0.96</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20140207">在CentOS上安装ZooKeeper集群</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20140206">Hadoop多用户的配置(Hadoop 2.x)</a>
+      </li>
+    
+  </ul>
+</section><section>
+<h2>最新评论</h2>
+<ul class="ds-recent-comments" data-num-items="5" data-show-avatars="1" data-show-time="1" data-show-title="1" data-show-admin="0" data-excerpt-length="32"></ul>
+
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo" class="page-footer"><!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX", "output/HTML-CSS"],
+  tex2jax: {
+    inlineMath: [ ['$', '$'] ],
+    displayMath: [ ['$$', '$$']],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  messageStyle: "none",
+  "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] }
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+<p>
+  Copyright &copy; 2014 - soulmachine -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

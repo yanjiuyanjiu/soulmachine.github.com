@@ -1,0 +1,960 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Search-Engine | 研究研究]]></title>
+  <link href="http://www.yanjiuyanjiu.com/blog/categories/search-engine/atom.xml" rel="self"/>
+  <link href="http://www.yanjiuyanjiu.com/"/>
+  <updated>2014-03-16T17:09:01+08:00</updated>
+  <id>http://www.yanjiuyanjiu.com/</id>
+  <author>
+    <name><![CDATA[soulmachine]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[编写Nutch插件]]></title>
+    <link href="http://www.yanjiuyanjiu.com/blog/20140220"/>
+    <updated>2014-02-20T16:53:00+08:00</updated>
+    <id>http://www.yanjiuyanjiu.com/blog/writing-nutch-plugins</id>
+    <content type="html"><![CDATA[<p>软件版本：Nutch 1.7</p>
+
+<p>Nutch Plugin的所有资料，都在官网这里, <a href="http://wiki.apache.org/nutch/PluginCentral">PluginCentral</a></p>
+
+<h2 id="section">前提</h2>
+<p><a href="http://www.yanjiuyanjiu.com/blog/20140120">在Eclipse里运行Nutch</a></p>
+
+<h2 id="extension--extension-point">Extension 和 Extension-point的关系</h2>
+<p>Extension point类似与Java语言里的接口(interface), extension 则是具体的实现(implementation)。</p>
+
+<p><a href="http://wiki.apache.org/nutch/AboutPlugins">About Plugins</a>里有一句话，<strong>Each extension-point defines an interface that must be implemented by the extension.</strong></p>
+
+<h2 id="nutch">Nutch里的各种概念</h2>
+<p>Extension point, extension, plugin, 这些概念是什么意思？见 <a href="http://wiki.apache.org/nutch/WhichTechnicalConceptsAreBehindTheNutchPluginSystem">Technical Concepts Behind the Nutch Plugin System</a></p>
+
+<h2 id="nutch-17--extension-point">Nutch 1.7 有哪些 Extension-point</h2>
+<p><img src="/images/extension-points.png" alt="" /></p>
+
+<p>ExtensionPoint 这个东西，本身也是一个插件，可以看看 <code>src/plugin/nutch-extensionpoints/plugin.xml</code>，里面定义了所有的扩展点，跟上图基本一致。</p>
+
+<p><a href="http://wiki.apache.org/nutch/AboutPlugins">AboutPlugins</a>这里列出来的是 Nuch 1.4的扩展点，有点过时了。</p>
+
+<h2 id="nutch-1">一个Nutch的组成文件</h2>
+<p>build.xml, plugins.xml 等等</p>
+
+<h2 id="nutch-">Nutch 插件例子</h2>
+
+<ol>
+  <li><a href="http://wiki.apache.org/nutch/WritingPluginExample">WritingPluginExample</a></li>
+  <li><a href="http://wiki.apache.org/nutch/WritingPluginExample-1.2">WritingPluginExample-1.2</a>，针对Nutch 1.2的，有点老，但是值得一看</li>
+  <li><a href="http://www.ryanpfister.com/2009/04/how-to-sort-by-date-with-nutch/">Writing a plugin to add dates by Ryan Pfister</a></li>
+</ol>
+
+<p>看来这3个例子，你应该就知道怎么开发插件了。</p>
+
+<h2 id="nutch--1">Nutch 的缺点</h2>
+<p>在抓取的过程中，真正的难度在于, ip limit 和 user limit，可惜 Nutch 对这两个问题都没有解决方案。</p>
+
+<ol>
+  <li>Nutch 的 <a href="http://wiki.apache.org/nutch/HttpPostAuthentication">HttpPostAuthentication</a> 现在还没有开发完，导致无法抓取需要登录的网站，例如新浪微波，豆瓣等UGC网站，都是需要登录的。没有这个<code>HttpPostAuthentication</code>，Nutch其实只能抓取不需要登录的网页，适用范围大打折扣，现在是web 2.0时代，真正优质的内容，几乎都是需要登录的。</li>
+  <li>多个代理的管理。Nutch 没有提供多个代理的管理功能，只能在<code>nutch-site.xml</code>里配置一个代理。比如我在网上抓取了几百个免费的http代理，怎么让Nutch的各个线程均匀的使用这些代理，平能自动判断代理的速度，优先选择速度高的代理呢？</li>
+</ol>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[把Nutch爬虫部署到Hadoop集群上]]></title>
+    <link href="http://www.yanjiuyanjiu.com/blog/20140204"/>
+    <updated>2014-02-04T22:36:00+08:00</updated>
+    <id>http://www.yanjiuyanjiu.com/blog/running-nutch-on-hadoop-cluster</id>
+    <content type="html"><![CDATA[<p>软件版本：Nutch 1.7, Hadoop 1.2.1, CentOS 6.5, JDK 1.7</p>
+
+<p>前面的3篇文章中，<a href="http://www.yanjiuyanjiu.com/blog/20140121">Nutch 快速入门(Nutch 1.7)</a>，<a href="http://www.yanjiuyanjiu.com/blog/20140201">Nutch 快速入门(Nutch 2.2.1)</a>，<a href="http://www.yanjiuyanjiu.com/blog/20140120">在Eclipse里运行Nutch</a>，Nutch都是跑在单机上，本文把Nutch部署到Hadoop集群上，在真正的分布式Hadoop集群上跑。</p>
+
+<h2 id="section">前提</h2>
+
+<ul>
+  <li>学会了搭建一个分布式Hadoop集群，见<a href="http://www.yanjiuyanjiu.com/blog/20140202">在CentOS上安装Hadoop集群</a></li>
+  <li>学会了单机跑Nutch，见<a href="http://www.yanjiuyanjiu.com/blog/20140121">Nutch 快速入门(Nutch 1.7)</a></li>
+</ul>
+
+<h2 id="hadoop">1 启动Hadoop集群</h2>
+<p>伪分布式或真分布式的Hadoop集群都可以，无所谓。</p>
+
+<p>选择一台配置好了的Hadoop客户端的机器（见<a href="http://www.yanjiuyanjiu.com/blog/20140203">Hadoop多用户的配置</a>），作为客户机，以下操作均在这台客户机上进行。</p>
+
+<h2 id="nutch">2 下载Nutch源码</h2>
+<p>有两种方法，</p>
+
+<ol>
+  <li>去官网首页下载apache-nutch-1.7-src.tar.gz</li>
+  <li>
+    <p>用svn checkout</p>
+
+    <pre><code> $ svn co https://svn.apache.org/repos/asf/nutch/tags/release-1.7
+</code></pre>
+  </li>
+</ol>
+
+<h2 id="hadoop6nutchconf">3 把Hadoop的6个配置文件拷贝到Nutch的conf/目录</h2>
+<p>将Hadoop的六个配置文件，拷贝到Nutch的conf/目录，相当于把Hadoop集群的配置信息告诉Nutch，</p>
+
+<!-- more -->
+
+<p>在伪分布式模式下，</p>
+
+<pre><code>$ cd ~/local/opt/hadoop-1.2.1/conf
+$ cp hadoop-env.sh core-site.xml hdfs-site.xml mapred-site.xml masters slaves /home/soulmachine/local/src/apache-nutch-1.7/conf
+</code></pre>
+
+<p>在分布式模式下，</p>
+
+<pre><code>$ ssh hadoop@localhost
+$ cd ~/local/opt/hadoop-1.2.1/conf
+$ scp hadoop-env.sh core-site.xml hdfs-site.xml mapred-site.xml masters slaves soulmachine@localhost:~/local/src/apache-nutch-1.7/conf
+$ exit
+</code></pre>
+
+<h2 id="nutch-1">4 修改Nutch的配置文件</h2>
+<p>修改 conf/nutch-site.xml:</p>
+
+<pre><code>&lt;property&gt;
+  &lt;name&gt;http.agent.name&lt;/name&gt;
+  &lt;value&gt;My Nutch Spider&lt;/value&gt;
+&lt;/property&gt;
+</code></pre>
+
+<p>修改 <code>regex-urlfilter.txt</code>, 见<a href="http://www.yanjiuyanjiu.com/blog/20140121/">Nutch 快速入门(Nutch 1.7)</a> 第4节，</p>
+
+<pre><code>#注释掉这一行
+# skip URLs containing certain characters as probable queries, etc.
+#-[?*!@=]
+# accept anything else
+#注释掉这行
+#+.
++^http:\/\/movie\.douban\.com\/subject\/[0-9]+\/(\?.+)?$
+</code></pre>
+
+<h2 id="nutch-2">5 重新编译Nutch</h2>
+<p>每次修改了<code>$NUTCH_HOME/conf</code>下的的文件，都需要重新编译Nutch，重新打包生成一个nutch-x.x.x.job文件，见这里，<a href="http://wiki.apache.org/nutch/NutchHadoopSingleNodeTutorial">Running Nutch in (pseudo) distributed-mode</a>。也可以打开build.xml看看里面的”runtime”这个task干了什么，就明白了。</p>
+
+<pre><code>$ ant runtime
+</code></pre>
+
+<p>这会在<code>runtime/deploy</code>下生成一个Job文件，<code>apache-nutch-1.7.job</code>，它本质上是一个zip压缩包，可以打开看一下它里面的内容。可以看到它包含了很多编译好的class文件，以及从conf/目录下的拷贝出来的xml配置文件。</p>
+
+<h2 id="hadoopjob">6 向Hadoop集群提交Job，进行抓取</h2>
+
+<p>首先，要在con/hadoop-env.sh 添加<code>HADOOP_CLASSPATH</code>，让Hadoop知道去哪里找Nutch所依赖的jar包，</p>
+
+<pre><code>export HADOOP_CLASSPATH=/home/soulmachine/local/opt/apache-nutch-1.7/runtime/local/lib/*.jar
+</code></pre>
+
+<p>上传种子URL列表，</p>
+
+<pre><code>$ hadoop fs -put ~/urls urls
+$ hadoop fs -lsr urls
+</code></pre>
+
+<p>提交Job,</p>
+
+<pre><code>$ hadoop jar ./runtime/deploy/apache-nutch-1.7.job org.apache.nutch.crawl.Crawl urls -dir TestCrawl -depth 1 -topN 5
+</code></pre>
+
+<p>可以打开web页面监控job的进度，</p>
+
+<ul>
+  <li>Jobtracer: <a href="http://master:50030">http://master:50030</a></li>
+  <li>Namenode: <a href="http://master:50070">http://master:50070</a></li>
+</ul>
+
+<p>把Nutch运行在伪分布式Hadoop集群上，比Standalone模式要好，因为可以通过web页面监控job。</p>
+
+<p>查看结果</p>
+
+<pre><code>$ hadoop fs -ls TestCrawl
+
+Found 3 items
+drwxr-xr-x   - soulmachine supergroup          0 2014-02-04 02:17 /user/soulmachine/TestCrawl/crawldb
+drwxr-xr-x   - soulmachine supergroup          0 2014-02-04 02:18 /user/soulmachine/TestCrawl/linkdb
+drwxr-xr-x   - soulmachine supergroup          0 2014-02-04 02:16 /user/soulmachine/TestCrawl/segments
+</code></pre>
+
+<h2 id="section-1">7 注意</h2>
+<p>如果出现<code>java.io.IOException: No valid local directories in property: mapred.local.dir</code>的错误，说明你的客户机的mapred-site.xml是从hadoop集群拷贝过来的，没有修改过，<code>mapred.local.dir</code>是一个本地目录，集群上的机器有这个目录，但是你的本机上没有，所以出现了这个错误。解决办法是，在本地新建一个目录，然后把<code>mapred.local.dir</code>设置为这个路径。</p>
+
+<p>如果出现<code>org.apache.hadoop.security.AccessControlException: Permission denied: user=soulmachine, access=WRITE, inode="tmp"</code>的错误，多半是因为你没有给这个用户创建<code>hadoop.tmp.dir</code>文件夹，见<a href="http://www.yanjiuyanjiu.com/blog/20140203">Hadoop多用户的配置</a>第2.2节。</p>
+
+<h2 id="nutch-17-hadoop-2x">8 把Nutch 1.7 爬虫部署到Hadoop 2.x集群上</h2>
+<p>事实证明是完全可行的，Hadoop 2.x 向后兼容。</p>
+
+<p>把hadoop 2.x的配置文件，全部拷贝到 nutch 的conf目录下</p>
+
+<pre><code>cp ~/local/opt/hadoop-2.2.0/etc/hadoop* ~/local/src/apache-nutch-1.7/conf
+</code></pre>
+
+<p>然后编译，</p>
+
+<pre><code>ant runtime
+</code></pre>
+
+<p>把种子列表上传到hdfs,</p>
+
+<pre><code>$ hdfs dfs -put ~/urls urls
+$ hdfs dfs -lsr urls
+</code></pre>
+
+<p>提交Job,</p>
+
+<pre><code>$ hadoop jar ./runtime/deploy/apache-nutch-1.7.job org.apache.nutch.crawl.Crawl urls -dir TestCrawl -depth 2
+</code></pre>
+
+<p>查看结果，</p>
+
+<pre><code>$ cd runtime/deploy
+$ ./bin/readdb hdfs://localhost/user/soulmachine/TestCrawl/crawldb/ -stats
+14/02/14 16:51:07 INFO crawl.CrawlDbReader: Statistics for CrawlDb: hdfs://localhost/user/soulmachine/TestCrawl/crawldb/
+14/02/14 16:51:07 INFO crawl.CrawlDbReader: TOTAL urls:	70
+14/02/14 16:51:07 INFO crawl.CrawlDbReader: retry 0:	70
+14/02/14 16:51:07 INFO crawl.CrawlDbReader: min score:	0.006
+14/02/14 16:51:07 INFO crawl.CrawlDbReader: avg score:	0.03972857
+14/02/14 16:51:07 INFO crawl.CrawlDbReader: max score:	1.2
+14/02/14 16:51:07 INFO crawl.CrawlDbReader: status 1 (db_unfetched):	59
+14/02/14 16:51:07 INFO crawl.CrawlDbReader: status 2 (db_fetched):	11
+14/02/14 16:51:07 INFO crawl.CrawlDbReader: CrawlDb statistics: done
+</code></pre>
+
+<h2 id="section-2">参考资料</h2>
+<ol>
+  <li><a href="http://packtlib.packtpub.com/library/web-crawling-and-data-mining-with-apache-nutch/ch03lvl1sec20">Web Crawling and Data Mining with Apache Nutch 的第3.2节</a></li>
+  <li>
+    <p><a href="http://nutchhadoop.blogspot.com/">Install Nutch 1.7 and Hadoop 1.2.0</a></p>
+  </li>
+  <li><a href="http://blog.csdn.net/azhao_dn/article/details/6921398">hadoop mapred(hive)执行目录 文件权限问题</a></li>
+</ol>
+
+<h2 id="section-3">废弃的资料</h2>
+<ol>
+  <li>
+    <p><a href="http://wiki.apache.org/nutch/NutchHadoopTutorial">Nutch and Hadoop Tutorial</a>，讲的是Nutch 1.3的，太老了，完全不适用Nutch 1.7</p>
+  </li>
+  <li>
+    <p><a href="http://wiki.apache.org/nutch/NutchHadoopSingleNodeTutorial">Running Nutch in (pseudo) distributed-mode</a>，太短了，没什么内容</p>
+  </li>
+</ol>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Nutch 快速入门(Nutch 2.2.1)]]></title>
+    <link href="http://www.yanjiuyanjiu.com/blog/20140201"/>
+    <updated>2014-02-01T04:11:00+08:00</updated>
+    <id>http://www.yanjiuyanjiu.com/blog/nutch-tutorial</id>
+    <content type="html"><![CDATA[<p>本文主要参考<a href="http://wiki.apache.org/nutch/Nutch2Tutorial">Nutch 2.x Tutorial</a></p>
+
+<p>Nutch 2.x 与 Nutch 1.x 相比，剥离出了存储层，放到了gora中，可以使用多种数据库，例如HBase, Cassandra, MySql来存储数据了。Nutch 1.7 则是把数据直接存储在HDFS上。</p>
+
+<h2 id="hbase">1. 安装并运行HBase</h2>
+<p>为了简单起见，使用Standalone模式，参考 <a href="http://hbase.apache.org/book/quickstart.html">HBase Quick start</a></p>
+
+<h3 id="section">1.1 下载，解压</h3>
+
+<pre><code>wget http://archive.apache.org/dist/hbase/hbase-0.90.4/hbase-0.90.4.tar.gz
+tar zxf hbase-0.90.4.tar.gz
+</code></pre>
+
+<h3 id="confhbase-sitexml">1.2 修改 conf/hbase-site.xml</h3>
+<p>内容如下</p>
+
+<pre><code>&lt;configuration&gt;
+  &lt;property&gt;
+    &lt;name&gt;hbase.rootdir&lt;/name&gt;
+    &lt;value&gt;file:///DIRECTORY/hbase&lt;/value&gt;
+  &lt;/property&gt;
+  &lt;property&gt;
+    &lt;name&gt;hbase.zookeeper.property.dataDir&lt;/name&gt;
+    &lt;value&gt;/DIRECTORY/zookeeper&lt;/value&gt;
+  &lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre>
+
+<p><code>hbase.rootdir</code>目录是用来存放HBase的相关信息的，默认值是<code>/tmp/hbase-${user.name}/hbase</code>； <code>hbase.zookeeper.property.dataDir</code>目录是用来存放zookeeper（HBase内置了zookeeper）的相关信息的，默认值是<code>/tmp/hbase-${user.name}/zookeeper</code>。</p>
+
+<h3 id="section-1">1.3 启动</h3>
+
+<pre><code>$ ./bin/start-hbase.sh
+starting Master, logging to logs/hbase-user-master-example.org.out
+</code></pre>
+
+<!-- more -->
+
+<h3 id="shell">1.4 试用一下shell</h3>
+<p>$ ./bin/hbase shell
+HBase Shell; enter ‘help<return>' for list of supported commands.
+Type "exit<return>" to leave the HBase Shell
+Version 0.90.4, r1150278, Sun Jul 24 15:53:29 PDT 2011</return></return></p>
+
+<p>hbase(main):001:0&gt;</p>
+
+<p>创建一张名字为<code>test</code>的表，只有一个列，名为<code>cf</code>。为了验证创建是否成功，用<code>list</code>命令查看所有的table，并用<code>put</code>命令插入一些值。</p>
+
+<pre><code>hbase(main):003:0&gt; create 'test', 'cf'
+0 row(s) in 1.2200 seconds
+hbase(main):003:0&gt; list 'test'
+..
+1 row(s) in 0.0550 seconds
+hbase(main):004:0&gt; put 'test', 'row1', 'cf:a', 'value1'
+0 row(s) in 0.0560 seconds
+hbase(main):005:0&gt; put 'test', 'row2', 'cf:b', 'value2'
+0 row(s) in 0.0370 seconds
+hbase(main):006:0&gt; put 'test', 'row3', 'cf:c', 'value3'
+0 row(s) in 0.0450 seconds
+</code></pre>
+
+<p>用<code>scan</code>命令扫描table，验证一下刚才的插入是否成功。</p>
+
+<pre><code>hbase(main):007:0&gt; scan 'test'
+ROW        COLUMN+CELL
+row1       column=cf:a, timestamp=1288380727188, value=value1
+row2       column=cf:b, timestamp=1288380738440, value=value2
+row3       column=cf:c, timestamp=1288380747365, value=value3
+3 row(s) in 0.0590 seconds
+</code></pre>
+
+<p>现在，disable并drop掉你的表，这会把上面的所有操作清零。</p>
+
+<pre><code>hbase(main):012:0&gt; disable 'test'
+0 row(s) in 1.0930 seconds
+hbase(main):013:0&gt; drop 'test'
+0 row(s) in 0.0770 seconds 
+</code></pre>
+
+<p>退出shell，</p>
+
+<pre><code>hbase(main):014:0&gt; exit
+</code></pre>
+
+<h3 id="section-2">1.5 停止</h3>
+
+<pre><code>$ ./bin/stop-hbase.sh
+stopping hbase...............
+</code></pre>
+
+<h3 id="section-3">1.6 再次启动</h3>
+<p>后面运行Nutch，需要把数据存储到HBase，因此需要启动HBase。</p>
+
+<pre><code>$ ./bin/start-hbase.sh
+starting Master, logging to logs/hbase-user-master-example.org.out
+</code></pre>
+
+<h2 id="nutch-221">2 编译Nutch 2.2.1</h2>
+
+<h3 id="section-4">2.1 下载，解压</h3>
+<pre><code>wget http://www.apache.org/dyn/closer.cgi/nutch/2.2.1/apache-nutch-2.2.1-src.tar.gz
+tar zxf apache-nutch-2.2.1-src.tar.gz
+</code></pre>
+
+<h3 id="section-5">2.2 修改配置文件</h3>
+<p>参考<a href="http://wiki.apache.org/nutch/Nutch2Tutorial">Nutch 2.0 Tutorial</a></p>
+
+<p>修改 <code>conf/nutch-site.xml</code></p>
+
+<pre><code>&lt;property&gt;
+  &lt;name&gt;storage.data.store.class&lt;/name&gt;
+  &lt;value&gt;org.apache.gora.hbase.store.HBaseStore&lt;/value&gt;
+  &lt;description&gt;Default class for storing data&lt;/description&gt;
+&lt;/property&gt;
+</code></pre>
+
+<p>修改<code>ivy/ivy.xml</code></p>
+
+<pre><code>&lt;!-- Uncomment this to use HBase as Gora backend. --&gt;
+&lt;dependency org="org.apache.gora" name="gora-hbase" rev="0.3" conf="*-&gt;default" /&gt;
+</code></pre>
+
+<p>修改 <code>conf/gora.properties</code>，确保<code>HBaseStore</code>被设置为默认的存储，</p>
+
+<pre><code>gora.datastore.default=org.apache.gora.hbase.store.HBaseStore
+</code></pre>
+
+<h3 id="section-6">2.3 编译</h3>
+
+<pre><code>ant runtime
+</code></pre>
+
+<p>刚开始会下载很多jar，需要等待一段时间。</p>
+
+<p>有可能你会得到如下错误：</p>
+
+<pre><code>Trying to override old definition of task javac
+  [taskdef] Could not load definitions from resource org/sonar/ant/antlib.xml. It could not be found.
+
+ivy-probe-antlib:
+
+ivy-download:
+  [taskdef] Could not load definitions from resource org/sonar/ant/antlib.xml. It could not be found.
+</code></pre>
+
+<p>无所谓，不用管它。</p>
+
+<p>要等一会儿才能编译结束。编译完后，多出来了 build 和 runtime两个文件夹。</p>
+
+<p>第3、4、5、6步与另一篇博客<a href="">Nutch 快速入门(Nutch 1.7)</a>中的第3、4、5、6步骤一模一样。</p>
+
+<h2 id="url">3 添加种子URL</h2>
+
+<pre><code>mkdir ~/urls
+vim ～/urls/seed.txt
+http://movie.douban.com/subject/5323968/
+</code></pre>
+
+<h2 id="url-1">4 设置URL过滤规则</h2>
+<p>如果只想抓取某种类型的URL，可以在 <code>conf/regex-urlfilter.txt</code>设置正则表达式，于是，只有匹配这些正则表达式的URL才会被抓取。</p>
+
+<p>例如，我只想抓取豆瓣电影的数据，可以这样设置：</p>
+
+<pre><code>#注释掉这一行
+# skip URLs containing certain characters as probable queries, etc.
+#-[?*!@=]
+# accept anything else
+#注释掉这行
+#+.
++^http:\/\/movie\.douban\.com\/subject\/[0-9]+\/(\?.+)?$
+</code></pre>
+
+<h2 id="agent">5 设置agent名字</h2>
+
+<p>conf/nutch-site.xml:</p>
+
+<pre><code>&lt;property&gt;
+  &lt;name&gt;http.agent.name&lt;/name&gt;
+  &lt;value&gt;My Nutch Spider&lt;/value&gt;
+&lt;/property&gt;
+</code></pre>
+
+<p>这一步是从这本书上看到的，<a href="http://www.packtpub.com/web-crawling-and-data-mining-with-apache-nutch/book">Web Crawling and Data Mining with Apache Nutch</a>，第14页。</p>
+
+<h2 id="solr">6 安装Solr</h2>
+<p>由于建索引的时候需要使用Solr，因此我们需要安装并启动一个Solr服务器。</p>
+
+<p>参考<a href="http://wiki.apache.org/nutch/NutchTutorial">Nutch Tutorial</a> 第4、5、6步，以及<a href="http://lucene.apache.org/solr/4_6_1/tutorial.html">Solr Tutorial</a>。</p>
+
+<h3 id="section-7">6.1 下载，解压</h3>
+
+<p>wget http://mirrors.cnnic.cn/apache/lucene/solr/4.6.1/solr-4.6.1.tgz
+tar -zxf solr-4.6.1.tgz</p>
+
+<h3 id="solr-1">6.2 运行Solr</h3>
+
+<pre><code>cd example
+java -jar start.jar
+</code></pre>
+
+<p>验证是否启动成功</p>
+
+<p>用浏览器打开 <a href="http://localhost:8983/solr/admin/">http://localhost:8983/solr/admin/</a>，如果能看到页面，说明启动成功。</p>
+
+<h3 id="nutchsolr">6.3 将Nutch与Solr集成在一起</h3>
+
+<p>将<code>NUTCH_DIR/conf/schema-solr4.xml</code>拷贝到<code>SOLR_DIR/solr/collection1/conf/</code>，重命名为schema.xml，并在<code>&lt;fields&gt;...&lt;/fields&gt;</code>最后添加一行(具体解释见<a href="http://stackoverflow.com/questions/15527380/solr-4-2-what-is-version-field">Solr 4.2 - what is _version_field?</a>)，</p>
+
+<pre><code>&lt;field name="_version_" type="long" indexed="true" stored="true" multiValued="false"/&gt;
+</code></pre>
+
+<p>重启Solr，</p>
+
+<pre><code># Ctrl+C to stop Solr
+java -jar start.jar
+</code></pre>
+
+<p>第7步和第8步也和Nutch 1.7那篇博客中的7、8步很类似。主要区别在于，Nutch 2.x的所有数据，不再以文件和目录的形式存放在硬盘上，而是存放到HBase里。</p>
+
+<h2 id="section-8">7 一步一步使用单个命令抓取网页</h2>
+<p>TODO</p>
+
+<h2 id="crawl">8 使用crawl脚本一键抓取</h2>
+<p>刚才我们是手工敲入多个命令，一个一个步骤，来完成抓取的，其实Nutch自带了一个脚本，<code>./bin/crawl</code>，把抓取的各个步骤合并成一个命令，看一下它的用法</p>
+
+<pre><code>$ ./bin/crawl 
+Missing seedDir : crawl &lt;seedDir&gt; &lt;crawlID&gt; &lt;solrURL&gt; &lt;numberOfRounds&gt;
+</code></pre>
+
+<p><strong>注意</strong>，这里是<code>crawlId</code>，不再是<code>crawlDir</code>。</p>
+
+<p>先删除第7节产生的数据，使用HBase shell，用<code>disable</code>删除表。</p>
+
+<h3 id="section-9">8.1 抓取网页</h3>
+
+<pre><code>$ ./bin/crawl ~/urls/ TestCrawl http://localhost:8983/solr/ 2
+</code></pre>
+
+<ul>
+  <li><code>～/urls</code> 是存放了种子url的目录</li>
+  <li>TestCrawl 是crawlId，这会在HBase中创建一张以crawlId为前缀的表，例如TestCrawl_Webpage。</li>
+  <li>http://localhost:8983/solr/ , 这是Solr服务器</li>
+  <li>2，numberOfRounds，迭代的次数</li>
+</ul>
+
+<p>过了一会儿，屏幕上出现了一大堆url，可以看到爬虫正在抓取！</p>
+
+<pre><code>fetching http://music.douban.com/subject/25811077/ (queue crawl delay=5000ms)
+fetching http://read.douban.com/ebook/1919781 (queue crawl delay=5000ms)
+fetching http://www.douban.com/online/11670861/ (queue crawl delay=5000ms)
+fetching http://book.douban.com/tag/绘本 (queue crawl delay=5000ms)
+fetching http://movie.douban.com/tag/科幻 (queue crawl delay=5000ms)
+49/50 spinwaiting/active, 56 pages, 0 errors, 0.9 1 pages/s, 332 245 kb/s, 131 URLs in 5 queues
+fetching http://music.douban.com/subject/25762454/ (queue crawl delay=5000ms)
+fetching http://read.douban.com/reader/ebook/1951242/ (queue crawl delay=5000ms)
+fetching http://www.douban.com/mobile/read-notes (queue crawl delay=5000ms)
+fetching http://book.douban.com/tag/诗歌 (queue crawl delay=5000ms)
+50/50 spinwaiting/active, 61 pages, 0 errors, 0.9 1 pages/s, 334 366 kb/s, 127 URLs in 5 queues
+</code></pre>
+
+<h3 id="section-10">8.2 查看结果</h3>
+
+<pre><code>./bin/nutch readdb -crawlId TestCrawl -stats
+</code></pre>
+
+<p>也可以进HBase shell 查看，</p>
+
+<pre><code>cd ~/hbase-0.90.4
+./bin/hbase shell
+hbase(main):001:0&gt; scan 'TestCrawl_webpage'
+</code></pre>
+
+<p>屏幕开始不断输出内容，可以用Ctrl+C 结束。</p>
+
+<p>在运行scan查看表中内容时，对于列的含义不确定时可以查看<code>conf/gora-hbase-mapping.xml</code>文件，该文件定义了列族及列的含义。</p>
+
+<h2 id="section-11">相关文章</h2>
+<p><a href="http://www.yanjiuyanjiu.com/blog/20140121/">Nutch 快速入门(Nutch 1.7)</a></p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Nutch 快速入门(Nutch 1.7)]]></title>
+    <link href="http://www.yanjiuyanjiu.com/blog/20140121"/>
+    <updated>2014-01-21T04:11:00+08:00</updated>
+    <id>http://www.yanjiuyanjiu.com/blog/nutch-tutorial-17</id>
+    <content type="html"><![CDATA[<p>本文主要参考<a href="http://wiki.apache.org/nutch/NutchTutorial">Nutch Tutorial</a></p>
+
+<p>Nutch 2.2.1目前性能没有Nutch 1.7好，参考这里，<a href="http://digitalpebble.blogspot.com/2013/09/nutch-fight-17-vs-221.html">NUTCH FIGHT! 1.7 vs 2.2.1</a>. 所以我目前还是使用的Nutch 1.7。</p>
+
+<h2 id="section">1 下载已编译好的二进制包，解压</h2>
+<pre><code>$ wget http://psg.mtu.edu/pub/apache/nutch/1.7/apache-nutch-1.7-bin.tar.gz
+$ tar zxf apache-nutch-1.7-bin.tar.gz
+</code></pre>
+
+<h2 id="section-1">2 验证一下</h2>
+
+<pre><code>$ cd apache-nutch-1.7
+$ bin/nutch
+</code></pre>
+
+<p>如果出现”Permission denied”请运行下面的命令：</p>
+
+<pre><code>$ chmod +x bin/nutch
+</code></pre>
+
+<p>如果有Warning说 <code>JAVA_HOME</code>没有设置，请设置一下<code>JAVA_HOME</code>.</p>
+
+<h2 id="url">3 添加种子URL</h2>
+
+<pre><code>mkdir ~/urls
+vim ～/urls/seed.txt
+http://movie.douban.com/subject/5323968/
+</code></pre>
+
+<h2 id="url-1">4 设置URL过滤规则</h2>
+<p>如果只想抓取某种类型的URL，可以在 <code>conf/regex-urlfilter.txt</code>设置正则表达式，于是，只有匹配这些正则表达式的URL才会被抓取。</p>
+
+<!--more-->
+
+<p>例如，我只想抓取豆瓣电影的数据，可以这样设置：</p>
+
+<pre><code>#注释掉这一行
+# skip URLs containing certain characters as probable queries, etc.
+#-[?*!@=]
+# accept anything else
+#注释掉这行
+#+.
++^http:\/\/movie\.douban\.com\/subject\/[0-9]+\/(\?.+)?$
+</code></pre>
+
+<h2 id="agent">5 设置agent名字</h2>
+
+<p>conf/nutch-site.xml:</p>
+
+<pre><code>&lt;property&gt;
+  &lt;name&gt;http.agent.name&lt;/name&gt;
+  &lt;value&gt;My Nutch Spider&lt;/value&gt;
+&lt;/property&gt;
+</code></pre>
+
+<p>这一步是从这本书上看到的，<a href="http://www.packtpub.com/web-crawling-and-data-mining-with-apache-nutch/book">Web Crawling and Data Mining with Apache Nutch</a>，第14页。</p>
+
+<h2 id="solr">6 安装Solr</h2>
+<p>由于建索引的时候需要使用Solr，因此我们需要安装并启动一个Solr服务器。</p>
+
+<p>参考<a href="http://wiki.apache.org/nutch/NutchTutorial">Nutch Tutorial</a> 第4、5、6步，以及<a href="http://lucene.apache.org/solr/4_6_1/tutorial.html">Solr Tutorial</a>。</p>
+
+<h3 id="section-2">6.1 下载，解压</h3>
+
+<p>wget http://mirrors.cnnic.cn/apache/lucene/solr/4.6.1/solr-4.6.1.tgz
+tar -zxf solr-4.6.1.tgz</p>
+
+<h3 id="solr-1">6.2 运行Solr</h3>
+
+<pre><code>cd example
+java -jar start.jar
+</code></pre>
+
+<p>验证是否启动成功</p>
+
+<p>用浏览器打开 <a href="http://localhost:8983/solr/admin/">http://localhost:8983/solr/admin/</a>，如果能看到页面，说明启动成功。</p>
+
+<h3 id="nutchsolr">6.3 将Nutch与Solr集成在一起</h3>
+
+<p>将<code>NUTCH_DIR/conf/schema-solr4.xml</code>拷贝到<code>SOLR_DIR/solr/collection1/conf/</code>，重命名为schema.xml，并在<code>&lt;fields&gt;...&lt;/fields&gt;</code>最后添加一行(具体解释见<a href="http://stackoverflow.com/questions/15527380/solr-4-2-what-is-version-field">Solr 4.2 - what is _version_field?</a>)，</p>
+
+<pre><code>&lt;field name="_version_" type="long" indexed="true" stored="true" multiValued="false"/&gt;
+</code></pre>
+
+<p>重启Solr，</p>
+
+<pre><code># Ctrl+C to stop Solr
+java -jar start.jar
+</code></pre>
+
+<h2 id="crawl">7 使用crawl脚本一键抓取</h2>
+<p>Nutch自带了一个脚本，<code>./bin/crawl</code>，把抓取的各个步骤合并成一个命令，看一下它的用法</p>
+
+<pre><code>$ bin/crawl 
+Missing seedDir : crawl &lt;seedDir&gt; &lt;crawlDir&gt; &lt;solrURL&gt; &lt;numberOfRounds&gt;
+</code></pre>
+
+<p>注意，是使用<code>bin/crawl</code>，不是<code>bin/nutch crawl</code>，后者已经是deprecated的了。</p>
+
+<h3 id="section-3">7.1 抓取网页</h3>
+
+<pre><code>$ ./bin/crawl ~/urls/ ./TestCrawl http://localhost:8983/solr/ 2
+</code></pre>
+
+<ul>
+  <li><code>～/urls</code> 是存放了种子url的目录</li>
+  <li>TestCrawl 是存放数据的根目录（在Nutch 2.x中，则表示crawlId，这会在HBase中创建一张以crawlId为前缀的表，例如TestCrawl_Webpage）</li>
+  <li>http://localhost:8983/solr/ , 这是Solr服务器</li>
+  <li>2，numberOfRounds，迭代的次数</li>
+</ul>
+
+<p>过了一会儿，屏幕上出现了一大堆url，可以看到爬虫正在抓取！</p>
+
+<pre><code>fetching http://music.douban.com/subject/25811077/ (queue crawl delay=5000ms)
+fetching http://read.douban.com/ebook/1919781 (queue crawl delay=5000ms)
+fetching http://www.douban.com/online/11670861/ (queue crawl delay=5000ms)
+fetching http://book.douban.com/tag/绘本 (queue crawl delay=5000ms)
+fetching http://movie.douban.com/tag/科幻 (queue crawl delay=5000ms)
+49/50 spinwaiting/active, 56 pages, 0 errors, 0.9 1 pages/s, 332 245 kb/s, 131 URLs in 5 queues
+fetching http://music.douban.com/subject/25762454/ (queue crawl delay=5000ms)
+fetching http://read.douban.com/reader/ebook/1951242/ (queue crawl delay=5000ms)
+fetching http://www.douban.com/mobile/read-notes (queue crawl delay=5000ms)
+fetching http://book.douban.com/tag/诗歌 (queue crawl delay=5000ms)
+50/50 spinwaiting/active, 61 pages, 0 errors, 0.9 1 pages/s, 334 366 kb/s, 127 URLs in 5 queues
+</code></pre>
+
+<h3 id="section-4">7.2 查看结果</h3>
+
+<pre><code>$ bin/nutch readdb TestCrawl/crawldb/ -stats
+14/02/14 16:35:47 INFO crawl.CrawlDbReader: Statistics for CrawlDb: TestCrawl/crawldb/
+14/02/14 16:35:47 INFO crawl.CrawlDbReader: TOTAL urls:	70
+14/02/14 16:35:47 INFO crawl.CrawlDbReader: retry 0:	70
+14/02/14 16:35:47 INFO crawl.CrawlDbReader: min score:	0.005
+14/02/14 16:35:47 INFO crawl.CrawlDbReader: avg score:	0.03877143
+14/02/14 16:35:47 INFO crawl.CrawlDbReader: max score:	1.23
+14/02/14 16:35:47 INFO crawl.CrawlDbReader: status 1 (db_unfetched):	59
+14/02/14 16:35:47 INFO crawl.CrawlDbReader: status 2 (db_fetched):	11
+14/02/14 16:35:47 INFO crawl.CrawlDbReader: CrawlDb statistics: done
+</code></pre>
+
+<h2 id="section-5">8 一步一步使用单个命令抓取网页</h2>
+<p>上一节为了简单性，一个命令搞定。本节我将严格按照抓取的步骤，一步一步来，揭开爬虫的神秘面纱。感兴趣的读者也可以看看 <code>bin/crawl</code> 脚本里的内容，可以很清楚的看到各个步骤。</p>
+
+<p>先删除第7节产生的数据，</p>
+
+<pre><code>$ rm -rf TestCrawl/
+</code></pre>
+
+<h3 id="section-6">8.1 基本概念</h3>
+<p>Nutch data is composed of:</p>
+
+<ul>
+  <li>The crawl database, or <code>crawldb</code>. This contains information about every URL known to Nutch, including whether it was fetched, and, if so, when.</li>
+  <li>The link database, or <code>linkdb</code>. This contains the list of known links to each URL, including both the source URL and anchor text of the link.</li>
+  <li>A set of <code>segments</code>. Each segment is a set of URLs that are fetched as a unit. Segments are directories with the following subdirectories:
+    <ul>
+      <li>a <code>crawl_generate</code> names a set of URLs to be fetched</li>
+      <li>a <code>crawl_fetch</code> contains the status of fetching each URL</li>
+      <li>a <code>content</code> contains the raw content retrieved from each URL</li>
+      <li>a <code>parse_text</code> contains the parsed text of each URL</li>
+      <li>a <code>parse_data</code> contains outlinks and metadata parsed from each URL</li>
+      <li>a <code>crawl_parse</code> contains the outlink URLs, used to update the crawldb</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="injecturlcrawldb">8.2 inject:使用种子URL列表，生成crawldb</h3>
+
+<pre><code>$ bin/nutch inject TestCrawl/crawldb ~/urls
+</code></pre>
+
+<p>将根据<code>～/urls</code>下的种子URL，生成一个URL数据库，放在<code>crawdb</code>目录下。</p>
+
+<h3 id="generate">8.3 generate</h3>
+
+<pre><code>$ bin/nutch generate TestCrawl/crawldb TestCrawl/segments
+</code></pre>
+
+<p>这会生成一个 fetch list，存放在一个<code>segments/日期</code>目录下。我们将这个目录的名字保存在shell变量<code>s1</code>里：</p>
+
+<pre><code>$ s1=`ls -d TestCrawl/segments/2* | tail -1`
+$ echo $s1
+</code></pre>
+
+<h3 id="fetch">8.4 fetch</h3>
+
+<pre><code>$ bin/nutch fetch $s1
+</code></pre>
+
+<p>将会在 <code>$1</code> 目录下，生成两个子目录, <code>crawl_fetch</code> 和 <code>content</code>。</p>
+
+<h3 id="parse">8.5 parse</h3>
+
+<pre><code>$ bin/nutch parse $s1
+</code></pre>
+
+<p>将会在 <code>$1</code> 目录下，生成3个子目录, <code>crawl_parse</code>, <code>parse_data</code> 和 <code>parse_text</code> 。</p>
+
+<h3 id="updatedb">8.6 updatedb</h3>
+
+<pre><code>$ bin/nutch updatedb TestCrawl/crawldb $s1
+</code></pre>
+
+<p>这将把<code>crawldb/current</code>重命名为<code>crawldb/old</code>，并生成新的 <code>crawldb/current</code> 。</p>
+
+<h3 id="section-7">8.7 查看结果</h3>
+
+<pre><code>$ bin/nutch readdb TestCrawl/crawldb/ -stats
+</code></pre>
+
+<h3 id="invertlinks">8.8 invertlinks</h3>
+
+<p>在建立索引之前，我们首先要反转所有的链接，这样我们就可以获得一个页面所有的锚文本，并给这些锚文本建立索引。</p>
+
+<pre><code>$ bin/nutch invertlinks TestCrawl/linkdb -dir TestCrawl/segments
+</code></pre>
+
+<h3 id="solrindex-solr">8.9 solrindex, 提交数据给solr，建立索引</h3>
+
+<pre><code>$ bin/nutch solrindex http://localhost:8983/solr TestCrawl/crawldb/ -linkdb TestCrawl/linkdb/ TestCrawl/segments/20140203004348/ -filter -normalize
+</code></pre>
+
+<h3 id="solrdedup-">8.10 solrdedup, 给索引去重</h3>
+<p>有时重复添加了数据，导致索引里有重复数据，我们需要去重，</p>
+
+<pre><code>$bin/nutch solrdedup http://localhost:8983/solr
+</code></pre>
+
+<h3 id="solrclean-">8.11 solrclean, 删除索引</h3>
+<p>如果数据过时了，需要在索引里删除，也是可以的。</p>
+
+<pre><code>$ bin/nutch solrclean TestCrawl/crawldb/ http://localhost:8983/solr
+</code></pre>
+
+<h2 id="section-8">相关文章</h2>
+<p><a href="http://www.yanjiuyanjiu.com/blog/20140201/">Nutch 快速入门(Nutch 2.2.1)</a></p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[在Eclipse里运行Nutch]]></title>
+    <link href="http://www.yanjiuyanjiu.com/blog/20140120"/>
+    <updated>2014-01-20T04:11:00+08:00</updated>
+    <id>http://www.yanjiuyanjiu.com/blog/Running-Nutch-in-Eclipse</id>
+    <content type="html"><![CDATA[<p>环境：Ubuntu Desktop 12.04，JDK 1.7, Nutch 1.7</p>
+
+<p>本文主要参考<a href="http://wiki.apache.org/nutch/RunNutchInEclipse">Running Nutch in Eclipse</a></p>
+
+<h2 id="section">前提</h2>
+
+<ul>
+  <li>机器上安装了Ant, Eclipse</li>
+  <li>Eclipse安装了subclipse, update site 是 <a href="http://subclipse.tigris.org/update_1.10.x">http://subclipse.tigris.org/update_1.10.x</a></li>
+  <li>Eclipse安装了IvyDE, update site 是 <a href="http://www.apache.org/dist/ant/ivyde/updatesite">http://www.apache.org/dist/ant/ivyde/updatesite</a></li>
+  <li>Eclipse安装了m2e插件，update site 是 <a href="http://download.eclipse.org/technology/m2e/releases">http://download.eclipse.org/technology/m2e/releases</a></li>
+</ul>
+
+<h2 id="section-1">1 下载源码</h2>
+<p>有两种方法，</p>
+
+<ol>
+  <li>去官网首页下载apache-nutch-1.7-src.tar.gz</li>
+  <li>
+    <p>用svn checkout</p>
+
+    <pre><code> $ svn co https://svn.apache.org/repos/asf/nutch/tags/release-1.7
+</code></pre>
+  </li>
+</ol>
+
+<p>推荐用第2种方法，因为用SVN checkout出来的有<code>pom.xml</code>文件，即maven文件，但是压缩包里没有，只有ant的<code>build.xml</code>文件。</p>
+
+<h2 id="section-2">2 配置</h2>
+<p>把 conf/ 下的 <code>nutch-site.xml.template</code>复制一份，命名为<code>nutch-site.xml</code>，在里面添加如下配置：</p>
+
+<pre><code>&lt;property&gt;
+  &lt;name&gt;http.agent.name&lt;/name&gt;
+  &lt;value&gt;My Nutch Spider&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+  &lt;name&gt;plugin.folders&lt;/name&gt;
+  &lt;value&gt;$NUTCH_HOME/build/plugins&lt;/value&gt;
+&lt;/property&gt;
+</code></pre>
+
+<p><code>$NUTCH_HOME</code>是指nutch源码的根目录，例如我的是<code>/home/soulmachine/local/opt/apache-nutch-1.7</code>.</p>
+
+<h2 id="eclipseproject">3 生成Eclipse项目文件，即.project文件</h2>
+
+<pre><code>$ ant eclipse
+</code></pre>
+
+<!--more-->
+
+<p>如果发现一直卡在 <code>ivy:resolve .....</code>这里，原因很有可能是 <a href="http://repo1.maven.org">http://repo1.maven.org</a>被墙，参考<a href="http://blog.csdn.net/majian_1987/article/details/17004531">这里</a>，这时候要设置HTTP代理，</p>
+
+<pre><code>$ Ctrl+C
+$ export HTTP_PROXY=localhost:8087    #我用的goagent
+$ ant runtime
+</code></pre>
+
+<h2 id="eclipse">4 加载到Eclipse</h2>
+<p>启动Eclipse，点击”File-&gt;Import-&gt;General-&gt;Existing projects into workspace”，浏览到<code>$NUTCH_DIR</code>，点击”Finish”。</p>
+
+<p><img src="http://wiki.apache.org/nutch/RunNutchInEclipse?action=AttachFile&amp;do=get&amp;target=importproject.png" alt="" /></p>
+
+<p>请等待一会儿，让Eclipse解析该项目，可以在右下角看到状态。</p>
+
+<h2 id="confclass-folder">5 把conf/目录加入到class folder</h2>
+<p>在Package Explorer里右击项目，选择”Build Path-&gt;Configure Build Path-&gt;Order and Export”，下拉滚动条，找到conf/目录，打上勾，点击”Top”按钮。</p>
+
+<p><img src="http://wiki.apache.org/nutch/RunNutchInEclipse?action=AttachFile&amp;do=get&amp;target=order_and_export.png" alt="" /></p>
+
+<h2 id="eclipseorgapachenutchcrawlcrawl">6 在Eclipse里运行org.apache.nutch.crawl.Crawl来抓取网页</h2>
+<p>在Package Explorer里找到<code>org.apache.nutch.crawl.Crawl</code>，右击，选择”Run as -&gt; Java Application”，发现输出如下：</p>
+
+<pre><code>Usage: Crawl &lt;urlDir&gt; -solr &lt;solrURL&gt; [-dir d] [-threads n] [-depth i] [-topN N]
+</code></pre>
+
+<p>因为我们没有给main()函数提供必要的参数。</p>
+
+<h3 id="url">6.1 添加种子URL</h3>
+
+<pre><code>$ cd PROJECT_DIR
+$ mkdir urls
+$ vim ./urls/seed.txt
+http://movie.douban.com/subject/5323968/
+</code></pre>
+
+<h3 id="url-1">6.2 设置URL过滤规则</h3>
+<p>如果只想抓取某种类型的URL，可以在 <code>conf/regex-urlfilter.txt</code>设置正则表达式，于是，只有匹配这些正则表达式的URL才会被抓取。</p>
+
+<p>例如，我只想抓取豆瓣电影的数据，可以这样设置：</p>
+
+<pre><code>#注释掉这一行
+# skip URLs containing certain characters as probable queries, etc.
+#-[?*!@=]
+# accept anything else
+#注释掉这行
+#+.
++^http:\/\/movie\.douban\.com\/subject\/[0-9]+\/(\?.+)?$
+</code></pre>
+
+<p><strong>注意</strong>，每次修改了conf目录中的配置文件，必须重新编译，修改才能生效，原因是ant里有拷贝文件的任务，将conf/下的xml文件拷贝到<code>runtie/local/conf</code>和<code>runtime/deploy/conf</code>下。</p>
+
+<p>这里，我们不再使用命令行编译，而是在eclipse里右击build.xml，选择<code>Run as -&gt; Ant Build</code>.</p>
+
+<h3 id="solr">6.3 安装Solr</h3>
+<p>见我的这篇文章，<a href="http://www.yanjiuyanjiu.com/blog/20140121/">Nutch 快速入门(Nutch 1.7)</a> 第6节。</p>
+
+<h3 id="main">6.4 给main()函数提供参数</h3>
+<p>右击<code>org.apache.nutch.crawl.Crawl</code>，选择”Run as -&gt; Run Configurations”，在<code>Program arguments</code>里填写：</p>
+
+<pre><code>urls -solr http://localhost:8983/solr/ -dir TestCrawl -depth 2 -topN 5
+</code></pre>
+
+<p>在”VM Arguments”里填写<code>-Dhadoop.log.dir=logs -Dhadoop.log.file=hadoop.log</code></p>
+
+<h3 id="section-3">6.5 运行</h3>
+<p>最后点击”Apply”, “Run”，就开始抓取了。</p>
+
+<h3 id="section-4">6.6 查看结果</h3>
+
+<h4 id="segments">6.6.1 查看segments目录</h4>
+<p>右击<code>org.apache.nutch.segment.SegmentReader</code>，选择”Run as -&gt; Run Configurations”，在<code>Program arguments</code>里填写：</p>
+
+<pre><code>-dump TestCrawl/segments/* TestCrawl/segments/dump
+</code></pre>
+
+<p>然后点击”Run”。</p>
+
+<p>用文本编辑器打开文件 <code>TestCrawl/segments/dump/dump</code>查看segments中存储的信息。</p>
+
+<h4 id="crawldb">6.6.2 查看crawldb目录</h4>
+<p>右击<code>org.apache.nutch.crawl.CrawlDbReader</code>，选择”Run as -&gt; Run Configurations”，在<code>Program arguments</code>里填写：</p>
+
+<pre><code>TestCrawl/crawldb -stats
+</code></pre>
+
+<p>然后点击”Run”，控制台会输出 crawldb统计信息。</p>
+
+<h4 id="linkdb">6.6.3 查看linkdb目录</h4>
+<p>右击<code>org.apache.nutch.crawl.LinkDbReader</code>，选择”Run as -&gt; Run Configurations”，在<code>Program arguments</code>里填写：</p>
+
+<pre><code>TestCrawl/linkdb -dump TestCrawl/linkdb_dump
+</code></pre>
+
+<p>然后点击”Run”。</p>
+
+<p>用文本编辑器打开文件 <code>TestCrawl/linkdb_dump/part-00000</code>查看linkdb中存储的信息</p>
+
+<h3 id="nutchjava">6.7 每个nutch命令对应的java类</h3>
+<p>怎么知道每个nutch命令对应的java类呢？打开<code>src/bin/nutch</code>并滚动到底部，就会找到每个命令对应的java类。</p>
+
+<h2 id="eclipse-1">7 在Eclipse里单步调试</h2>
+<p>以上费了这么大劲，为的是什么？就是为了利用Eclipse这个强大的IDE，能够进行单步调试。写代码其实不花时间，调试才是最花时间的，因此一定要有好的调试工具，磨刀不误砍柴功。</p>
+
+<p>如果想调试某一个类的代码，在Eclipse里下断点，然后”Debug as …“就可以了。</p>
+
+<p>由于有Hadoop job的关系，比较难以难以在哪些地方下断点好。下面给出了Nutch 1.x 的代码中，一些比较好的断点位置：</p>
+
+<ul>
+  <li>Fetcher [line: 1115] - run</li>
+  <li>Fetcher [line: 530] - fetch</li>
+  <li>Fetcher$FetcherThread [line: 560] - run()</li>
+  <li>Generator [line: 443] - generate</li>
+  <li>Generator$Selector [line: 108] - map</li>
+  <li>OutlinkExtractor [line: 71 &amp; 74] - getOutlinks</li>
+</ul>
+
+<h2 id="section-5">相关文章</h2>
+<p><a href="http://www.yanjiuyanjiu.com/blog/20140121/">Nutch 快速入门(Nutch 1.7)</a></p>
+
+<p><a href="http://www.yanjiuyanjiu.com/blog/20140201/">Nutch 快速入门(Nutch 2.2.1)</a></p>
+
+]]></content>
+  </entry>
+  
+</feed>

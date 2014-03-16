@@ -1,0 +1,498 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Spark开发环境的配置 - 研究研究</title>
+  <meta name="author" content="soulmachine">
+
+  
+  <meta name="description" content="一个关于机器学习的技术博客">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://www.yanjiuyanjiu.com/blog/20140130">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/bootstrap/bootstrap.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/stylesheets/bootstrap/responsive.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/stylesheets/syntax/syntax.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <style type="text/css">
+    body {
+      padding-bottom: 40px;
+    }
+    h1 {
+      margin-bottom: 15px;
+    }
+    img {
+      max-width: 100%;
+    }
+    .sharing, .meta, .pager {
+      margin: 20px 0px 20px 0px;
+    }
+    .page-footer p {
+      text-align: center;
+    }
+  </style>
+  <script src="/javascripts/libs/jquery.js"></script>
+  <script src="/javascripts/libs/modernizr-2.0.js"></script>
+  <script src="/javascripts/libs/bootstrap.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="研究研究" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<!-- <link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css"> -->
+<!-- <link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css"> -->
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-7583537-4']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <nav role="navigation"><div class="navbar navbar-inverse">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </a>
+
+      <a class="brand" href="/">研究研究</a>
+
+      <div class="nav-collapse">
+        <ul class="nav">
+  <li><a href="/">Home</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about/">About</a></li>
+  <li><a href="/notes/">读书笔记</a></li>
+</ul>
+
+
+        <ul class="nav pull-right" data-subscription="rss">
+          <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+          
+        </ul>
+
+        
+          <form class="pull-right navbar-search" action="http://google.com/search" method="get">
+            <fieldset role="search">
+              <input type="hidden" name="q" value="site:www.yanjiuyanjiu.com" />
+              <input class="search-query" type="text" name="q" results="0" placeholder="Search"/>
+            </fieldset>
+          </form>
+        
+      </div>
+    </div>
+  </div>
+</div>
+</nav>
+  <div class="container">
+    <div class="row-fluid">
+      
+<article class="hentry span9" role="article">
+
+  
+  <header class="page-header">
+    
+      <h1 class="entry-title">Spark开发环境的配置</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-30T16:36:00+08:00" pubdate data-updated="true">Jan 30<span>th</span>, 2014</time>
+        
+		
+         | <a href="#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p><strong>软件版本</strong>：Spark 0.9</p>
+
+<p>配置Spark开发环境，其实分为三个层次，一种是针对运维人员，把Spark安装部署到集群；一种是针对普通开发者，引入Spark的jar包，调用Spark提供的接口，编写分布式程序，写好后编译成jar，就可以提交到Spark集群去运行了；第三种是针对Spark开发者，为了给Spark贡献代码，需要git clone Spark的代码，然后导入IDE，为Spark开发代码。</p>
+
+<h2 id="spark">1 部署Spark集群</h2>
+<p>这种是运维人员在生产环境下，搭建起一个Spark集群。</p>
+
+<h3 id="spark-1">（可选）创建新用户 Spark</h3>
+<p>一般我倾向于把需要启动daemon进程，对外提供服务的程序，即服务器类的程序，安装在单独的用户下面。这样可以做到隔离，运维方面，安全性也提高了。</p>
+
+<p>创建一个新的group,</p>
+
+<pre><code>$ sudo groupadd spark
+</code></pre>
+
+<p>创建一个新的用户，并加入group,</p>
+
+<pre><code>$ sudo useradd -g spark spark
+</code></pre>
+
+<p>给新用户设置密码，</p>
+
+<pre><code>$ sudo passwd spark
+</code></pre>
+
+<p>在每台机器上创建 spark 新用户，并配置好SSH无密码，参考我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20120102/">SSH无密码登录的配置</a></p>
+
+<p>假设有三台机器，hostname分别是 master, worker01, worker02。</p>
+
+<h3 id="spark-">1.1 下载 Spark 预编译好的二进制包</h3>
+<p>如果你需要用到HDFS，则要针对Hadoop 1.x 和Hadoop 2.x 选择不同的版本。这里我选择 Hadoop 2.x 版。</p>
+
+<pre><code>spark@master $ wget http://d3kbcqa49mib13.cloudfront.net/spark-0.9.0-incubating-bin-hadoop1.tgz
+spark@master $ tar zxf spark-0.9.0-incubating-bin-hadoop1.tgz -C ~/local/opt
+</code></pre>
+
+<h3 id="tgzscp">1.2 将tgz压缩包scp到所有机器，解压到相同的路径</h3>
+
+<pre><code>spark@master $ scp spark-0.9.0-incubating-bin-hadoop1.tgz spark@worker01:~
+spark@master $ ssh worker01
+spark@worker01 $ tar zxf spark-0.9.0-incubating-bin-hadoop1.tgz -C ~/local/opt
+spark@worker01 $ exit
+spark@master $ scp spark-0.9.0-incubating-bin-hadoop1.tgz spark@worker02:~
+spark@master $ ssh worker02
+spark@worker02 $ tar zxf spark-0.9.0-incubating-bin-hadoop1.tgz -C ~/local/opt
+spark@worker02 $ exit
+</code></pre>
+
+<h3 id="section">1.3 修改配置文件</h3>
+<p>Spark 0.9 以后，配置文件简单多了，只有一个必须要配置，就是 <code>conf/slaves</code> 这个文件。在这个文件里添加slave的hostname。</p>
+
+<h3 id="slave">1.4 拷贝配置文件到所有slave</h3>
+
+<pre><code>spark@master $ spark@master $ scp ./conf/slaves spark@worker01:~/local/opt/spark-0.9.0-incubating-bin-hadoop1/conf
+spark@master $ spark@master $ scp ./conf/slaves spark@worker02:~/local/opt/spark-0.9.0-incubating-bin-hadoop1/conf
+</code></pre>
+
+<h3 id="spark-2">1.5 启动Spark集群</h3>
+
+<pre><code>spark@master $ ./sbin/start-all.sh
+</code></pre>
+
+<!-- more -->
+
+<p>也可以一台一台启动，先启动 master</p>
+
+<pre><code>spark@master $ ./sbin/start-master.sh
+</code></pre>
+
+<p>启动两台 slave，</p>
+
+<pre><code>spark@worker01 $ ./sbin/start-slave.sh 1 spark://master:7077
+spark@worker02 $ ./sbin/start-slave.sh 2 spark://master:7077
+</code></pre>
+
+<p>其中，<code>1</code>, <code>2</code> 是 worker的编号，可以是任意数字，只要不重复即可，<code>spark://master:7077</code> 是 master 的地址。以后向集群提交作业的时候，也需要这个地址。</p>
+
+<h3 id="section-1">1.6 测试一下，向集群提交一个作业</h3>
+
+<pre><code>spark@master $ ./bin/run-example org.apache.spark.examples.SparkPi spark://master:7077
+</code></pre>
+
+<h2 id="section-2">2 配置普通开发环境</h2>
+<p>TODO</p>
+
+<h2 id="spark-3">3 配置Spark开发环境</h2>
+<p>当你需要修改Spark的代码，或给Spark添加代码，就需要阅读本节了。</p>
+
+<h3 id="git-clone-">3.1 git clone 代码</h3>
+
+<pre><code>git clone git@github.com:apache/incubator-spark.git
+</code></pre>
+
+<h3 id="section-3">3.2 编译</h3>
+<p>Spark脚本会自动下载对应版本的sbt和scala编译器，因此机器事先不需要安装sbt和scala</p>
+
+<p>按照 github 官方repo首页的文档，输入如下一行命令即可开始编译，</p>
+
+<pre><code>./sbt/sbt assembly
+</code></pre>
+
+<h3 id="section-4">3.3 运行一个例子</h3>
+
+<pre><code>./run-example org.apache.spark.examples.SparkPi local
+</code></pre>
+
+<p>说明安装成功了。</p>
+
+<h3 id="spark-shell">3.4 试用 spark shell</h3>
+<!-- more -->
+
+<p>./spark-shell</p>
+
+<p>会出现<code>scala&gt;</code>提示符号，可见spark脚本自动下载了scala编译器，其实就是一个jar，例如<code>scala-compiler-2.10.3.jar</code>。</p>
+
+<h3 id="scala">3.5 安装scala</h3>
+<p>开发Spark的时候，由于Intellij Idea 需要调用外部的sbt和scala，因此机器上还是需要安装scala和sbt。</p>
+
+<p>打开 <code>projects/SparkBuild.scala</code>，搜索<code>scalaVersion</code>，获得spark所使用的scala编译器版本，然后去scala官网<a href="http://www.scala-lang.org/">http://www.scala-lang.org/</a>，下载该版本的scala编译器，并设置<code>SCALA_HOME</code>环境变量，将bin目录加入PATH。例如下载scala-2.10.3.tgz，解压到/opt，设置环境变量如下：</p>
+
+<pre><code>sudo vim /etc/profile
+export SCALA_HOME=/opt/scala-2.10.3
+export PATH=$PATH:$SCALA_HOME/bin
+</code></pre>
+
+<h3 id="sbt">3.6 安装sbt</h3>
+
+<p>打开<code>projects/build.properties</code>，可以看到spark所使用的sbt版本号，去
+官网<a href="http://www.scala-sbt.org/">http://www.scala-sbt.org/</a>下载该版本的sbt，双击安装。并设置<code>SBT_HOME</code>环境变量，将bin目录加入PATH。</p>
+
+<h3 id="idea">3.7 下载并安装idea</h3>
+
+<p>Spark核心团队的hashjoin曾在我博客上留言，说他们都使用idea在开发spark，我用过<a href="www.scala-ide.org">Scala IDE</a>和idea，两者各有优劣，总的来说，idea要好用一些，虽然我是老牌eclipse用户，但我还是转向了idea。</p>
+
+<p>去idea官网下载idea的tar.gz包，解压就行。运行idea，安装scala插件。</p>
+
+<h3 id="idea-1">3.8 生成idea项目文件</h3>
+<p>在源码根目录，使用如下命令</p>
+
+<pre><code>./sbt/sbt gen-idea
+</code></pre>
+
+<p>就生成了idea项目文件。</p>
+
+<h3 id="open-project">3.9 Open Project</h3>
+<p>使用 idea，点击<code>File-&gt;Open project</code>，浏览到 <code>incubator-spark</code>文件夹，打开项目，就可以修改Spark代码了。</p>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">soulmachine</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-30T16:36:00+08:00" pubdate data-updated="true">Jan 30<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/spark/'>Spark</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  <!-- AddThis Button BEGIN -->
+  <div class="addthis_toolbox addthis_default_style addthis_32x32_style">
+    <a class="addthis_button_sinaweibo"></a>
+    <a class="addthis_button_facebook"></a>
+    <a class="addthis_button_twitter"></a>
+    <a class="addthis_button_google_plusone_share"></a>
+    <a class="addthis_button_delicious"></a>
+    <a class="addthis_button_digg"></a>
+    <a class="addthis_button_reddit"></a>
+    <a class="addthis_button_compact"></a><a class="addthis_counter addthis_bubble_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=undefined"></script>
+  <!-- AddThis Button END -->
+  
+  
+  
+</div>
+
+    
+    
+	
+    <section>
+      <div id="duoshuo_thread" aria-live="polite"><!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-thread-key="/blog/20140130" data-title="Spark开发环境的配置"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"yanjiuyanjiu"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = 'http://static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		|| document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+</script>
+<!-- Duoshuo Comment END --></div>
+    </section>
+    
+    <ul class="pager">
+      
+      <li class="previous"><a class="basic-alignment left"
+        href="/blog/20140129" title="Previous Post:
+        我的Ansible playbook">&laquo; 我的Ansible playbook</a></li>
+      
+      <li><a href="/blog/archives">Blog Archives</a></li>
+      
+      <li class="next"><a class="basic-alignment right" href="/blog/20140131"
+        title="Next Post: 给CentOS安装UEK内核">给CentOS安装UEK内核
+        &raquo;</a></li>
+      
+    </ul>
+  </footer>
+</article>
+
+<aside class="sidebar-nav span3">
+  
+    <section>
+  <h2>公告</h2>
+  <p>独学而无友，则孤陋而寡闻，我每周在清华举办机器学习读书会，欢迎大家前来交流切磋。</p>
+  <p>详情请见<a href="http://q.weibo.com/1644133">读书会微博群</a></p>
+</section>
+<section>
+  <h2>分类目录</h2>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>Algorithm (1)</a></li><li><a href='/blog/categories/devops/'>DevOps (8)</a></li><li><a href='/blog/categories/docker/'>Docker (3)</a></li><li><a href='/blog/categories/hadoop/'>Hadoop (8)</a></li><li><a href='/blog/categories/language/'>Language (3)</a></li><li><a href='/blog/categories/machine-learning/'>Machine-Learning (5)</a></li><li><a href='/blog/categories/search-engine/'>Search-Engine (5)</a></li><li><a href='/blog/categories/spark/'>Spark (6)</a></li><li><a href='/blog/categories/tools/'>Tools (11)</a></li></ul>
+</section>
+<section>
+  <h2>友情链接</h2>
+  <ul>
+    <li>
+      <a href="http://yewen.us/" title="大学同学，ACM高手，曾在百度，现在人人网">笨狗随手留下</a>
+    </li>
+	<li>
+      <a href="http://blog.liancheng.info/" title="网易，百度，技术高手">连城</a>
+    </li>
+    <li>
+      <a href="http://www.rational.so/" title="系统方向的清华博士">阎栋</a>
+    </li>
+	<li>
+      <a href="http://www.parallellabs.com/" title="冠诚，IBM研究院研究员">并行实验室</a>
+    </li>
+	<li>
+      <a href="http://shenfeng.me/" title="http-kit, clojure">沈峰</a>
+    </li>
+	<li>
+      <a href="http://www.lihaipeng.info/" title="百度商业产品高级研发工程师">李海鹏</a>
+    </li>
+	<li>
+      <a href="http://www.chioka.in/" title="Google工程师">Eric</a>
+    </li>
+    <li>
+      <a href="http://blog.csdn.net/lgnlgn" title="好朋友，曾在赶集网，现在老家的猫扑">梁兄的技术博客</a>
+    </li>
+    <li>
+      <a href="http://www.doesbetter.com/" title="机器学习，北邮">王孝舒的博客</a>
+    </li>
+    <li>
+      <a href="http://www.foreverlee.net/" title="机器学习，中科院计算所">ForeverLee</a>
+    </li>
+  </ul>
+</section>
+
+
+
+
+<section>
+  <h2>最新文章</h2>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/20140220">编写Nutch插件</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20140214">CentOS上编译 Hadoop 2.2.0</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20140208">在CentOS上安装HBase 0.96</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20140207">在CentOS上安装ZooKeeper集群</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20140206">Hadoop多用户的配置(Hadoop 2.x)</a>
+      </li>
+    
+  </ul>
+</section><section>
+<h2>最新评论</h2>
+<ul class="ds-recent-comments" data-num-items="5" data-show-avatars="1" data-show-time="1" data-show-title="1" data-show-admin="0" data-excerpt-length="32"></ul>
+
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo" class="page-footer"><!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX", "output/HTML-CSS"],
+  tex2jax: {
+    inlineMath: [ ['$', '$'] ],
+    displayMath: [ ['$$', '$$']],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  messageStyle: "none",
+  "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] }
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+<p>
+  Copyright &copy; 2014 - soulmachine -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

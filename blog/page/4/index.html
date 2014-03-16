@@ -114,7 +114,7 @@
       
   <header class="page-header">
     
-      <h1 class="entry-title"><a href="/blog/20100401">Java使用imageio 读写图像</a></h1>
+      <h1 class="entry-title"><a href="/blog/20130611">使用Scala IDE 阅读spark源码 &#8211; 将sbt项目转化为eclipse项目</a></h1>
     
     
       <p class="meta">
@@ -130,46 +130,66 @@
   
 
 
-<time datetime="2010-04-01T16:53:00+08:00" pubdate data-updated="true">Apr 1<span>st</span>, 2010</time>
+<time datetime="2013-06-11T11:48:00+08:00" pubdate data-updated="true">Jun 11<span>th</span>, 2013</time>
         
 		
-         | <a href="/blog/20100401#duoshuo_thread">Comments</a>
+         | <a href="/blog/20130611#duoshuo_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>Java中进行图像I/O（即读图片和写图片，不涉及到复杂图像处理）有三个方法：</p>
+  <div class="entry-content"><p>阅读Spark源代码，最简单的方式是下载源码包，解压后用纯文本方式来阅读源码。这样效率不高，可以用sbteclipse这个插件，将sbt项目文件转化为eclipse项目文件，然后导入到Scala IDE，用eclipse来阅读源码，效率大大提高。</p>
+
+<p><strong>环境</strong>：Windows 7, JDK 1.6</p>
 
 <ol>
-  <li>Java Image I/O API，支持常见图片，从Java 2 version 1.4.0开始就内置了。
-主页：<a href="http://java.sun.com/javase/6/docs/technotes/guides/imageio/index.html">http://java.sun.com/javase/6/docs/technotes/guides/imageio/index.html</a></li>
-  <li>JAI 中的 Image I/O Tools，支持更多图片类型，例如JPEG-LS, JPEG2000, 和 TIFF。
-主页：<a href="https://jai-imageio.dev.java.net/">https://jai-imageio.dev.java.net/</a>。JAI 是一个关于图像处理的框架，很庞大，
-其中仅仅jai-imageio是关于图像I/O的，其他的可以不看。</li>
-  <li>JAI的com.sun.media.jai.codec 也有一定的图像解码能力</li>
-</ol>
+  <li>安装 scala。去官网 <a href="http://www.scala-lang.org/">http://www.scala-lang.org/</a> ，下载MSI，安装，按默认设置即可。</li>
+  <li>
+    <p>安装 sbt。去官网 <a href="http://www.scala-sbt.org/">http://www.scala-sbt.org/</a> ， 下载MSI，安装，按默认设置即可。
+Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt时它会自动下载对应的scala编译器。</p>
+  </li>
+  <li>
+    <p>安装 Scala IDE。 去官网 <a href="http://scala-ide.org/">http://scala-ide.org/</a>，点击”Get the SDK”绿色按钮，下载。这个IDE的好处是，自带了scala编译器，解压即可使用。</p>
+  </li>
+  <li>
+    <p>下载spark源码。 去官网 <a href="http://spark-project.org/">http://spark-project.org/</a> 下载源码，当前版本是 0.7.2, source package 大约4M左右。解压源码，例如 解压到 d:spark-0.7.0\</p>
+  </li>
+  <li>
+    <p>添加 sbteclipse 插件依赖。spark已经添加了依赖，这一步什么也不需要做。</p>
 
-<p>当然，还有众多的java开源工具包可以读写图像，例如JIMI, JMagic等，但JDK目前本身能
-够读写图片，就用JDK的，开发和部署方便，不需要额外下载jar包。</p>
+    <p>这个插件的作用，就是能够读取sbt的配置文件，生成一个eclipse的工程文件。有了eclipse工程文件，就可以导入到eclipse了。</p>
 
-<p>由于JAI是Java新加入的，很多组件不是正式规范，JDK不自带，因此开发和部署需要额外
-安装，安装文件在官网<a href="https://jai.dev.java.net/">https://jai.dev.java.net/</a>下载得到。</p>
+    <p>spark已经添加了依赖，见 d:\spark-0.7.2\project\plugins.sbt，有一行</p>
 
-<p>如果你仅仅想读取常见格式的图片，不需要用JAI这么高级这么庞大的东西，
-用Java Image I/O API即可。</p>
+    <p>addSbtPlugin(“com.typesafe.sbteclipse” % “sbteclipse-plugin” % “2.1.1”)</p>
+  </li>
+  <li>
+    <p>启动cmd，启动sbt。</p>
 
-<p>下面重点介绍 Java Image I/O API。</p>
+    <blockquote>
+      <p>cd  d:\spark-0.7.0<br />
+ sbt</p>
+    </blockquote>
 
-<p>Java Image I/O API 主要在 javax.imageio 下面。JDK已经内置了常见图片格式的插件，
-但它提供了插件体系结构，第三方也可以开发插件支持其他图片格式。</p>
+    <p>Linux下则是</p>
 
-</div>
+    <blockquote>
+      <p>cd  d:\spark-0.7.0<br />
+ sbt/sbt</p>
+    </blockquote>
+
+    <p>开始下载各种依赖包，需要等待很长时间。</p>
+  </li>
+  <li>
+    <p><strong>翻@_@墙。见本文最后一段。</strong></p>
+
+    <p></div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/20100401">继续阅读 &rarr;</a>
+      <a rel="full-article" href="/blog/20130611">继续阅读 &rarr;</a>
     </footer>
   
 
@@ -181,7 +201,7 @@
       
   <header class="page-header">
     
-      <h1 class="entry-title"><a href="/blog/20100331">Java质量检测评估工具</a></h1>
+      <h1 class="entry-title"><a href="/blog/20130412">LaTeX的各种发行版和编辑器的比较</a></h1>
     
     
       <p class="meta">
@@ -197,80 +217,183 @@
   
 
 
-<time datetime="2010-03-31T16:45:00+08:00" pubdate data-updated="true">Mar 31<span>st</span>, 2010</time>
+<time datetime="2013-04-12T11:01:00+08:00" pubdate data-updated="true">Apr 12<span>th</span>, 2013</time>
         
 		
-         | <a href="/blog/20100331#duoshuo_thread">Comments</a>
+         | <a href="/blog/20130412#duoshuo_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>Java代码质量检测评估工具
-“五大” 代码分析领域：</p>
+  <div class="entry-content"><h2 id="distribution">发行版(distribution)</h2>
+<p>TeX类似于Linux，有很多不同的发行版(distribution)。</p>
 
-<ul>
-  <li>编码风格</li>
-  <li>冗余代码</li>
-  <li>代码覆盖率</li>
-  <li>依赖项分析</li>
-  <li>复杂度监控</li>
-</ul>
+<p>先看看各个发行版的流行程度。</p>
 
-<p>一下列举了一些目前比较流行的工具。网址后面列出了其PR值，可以反映此工具的流行度。</p>
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"><strong>名字</strong></th>
+      <th style="text-align: center"><strong>官网</strong></th>
+      <th style="text-align: center"><strong>PR</strong></th>
+      <th style="text-align: center"><strong>Alexa</strong></th>
+      <th style="text-align: center"><strong>最后更新</strong></th>
+      <th style="text-align: center"><strong>weibo</strong></th>
+      <th style="text-align: center"><strong>quora</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">TeX Live</td>
+      <td style="text-align: center"><a href="http://www.tug.org/texlive/">http://www.tug.org/texlive/</a></td>
+      <td style="text-align: center">7</td>
+      <td style="text-align: center">N/A</td>
+      <td style="text-align: center">2012-07-01</td>
+      <td style="text-align: center">43</td>
+      <td style="text-align: center">N/A</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">MiKTeX</td>
+      <td style="text-align: center"><a href="http://miktex.org/">http://miktex.org/</a></td>
+      <td style="text-align: center">7</td>
+      <td style="text-align: center">188,485</td>
+      <td style="text-align: center">1.3.2 2012-09-24</td>
+      <td style="text-align: center">54</td>
+      <td style="text-align: center">N/A</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">CTeX</td>
+      <td style="text-align: center"><a href="http://www.ctex.org/">http://www.ctex.org/</a></td>
+      <td style="text-align: center">6</td>
+      <td style="text-align: center">252,657</td>
+      <td style="text-align: center">2.9.2 2012-03-30</td>
+      <td style="text-align: center">344</td>
+      <td style="text-align: center">N/A</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">proTeXt</td>
+      <td style="text-align: center"><a href="http://www.tug.org/protext/">http://www.tug.org/protext/</a></td>
+      <td style="text-align: center">7</td>
+      <td style="text-align: center">N/A</td>
+      <td style="text-align: center">3.1.1 2012-07-23</td>
+      <td style="text-align: center">10</td>
+      <td style="text-align: center">N/A</td>
+    </tr>
+  </tbody>
+</table>
 
-<h2 id="section">1. 编码风格</h2>
-<p>CheckStyle
-Home page: <a href="http://checkstyle.sourceforge.net/">http://checkstyle.sourceforge.net/</a> (6)<br />
-对应的eclipse插件有多个，其中eclipsecs最常用<br />
-Home page: <a href="http://eclipse-cs.sourceforge.net/">http://eclipse-cs.sourceforge.net/</a> (6)<br />
-eclipse插件URL：<a href="http://eclipse-cs.sf.net/update/">http://eclipse-cs.sf.net/update/</a></p>
+<p>其中CTeX和proTeXt都是基于MiKTeX的，再次进行了打包。国内估计用CTeX比较多。</p>
 
-<h2 id="section-1">2. 冗余代码</h2>
-<p>Simian <a href="http://www.redhillconsulting.com.au/products/simian/">http://www.redhillconsulting.com.au/products/simian/</a> (5)<br />
-PMD 的 CPD <a href="http://pmd.sourceforge.net/cpd.html">http://pmd.sourceforge.net/cpd.html</a> (5)</p>
+<h2 id="editor">编辑器(editor)</h2>
+<p>编辑器大概分为两种，一种为WYSIWYG，所见即所得，实时预览，类似于Word，另一种是纯文本编辑器，有语法高亮，没有预览功能，需要另外安装一个发行版，编译成PDF后才能预览。</p>
 
-<h2 id="section-2">3. 代码覆盖率</h2>
-<p>EMMA  <a href="http://emma.sourceforge.net/">http://emma.sourceforge.net/</a> (6)<br />
-Cobertura  <a href="http://cobertura.sourceforge.net/">http://cobertura.sourceforge.net/</a> (6)<br />
-EclEmma <a href="http://update.eclemma.org/">http://update.eclemma.org/</a> (5)<br />
-Coverlipse <a href="http://coverlipse.sourceforge.net/">http://coverlipse.sourceforge.net/</a> (3)</p>
+<p>先看看各个编辑器的流行程度。</p>
 
-<h2 id="section-3">4. 依赖项分析</h2>
-<p>JDepend <a href="http://clarkware.com/software/JDepend.html">http://clarkware.com/software/JDepend.html</a> (6)</p>
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"><strong>名字</strong></th>
+      <th style="text-align: center"><strong>官网</strong></th>
+      <th style="text-align: center"><strong>PR</strong></th>
+      <th style="text-align: center"><strong>Alexa</strong></th>
+      <th style="text-align: center"><strong>预览类型</strong></th>
+      <th style="text-align: center"><strong>最后更新</strong></th>
+      <th style="text-align: center"><strong>weibo</strong></th>
+      <th style="text-align: center"><strong>quora</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">TeXmaker</td>
+      <td style="text-align: center"><a href="http://www.xm1math.net/texmaker/">http://www.xm1math.net/texmaker/</a></td>
+      <td style="text-align: center">6</td>
+      <td style="text-align: center">289,311</td>
+      <td style="text-align: center">无预览</td>
+      <td style="text-align: center">4.0.1 2013-03-16</td>
+      <td style="text-align: center">60</td>
+      <td style="text-align: center">N/A</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">TeXworks</td>
+      <td style="text-align: center"><a href="http://www.tug.org/texworks/">http://www.tug.org/texworks/</a></td>
+      <td style="text-align: center">5</td>
+      <td style="text-align: center">90,230</td>
+      <td style="text-align: center">无预览</td>
+      <td style="text-align: center">0.4.4  2012-04</td>
+      <td style="text-align: center">23</td>
+      <td style="text-align: center">N/A</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">TeXstudio</td>
+      <td style="text-align: center"><a href="http://texstudio.sourceforge.net/">http://texstudio.sourceforge.net/</a></td>
+      <td style="text-align: center">6</td>
+      <td style="text-align: center">N/A</td>
+      <td style="text-align: center">无预览</td>
+      <td style="text-align: center">2.5.2 2013-01-08</td>
+      <td style="text-align: center">15</td>
+      <td style="text-align: center">N/A</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">TeXnicCenter</td>
+      <td style="text-align: center"><a href="http://www.texniccenter.org/">http://www.texniccenter.org/</a></td>
+      <td style="text-align: center">7</td>
+      <td style="text-align: center">884,570</td>
+      <td style="text-align: center">无预览</td>
+      <td style="text-align: center">v2.0 beta1 2012-11-03</td>
+      <td style="text-align: center">10</td>
+      <td style="text-align: center">N/A</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">Lyx</td>
+      <td style="text-align: center"><a href="http://www.lyx.org/">http://www.lyx.org/</a></td>
+      <td style="text-align: center">6</td>
+      <td style="text-align: center">261,649</td>
+      <td style="text-align: center">实时预览</td>
+      <td style="text-align: center">2.0.5.1 2013-01-08</td>
+      <td style="text-align: center">56</td>
+      <td style="text-align: center">42</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">Bakoma</td>
+      <td style="text-align: center"><a href="http://www.bakoma-tex.com/">http://www.bakoma-tex.com/</a></td>
+      <td style="text-align: center">5</td>
+      <td style="text-align: center">1,327,901</td>
+      <td style="text-align: center">实时预览</td>
+      <td style="text-align: center">10.10 2013-01-13</td>
+      <td style="text-align: center">3</td>
+      <td style="text-align: center">N/A</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">TeXmacs</td>
+      <td style="text-align: center"><a href="http://www.texmacs.org">http://www.texmacs.org</a></td>
+      <td style="text-align: center">6</td>
+      <td style="text-align: center">1,525,373</td>
+      <td style="text-align: center">实时预览</td>
+      <td style="text-align: center">1.0.7.19 2013-03-27</td>
+      <td style="text-align: center">27</td>
+      <td style="text-align: center">N/A</td>
+    </tr>
+    <tr>
+      <td style="text-align: center">LEd</td>
+      <td style="text-align: center"><a href="http://www.latexeditor.org/">http://www.latexeditor.org/</a></td>
+      <td style="text-align: center">6</td>
+      <td style="text-align: center">624,564</td>
+      <td style="text-align: center">实时预览</td>
+      <td style="text-align: center">0.53 2009-10-09</td>
+      <td style="text-align: center">0</td>
+      <td style="text-align: center">N/A</td>
+    </tr>
+  </tbody>
+</table>
 
-<h2 id="section-4">5. 复杂度监控</h2>
-<p>Metrics <a href="http://metrics.sourceforge.net/">http://metrics.sourceforge.net/</a> (4)</p>
-
-<h2 id="section-5">6. 静态分析工具</h2>
-<p>具有以上两项或两项以上的综合工具（也称为静态分析工具）： </p>
-
-<h3 id="pmd">6.1 PMD</h3>
-<p>Home page: <a href="http://pmd.sourceforge.net/">http://pmd.sourceforge.net/</a> (6)<br />
-eclipse插件URL：<a href="http://sourceforge.net/projects/pmd/files/pmd-eclipse/update-site/">http://sourceforge.net/projects/pmd/files/pmd-eclipse/update-site/</a></p>
-
-<h3 id="findbugs-httpfindbugssourceforgenet-6">6.2 FindBugs <a href="http://findbugs.sourceforge.net/">http://findbugs.sourceforge.net/</a> (6)</h3>
-<p>eclipse插件URL：<a href="http://findbugs.cs.umd.edu/eclipse">http://findbugs.cs.umd.edu/eclipse</a></p>
-
-<p>FindBugs 检查程序生成的class文件，即分析字节码
-PMD 检查源码，分析源代码</p>
-
-<h3 id="jtest">6.3 Jtest</h3>
-<p><a href="http://www.parasoft.com/jtest">http://www.parasoft.com/jtest</a></p>
-
-<h3 id="jlint">6.4 Jlint</h3>
-<p><a href="http://artho.com/jlint/">http://artho.com/jlint/</a> (5)</p>
-
-<h3 id="lint4j">6.5 Lint4j</h3>
-<p><a href="http://www.jutils.com/">http://www.jutils.com/</a> (4)</p>
-
-<p>我个人平时最常用的是Checkstyle，其次是PMD，大家可以参考一下。</p>
-
-<h2 id="section-6">参考资料</h2>
-<p><a href="http://blog.csdn.net/cb_121/archive/2009/05/22/4208792.aspx">http://blog.csdn.net/cb_121/archive/2009/05/22/4208792.aspx</a></p>
 </div>
   
+  
+    <footer>
+      <a rel="full-article" href="/blog/20130412">继续阅读 &rarr;</a>
+    </footer>
   
 
 
@@ -281,7 +404,7 @@ PMD 检查源码，分析源代码</p>
       
   <header class="page-header">
     
-      <h1 class="entry-title"><a href="/blog/20100328">使用pdfbox 抽取PDF文件中的文本</a></h1>
+      <h1 class="entry-title"><a href="/blog/20130402">我的Octopress配置</a></h1>
     
     
       <p class="meta">
@@ -297,17 +420,38 @@ PMD 检查源码，分析源代码</p>
   
 
 
-<time datetime="2010-03-28T16:41:00+08:00" pubdate data-updated="true">Mar 28<span>th</span>, 2010</time>
+<time datetime="2013-04-02T15:35:00+08:00" pubdate data-updated="true">Apr 2<span>nd</span>, 2013</time>
         
 		
-         | <a href="/blog/20100328#duoshuo_thread">Comments</a>
+         | <a href="/blog/20130402#duoshuo_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+  <div class="entry-content"><h2 id="section">实时预览</h2>
+<p>使用如下命令可以实现实时预览：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line">rake preview
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p><code>rake preview</code> 会自动监视文件的变化，重新生成静态页面。因此修改markdown文件后，只需要在浏览器里刷新一下页面，就立刻可以看到效果。不过如果修改了_config.yml的话，则需要Ctrl+C终止，用<code>rake generate</code>重新生成，才能看到效果。</p>
+
+<h2 id="section-1">嵌入代码块</h2>
+<p>见官方文档<a href="http://octopress.org/docs/blogging/code/">Sharing Code Snippets</a>。</p>
+
+<p>Octopress是一款为hacker量身定制的博客系统，当然内置了代码高亮的功能！它的代码高亮功能是通过Pygments实现的，配色方案用的是Solarized，堪称完美。</p>
+
+<p>Octopress支持多种方式嵌入代码，可以直接嵌入代码，也可以引用github上的gist 。</p>
+
+<p>我喜欢用<strong>三个反引号</strong>直接嵌入代码，比 <code>codeblock</code>要简洁。</p>
+
+<h3 id="mathjax">启用MathJax</h3>
+<p>在<code>source/_includes/custom/footer.html</code>的第一行加入如下代码：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
 <span class="line-number">2</span>
 <span class="line-number">3</span>
 <span class="line-number">4</span>
@@ -322,90 +466,33 @@ PMD 检查源码，分析源代码</p>
 <span class="line-number">13</span>
 <span class="line-number">14</span>
 <span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-<span class="line-number">23</span>
-<span class="line-number">24</span>
-<span class="line-number">25</span>
-<span class="line-number">26</span>
-<span class="line-number">27</span>
-<span class="line-number">28</span>
-<span class="line-number">29</span>
-<span class="line-number">30</span>
-<span class="line-number">31</span>
-<span class="line-number">32</span>
-<span class="line-number">33</span>
-<span class="line-number">34</span>
-<span class="line-number">35</span>
-<span class="line-number">36</span>
-<span class="line-number">37</span>
-<span class="line-number">38</span>
-<span class="line-number">39</span>
-<span class="line-number">40</span>
-<span class="line-number">41</span>
-<span class="line-number">42</span>
-<span class="line-number">43</span>
-<span class="line-number">44</span>
-<span class="line-number">45</span>
-<span class="line-number">46</span>
-<span class="line-number">47</span>
-<span class="line-number">48</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">yanjiuyanjiu</span><span class="o">.</span><span class="na">search</span><span class="o">;</span>
-</span><span class="line">
-</span><span class="line"><span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
-</span><span class="line"><span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
-</span><span class="line">
-</span><span class="line"><span class="kn">import</span> <span class="nn">org.apache.pdfbox.pdmodel.PDDocument</span><span class="o">;</span>
-</span><span class="line"><span class="kn">import</span> <span class="nn">org.apache.pdfbox.util.PDFTextStripper</span><span class="o">;</span>
-</span><span class="line">
-</span><span class="line"><span class="cm">/**</span>
-</span><span class="line"><span class="cm"> * 抽去PDF文件中的文本.</span>
-</span><span class="line"><span class="cm"> * @author soulmachine</span>
-</span><span class="line"><span class="cm"> *</span>
-</span><span class="line"><span class="cm"> */</span>
-</span><span class="line"><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">PDFboxTest</span> <span class="o">{</span>
-</span><span class="line"> <span class="cm">/** 禁止创建对象. */</span>
-</span><span class="line"> <span class="kd">private</span> <span class="nf">PDFboxTest</span><span class="o">()</span> <span class="o">{</span>
-</span><span class="line"> <span class="o">}</span>
-</span><span class="line"> <span class="cm">/**</span>
-</span><span class="line"><span class="cm"> * 抽取PDF中的文本.</span>
-</span><span class="line"><span class="cm"> * @param f PDF文件</span>
-</span><span class="line"><span class="cm"> * @return PDF对应的文本字符串</span>
-</span><span class="line"><span class="cm"> */</span>
-</span><span class="line"> <span class="kd">public</span> <span class="kd">static</span> <span class="n">String</span> <span class="nf">getText</span><span class="o">(</span><span class="kd">final</span> <span class="n">File</span> <span class="n">f</span><span class="o">)</span> <span class="o">{</span>
-</span><span class="line"> <span class="n">String</span> <span class="n">text</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="o">;</span>
-</span><span class="line"> <span class="k">try</span> <span class="o">{</span>
-</span><span class="line"> <span class="n">PDDocument</span> <span class="n">pdfdocument</span> <span class="o">=</span> <span class="n">PDDocument</span><span class="o">.</span><span class="na">load</span><span class="o">(</span><span class="n">f</span><span class="o">);</span>
-</span><span class="line"> <span class="n">PDFTextStripper</span> <span class="n">stripper</span> <span class="o">=</span> <span class="k">new</span> <span class="n">PDFTextStripper</span><span class="o">();</span>
-</span><span class="line"> <span class="n">stripper</span><span class="o">.</span><span class="na">setStartPage</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span> <span class="c1">// 只抽取第1页和第2页</span>
-</span><span class="line"> <span class="n">stripper</span><span class="o">.</span><span class="na">setEndPage</span><span class="o">(</span><span class="mi">2</span><span class="o">);</span>
-</span><span class="line"> <span class="n">text</span> <span class="o">=</span> <span class="n">stripper</span><span class="o">.</span><span class="na">getText</span><span class="o">(</span><span class="n">pdfdocument</span><span class="o">);</span>
-</span><span class="line"> <span class="n">pdfdocument</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
-</span><span class="line">
-</span><span class="line"> <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
-</span><span class="line"> <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
-</span><span class="line"> <span class="o">}</span>
-</span><span class="line">
-</span><span class="line"> <span class="k">return</span> <span class="n">text</span><span class="o">;</span>
-</span><span class="line"> <span class="o">}</span>
-</span><span class="line">
-</span><span class="line"> <span class="cm">/** 测试.</span>
-</span><span class="line"><span class="cm"> *</span>
-</span><span class="line"><span class="cm"> * @param args PDF文件路径</span>
-</span><span class="line"><span class="cm"> */</span>
-</span><span class="line"> <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="kd">final</span> <span class="n">String</span><span class="o">[]</span>  <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
-</span><span class="line"> <span class="n">File</span> <span class="n">file</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="n">args</span><span class="o">[</span><span class="mi">0</span><span class="o">]);</span>
-</span><span class="line"> <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">PDFboxTest</span><span class="o">.</span><span class="na">getText</span><span class="o">(</span><span class="n">file</span><span class="o">));</span>
-</span><span class="line"> <span class="o">}</span>
-</span><span class="line"><span class="o">}</span>
+</pre></td><td class="code"><pre><code class="javascript"><span class="line"><span class="c">&lt;!--</span> <span class="nx">mathjax</span> <span class="nx">config</span> <span class="nx">similar</span> <span class="nx">to</span> <span class="nx">math</span><span class="p">.</span><span class="nx">stackexchange</span> <span class="o">--&gt;</span>
+</span><span class="line"><span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/x-mathjax-config&quot;</span><span class="o">&gt;</span>
+</span><span class="line"><span class="nx">MathJax</span><span class="p">.</span><span class="nx">Hub</span><span class="p">.</span><span class="nx">Config</span><span class="p">({</span>
+</span><span class="line">  <span class="nx">jax</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;input/TeX&quot;</span><span class="p">,</span> <span class="s2">&quot;output/HTML-CSS&quot;</span><span class="p">],</span>
+</span><span class="line">  <span class="nx">tex2jax</span><span class="o">:</span> <span class="p">{</span>
+</span><span class="line">    <span class="nx">inlineMath</span><span class="o">:</span> <span class="p">[</span> <span class="p">[</span><span class="s1">&#39;$&#39;</span><span class="p">,</span> <span class="s1">&#39;$&#39;</span><span class="p">]</span> <span class="p">],</span>
+</span><span class="line">    <span class="nx">displayMath</span><span class="o">:</span> <span class="p">[</span> <span class="p">[</span><span class="s1">&#39;$$&#39;</span><span class="p">,</span> <span class="s1">&#39;$$&#39;</span><span class="p">]],</span>
+</span><span class="line">    <span class="nx">processEscapes</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+</span><span class="line">    <span class="nx">skipTags</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;script&#39;</span><span class="p">,</span> <span class="s1">&#39;noscript&#39;</span><span class="p">,</span> <span class="s1">&#39;style&#39;</span><span class="p">,</span> <span class="s1">&#39;textarea&#39;</span><span class="p">,</span> <span class="s1">&#39;pre&#39;</span><span class="p">,</span> <span class="s1">&#39;code&#39;</span><span class="p">]</span>
+</span><span class="line">  <span class="p">},</span>
+</span><span class="line">  <span class="nx">messageStyle</span><span class="o">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+</span><span class="line">  <span class="s2">&quot;HTML-CSS&quot;</span><span class="o">:</span> <span class="p">{</span> <span class="nx">preferredFont</span><span class="o">:</span> <span class="s2">&quot;TeX&quot;</span><span class="p">,</span> <span class="nx">availableFonts</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;STIX&quot;</span><span class="p">,</span><span class="s2">&quot;TeX&quot;</span><span class="p">]</span> <span class="p">}</span>
+</span><span class="line"><span class="p">});</span>
+</span><span class="line"><span class="o">&lt;</span><span class="err">/script&gt;</span>
+</span><span class="line"><span class="o">&lt;</span><span class="nx">script</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML&quot;</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>这样就引入了MathJax的JS包，可以直接在markdown文件里直接写公式了，例如 $\dfrac {\pi}{2}$。</p>
+
+<p>上面的代码也可以在<code>source/_includes/custom/header.html</code>里添加，不过这样会使得页面的加载速度变慢。还可以在<code>source/_layouts/default.html</code>里添加。</p>
+
 </div>
   
+  
+    <footer>
+      <a rel="full-article" href="/blog/20130402">继续阅读 &rarr;</a>
+    </footer>
   
 
 
@@ -416,7 +503,7 @@ PMD 检查源码，分析源代码</p>
       
   <header class="page-header">
     
-      <h1 class="entry-title"><a href="/blog/20100215">Java命令行下运行class文件</a></h1>
+      <h1 class="entry-title"><a href="/blog/20130401">使用github + Octopress 搭建免费博客</a></h1>
     
     
       <p class="meta">
@@ -432,17 +519,661 @@ PMD 检查源码，分析源代码</p>
   
 
 
-<time datetime="2010-02-15T16:27:00+08:00" pubdate data-updated="true">Feb 15<span>th</span>, 2010</time>
+<time datetime="2013-04-01T15:14:00+08:00" pubdate data-updated="true">Apr 1<span>st</span>, 2013</time>
         
 		
-         | <a href="/blog/20100215#duoshuo_thread">Comments</a>
+         | <a href="/blog/20130401#duoshuo_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>今天碰到了一个很变态的问题，写了一个很简单的HelloWord.java，内容如下：</p>
+  <div class="entry-content"><h3 id="section">前提条件</h3>
+<p>注册一个github账号。</p>
+
+<p>任何资料，都不如<a href="http://octopress.org/docs/">Octopress</a> 和<a href="https://help.github.com/categories/20/articles">Github Pages</a>的官方文档，建议首先阅读官方文档。</p>
+
+<h3 id="github-pages">GitHub Pages快速体验</h3>
+<p>在GitHub网站上，点击右上角的+号图标，创建一个新的Repo，Repository 的名字必须为 username.github.com。然后点击Settings进入该Repo的设置页面。看到”Automatic Page Generator”，说明这个Repo已经启用了GitHub Page。点击按钮进入设置。</p>
+
+<p>在”Create a GitHub User Page”填写一些基本信息，点击右下角的”Continue to Layout”。布局就用默认的，点击绿色的”Publish”按钮。</p>
+
+<p>大功告成，输入”username.github.com”，看到一个页面没？这就是你刚刚创建的一个页面。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20130401">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20130327">机器学习的一些通俗易懂的tutorial</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-03-27T21:50:00+08:00" pubdate data-updated="true">Mar 27<span>th</span>, 2013</time>
+        
+		
+         | <a href="/blog/20130327#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>以下记录了我的学习历程，按我的阅读顺序排序。</p>
+
+<h2 id="prior-likelihood-posterior">Prior, Likelihood, Posterior</h2>
+<p>MLAPP第3.2节，讲的很好，用了一个叫 number game 的小游戏做例子，通俗易懂</p>
+
+<h2 id="section">距离和相似度度量</h2>
+<p><a href="http://webdataanalysis.net/reference-and-source/distance-and-similarity/">距离和相似度度量 » webdataanalysis.net</a></p>
+
+<p><a href="http://www.zhihu.com/question/19640394">欧氏距离和余弦相似度的区别是什么？ – 知乎</a></p>
+
+<h2 id="knnk-nearest-neighbor">KNN(K Nearest Neighbor)</h2>
+<p><a href="http://coolshell.cn/articles/8052.html">K Nearest Neighbor 算法 _ 酷壳 – CoolShell</a></p>
+
+<p><a href="http://en.wikipedia.org/wiki/KNN">K-nearest neighbors algorithm – Wikipedia</a></p>
+
+<h2 id="k-means">K-Means</h2>
+<p><a href="http://coolshell.cn/articles/7779.html">K-Means 算法 _ 酷壳 – CoolShell</a></p>
+
+<p><a href="http://en.wikipedia.org/wiki/K-means">k-means clustering – Wikipedia</a></p>
+
+<p><a href="http://kylen314.blog.com/2012/09/10/k-means/">K-Means++ _ 愈宅屋</a></p>
+
+<p><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/20/k-means.html">算法杂货铺——k均值聚类(K-means) – T2噬菌体 – 博客园</a></p>
+
+<p><a href="http://blog.pluskid.org/?p=17">漫谈 Clustering (1)_ k-means « Free Mind</a></p>
+
+<p><a href="http://www.codeproject.com/Articles/439890/Text-Documents-Clustering-using-K-Means-Algorithm">Text Documents Clustering using K-Means Algorithm – CodeProject</a></p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20130327">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20130322">一些主流的编程竞赛网站</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-03-22T21:57:00+08:00" pubdate data-updated="true">Mar 22<span>nd</span>, 2013</time>
+        
+		
+         | <a href="/blog/20130322#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>今天把各个主流的编程网站仔细对比了一下，下面从各个角度对比一下这些编程竞赛网站。</p>
+
+<h2 id="section">分类和排名</h2>
+<table border="1" cellspacing="0" cellpadding="0">
+<tbody>
+<tr>
+<td valign="top" width="94">
+<p><a name="OLE_LINK30"></a><a name="OLE_LINK1"><b>网站地址</b></a></p>
+</td>
+<td valign="top" width="57">
+<p><b>类别</b></p>
+</td>
+<td valign="top" width="38">
+<p><b>PR</b></p>
+</td>
+<td valign="top" width="60">
+<p><b>ATR</b></p>
+</td>
+<td valign="top" width="44">
+<p><b>QF</b></p>
+</td>
+<td valign="top" width="151">
+<p><b>主办方</b></p>
+</td>
+<td valign="top" width="47">
+<p><b>备注</b></p>
+</td>
+</tr>
+<tr>
+<td valign="top" width="94">
+<p><a name="_Hlk352791085"></a><a href="http://www.topcoder.com/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://www.topcoder.com']);">TopCoder </a></p>
+</td>
+<td valign="top" width="57">
+<p>综合</p>
+</td>
+<td valign="top" width="38">
+<p>6</p>
+</td>
+<td valign="top" width="60">
+<p>33,586</p>
+</td>
+<td valign="top" width="44">
+<p>4167</p>
+</td>
+<td valign="top" width="151">
+<p>TopCoder公司</p>
+</td>
+<td valign="top" width="47">&nbsp;</td>
+</tr>
+<tr>
+<td valign="top" width="94">
+<p><a href="http://www.codechef.com/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://www.codechef.com']);">CodeChef </a></p>
+</td>
+<td valign="top" width="57">
+<p>综合</p>
+</td>
+<td valign="top" width="38">
+<p>6</p>
+</td>
+<td valign="top" width="60">
+<p>41,217</p>
+</td>
+<td valign="top" width="44">
+<p>5758</p>
+</td>
+<td valign="top" width="151">
+<p>Directi公司</p>
+</td>
+<td valign="top" width="47">&nbsp;</td>
+</tr>
+<tr>
+<td valign="top" width="94">
+<p><a href="http://codeforces.com/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://codeforces.com']);">CodeForces </a></p>
+</td>
+<td valign="top" width="57">
+<p>综合</p>
+</td>
+<td valign="top" width="38">
+<p>5</p>
+</td>
+<td valign="top" width="60">
+<p>73,012</p>
+</td>
+<td valign="top" width="44">
+<p>599</p>
+</td>
+<td valign="top" width="151">
+<p>CodeForces公司</p>
+</td>
+<td valign="top" width="47">&nbsp;</td>
+</tr>
+<tr>
+<td valign="top" width="94">
+<p><a href="http://www.spoj.com/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://www.spoj.com']);">SPOJ</a></p>
+</td>
+<td valign="top" width="57">
+<p>ACM</p>
+</td>
+<td valign="top" width="38">
+<p>3</p>
+</td>
+<td valign="top" width="60">
+<p>75,653</p>
+</td>
+<td valign="top" width="44">
+<p>1520</p>
+</td>
+<td valign="top" width="151">
+<p>Sphere Research Labs</p>
+</td>
+<td valign="top" width="47">&nbsp;</td>
+</tr>
+<tr>
+<td valign="top" width="94">
+<p><a href="http://poj.org/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://poj.org']);">POJ</a></p>
+</td>
+<td valign="top" width="57">
+<p>ACM</p>
+</td>
+<td valign="top" width="38">
+<p>7</p>
+</td>
+<td valign="top" width="60">
+<p>364,925</p>
+</td>
+<td valign="top" width="44">
+<p>N/A</p>
+</td>
+<td valign="top" width="151">
+<p>北京大学</p>
+</td>
+<td valign="top" width="47">&nbsp;</td>
+</tr>
+<tr>
+<td valign="top" width="94">
+<p><a href="http://acm.zju.edu.cn" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://acm.zju.edu.cn']);">ZOJ</a></p>
+</td>
+<td valign="top" width="57">
+<p>ACM</p>
+</td>
+<td valign="top" width="38">
+<p>6</p>
+</td>
+<td valign="top" width="60">
+<p>N/A</p>
+</td>
+<td valign="top" width="44">
+<p>N/A</p>
+</td>
+<td valign="top" width="151">
+<p>浙江大学</p>
+</td>
+<td valign="top" width="47">&nbsp;</td>
+</tr>
+<tr>
+<td valign="top" width="94">
+<p><a href="http://uva.onlinejudge.org/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://uva.onlinejudge.org']);">UVA OJ</a></p>
+</td>
+<td valign="top" width="57">
+<p>ACM</p>
+</td>
+<td valign="top" width="38">
+<p>6</p>
+</td>
+<td valign="top" width="60">
+<p>166,991</p>
+</td>
+<td valign="top" width="44">
+<p>N/A</p>
+</td>
+<td valign="top" width="151">
+<p>University of Virginia</p>
+</td>
+<td valign="top" width="47">&nbsp;</td>
+</tr>
+<tr>
+<td valign="top" width="94">
+<p><a href="http://acm.sgu.ru/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://acm.sgu.ru']);">SGU OJ</a></p>
+</td>
+<td valign="top" width="57">
+<p>ACM</p>
+</td>
+<td valign="top" width="38">
+<p>5</p>
+</td>
+<td valign="top" width="60">
+<p>194,881</p>
+</td>
+<td valign="top" width="44">
+<p>N/A</p>
+</td>
+<td valign="top" width="151">
+<p>Saratov State University</p>
+</td>
+<td valign="top" width="47">&nbsp;</td>
+</tr>
+<tr>
+<td valign="top" width="94">
+<p><a href="https://www.hackerrank.com/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://www.hackerrank.com']);">HackerRank</a></p>
+</td>
+<td valign="top" width="57">
+<p>综合</p>
+</td>
+<td valign="top" width="38">
+<p>5</p>
+</td>
+<td valign="top" width="60">
+<p>126,192</p>
+</td>
+<td valign="top" width="44">
+<p>56</p>
+</td>
+<td valign="top" width="151">
+<p>InterviewStreet公司</p>
+</td>
+<td valign="top" width="47">&nbsp;</td>
+</tr>
+<tr>
+<td valign="top" width="94">
+<p><a href="http://projecteuler.net/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://projecteuler.net']);">Project Euler</a></p>
+</td>
+<td valign="top" width="57">
+<p>数学</p>
+</td>
+<td valign="top" width="38">
+<p>6</p>
+</td>
+<td valign="top" width="60">
+<p>53,854</p>
+</td>
+<td valign="top" width="44">
+<p>428</p>
+</td>
+<td valign="top" width="151">
+<p>Project Euler公司</p>
+</td>
+<td valign="top" width="47">&nbsp;</td>
+</tr>
+<tr>
+<td valign="top" width="94">
+<p><a href="http://www.careercup.com/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://www.careercup.com']);">CareerUp</a></p>
+</td>
+<td valign="top" width="57">
+<p>面试</p>
+</td>
+<td valign="top" width="38">
+<p>4</p>
+</td>
+<td valign="top" width="60">
+<p>51,089</p>
+</td>
+<td valign="top" width="44">
+<p>654</p>
+</td>
+<td valign="top" width="151">
+<p>CareerUp公司</p>
+</td>
+<td valign="top" width="47">&nbsp;</td>
+</tr>
+<tr>
+<td valign="top" width="94">
+<p><a href="http://leetcode.com/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://leetcode.com']);">LeetCode</a></p>
+</td>
+<td valign="top" width="57">
+<p>面试</p>
+</td>
+<td valign="top" width="38">
+<p>4</p>
+</td>
+<td valign="top" width="60">
+<p>188,196</p>
+</td>
+<td valign="top" width="44">
+<p>N/A</p>
+</td>
+<td valign="top" width="151">
+<p>LeetCode公司</p>
+</td>
+<td valign="top" width="47">&nbsp;</td>
+</tr>
+</tbody>
+</table>
+
+<p>说明：PR是Google PageRank的缩写；ATR是Alexa Trafic Rank的缩写，即Alexa排名；QF是Quora Followers的缩写，具体含义是在Quora上关于某Topic的follower数量，例如<a href="http://www.quora.com/CodeChef">CodeChef的topic</a> 有5758个followers。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20130322">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20130226">数值计算库与科学计算库</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-26T23:15:00+08:00" pubdate data-updated="true">Feb 26<span>th</span>, 2013</time>
+        
+		
+         | <a href="/blog/20130226#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2 id="blas-">BLAS 接口</h2>
+<p><a href="http://www.netlib.org/blas/">BLAS</a>, <a href="http://www.netlib.org/lapack/">LAPACK</a>, <a href="http://math-atlas.sourceforge.net/">ATLAS</a> 这些数值计算库的名字很类似，他们之间有什么关系呢？BLAS是一组线性代数运算接口，目前是事实上的标准，很多数值计算/科学计算都实现了这套接口。</p>
+
+<p>BLAS定义了那些函数呢？可以查看<a href="http://www.netlib.org/blas/">官方文档</a>。</p>
+
+<p>LAPACK是BLAS的第一个实现，是最老牌的数值计算库，用FORTRAN 77语言写的。LAPACK实现了BLAS接口，并扩充了一些功能。很多数值计算库/科学计算库底层调用了LAPACK。</p>
+
+<p>很多硬件厂商都实现BLAS接口，例如<a href="http://software.intel.com/en-us/intel-mkl">Intel MKL</a>(Math Kernel Library), <a href="http://developer.amd.com/tools/cpu-development/amd-core-math-library-acml/">AMCL</a>(AMD Math Core Library)等。很多开源库也支持，例如ATLAS。</p>
+
+<p>还有非常多的库实现了BLAS接口，见<a href="http://en.wikipedia.org/wiki/Basic_Linear_Algebra_Subprograms">Wikipedia BLAS</a> 的Implementations小节。</p>
+
+<p>下面介绍一些各种语言常用的数值计算/科学计算库。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20130226">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20130225">KNN与K-Means的区别</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-25T23:41:00+08:00" pubdate data-updated="true">Feb 25<span>th</span>, 2013</time>
+        
+		
+         | <a href="/blog/20130225#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2 id="knnk-nearest-neighbor">KNN(K-Nearest Neighbor)介绍</h2>
+<p>Wikipedia上的<a href="http://en.wikipedia.org/wiki/K-nearest_neighbor_algorithm">KNN词条</a>中有一个比较经典的图如下：</p>
+
+<p><img src="http://yanjiuyanjiu-wordpress.stor.sinaapp.com/uploads/2013/02/022513_0955_KNNKMeans1.png" /></p>
+
+<p>KNN的算法过程是是这样的：</p>
+
+<p>从上图中我们可以看到，图中的数据集是良好的数据，即都打好了label，一类是蓝色的正方形，一类是红色的三角形，那个绿色的圆形是我们待分类的数据。</p>
+
+<p>如果K=3，那么离绿色点最近的有2个红色三角形和1个蓝色的正方形，这3个点投票，于是绿色的这个待分类点属于红色的三角形。</p>
+
+<p>如果K=5，那么离绿色点最近的有2个红色三角形和3个蓝色的正方形，这5个点投票，于是绿色的这个待分类点属于蓝色的正方形。（参考 <a href="http://coolshell.cn/articles/8052.html">酷壳的 K Nearest Neighbor 算法</a>）</p>
+
+<p>我们可以看到，KNN本质是基于一种数据统计的方法！其实很多机器学习算法也是基于数据统计的。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20130225">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20120811">用VisualVM连接 Tomcat 服务器时，如何配置tomcat启动JMX</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-08-11T21:37:00+08:00" pubdate data-updated="true">Aug 11<span>th</span>, 2012</time>
+        
+		
+         | <a href="/blog/20120811#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>用VisualVM连接 tomcat 服务器时，需要让tomcat启动JMX，在catalina.sh 中添加一行代码即可：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">JAVA_OPTS</span><span class="o">=</span>”<span class="nv">$JAVA_OPTS</span> -Djava.rmi.server.hostname<span class="o">=</span>192.168.0.123 -Dcom.sun.management.jmxremote<span class="o">=</span><span class="nb">true</span> -Dcom.sun.management.jmxremote.port<span class="o">=</span>8086 -Dcom.sun.management.jmxremote.ssl<span class="o">=</span><span class="nb">false</span> -Dcom.sun.management.jmxremote.authenticate<span class="o">=</span><span class="nb">false</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>注意，用hostname -i 查看是否为127.0.01，这步非常重要,否则会连接失败，如果是，必须要配置-Djava.rmi.server.hostname。</p>
+
+<p>参考： <br />
+<a href="http://blog.tty.nl/2010/09/03/using-visualvm-to-fix-live-tomcat-and-jvm-problems/">Using VisualVM to fix live Tomcat and JVM problems</a><br />
+<a href="http://blog.csdn.net/linghunhong/article/details/6438572">JVM内存监控:visualVM jconsole jstatd jmap</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20120423">安装和配置CentOS服务器的详细步骤</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-04-23T20:43:00+08:00" pubdate data-updated="true">Apr 23<span>rd</span>, 2012</time>
+        
+		
+         | <a href="/blog/20120423#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>这是我安装CentOS服务器的过程，记录下来，与大家一起分享。</p>
+
+<h2 id="section">安装操作系统</h2>
+<p>CentOS 6.2 ，CentOS-6.2-i386-bin-DVD1.iso（32位） ，CentOS-6.2-x86_64-bin-DVD1.iso（64位）</p>
+
+<p>安装 CentOS时，选择 “Basic Server”<br />
+root密码：root123<br />
+CentOS 自带了ssh  </p>
+
+<p>安装完操作系统后，添加一个用户 dev</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="o">[</span>root@localhost ~<span class="o">]</span><span class="nv">$ </span>useradd dev
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>然后密码设为 dev123</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="o">[</span>root@localhost ~<span class="o">]</span><span class="nv">$ </span>passwd dev
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>给予 sudo 权限</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="o">[</span>root@localhost ~<span class="o">]</span><span class="nv">$ </span>chmod u+w /etc/sudoers
+</span><span class="line"><span class="o">[</span>root@localhost ~<span class="o">]</span><span class="nv">$ </span>vim /etc/sudoers
+</span><span class="line"><span class="c"># 在root ALL=(ALL) ALL 下 添加dev ALL=(ALL) ALL</span>
+</span><span class="line"><span class="o">[</span>root@localhost ~<span class="o">]</span><span class="nv">$ </span>chmod u-w /etc/sudoers
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="section-1">设置上网</h2>
+<p>安装完操作系统后，还不能上网，配置DHCP方式上网：</p>
 
 <div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
 <span class="line-number">2</span>
@@ -451,23 +1182,28 @@ PMD 检查源码，分析源代码</p>
 <span class="line-number">5</span>
 <span class="line-number">6</span>
 <span class="line-number">7</span>
-</pre></td><td class="code"><pre><code class="java"><span class="line"><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">yanjiuyanjiu</span><span class="o">;</span>
-</span><span class="line">
-</span><span class="line"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloWorld</span> <span class="o">{</span>
-</span><span class="line"><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span> <span class="n">args</span><span class="o">[])</span> <span class="o">{</span>
-</span><span class="line"><span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="err">“</span><span class="n">Hello</span> <span class="n">World</span><span class="o">!</span><span class="err">”</span><span class="o">);</span>
-</span><span class="line"><span class="o">}</span>
-</span><span class="line"><span class="o">}</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line">vim /etc/sysconfig/network-scripts/ifcfg-eth0
+</span><span class="line"><span class="nv">DEVICE</span><span class="o">=</span><span class="s2">&quot;eth0&quot;</span>
+</span><span class="line"><span class="nv">HWADDR</span><span class="o">=</span><span class="s2">&quot;00:0C:29:BD:E1:19&quot;</span>
+</span><span class="line"><span class="nv">NM_CONTROLLED</span><span class="o">=</span><span class="s2">&quot;yes&quot;</span>
+</span><span class="line"><span class="nv">ONBOOT</span><span class="o">=</span><span class="s2">&quot;yes&quot;</span>
+</span><span class="line"><span class="nv">BOOTPROTO</span><span class="o">=</span>dhcp
+</span><span class="line"><span class="nv">USECTL</span><span class="o">=</span>no
+</span><span class="line"><span class="nv">TYPE</span><span class="o">=</span>Ethernet
+</span><span class="line"><span class="nv">PEERDNS</span><span class="o">=</span>yes
+</span><span class="line"><span class="c">#保存退出</span>
+</span><span class="line">sudo service network restart
 </span></code></pre></td></tr></table></div></figure></notextile></div>
-<p>在eclipse中运行是可以的，但是在命令行下运行总是失败。我的工程位置为 d:workspaceHelloWorld。</p>
-
-<p>尝试了很多次，如下：</p>
 
 </div>
   
   
     <footer>
-      <a rel="full-article" href="/blog/20100215">继续阅读 &rarr;</a>
+      <a rel="full-article" href="/blog/20120423">继续阅读 &rarr;</a>
     </footer>
   
 
@@ -475,6 +1211,8 @@ PMD 检查源码，分析源代码</p>
     </article>
   
   <ul class="pager">
+    
+    <li class="previous"><a href="/blog/page/5/">&larr; Older</a></li>
     
     <li><a href="/blog/archives">Blog Archives</a></li>
     
@@ -491,7 +1229,7 @@ PMD 检查源码，分析源代码</p>
 </section>
 <section>
   <h2>分类目录</h2>
-    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/docker/'>docker (3)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (5)</a></li><li><a href='/blog/categories/sa/'>SA (3)</a></li><li><a href='/blog/categories/spark/'>spark (5)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>Algorithm (1)</a></li><li><a href='/blog/categories/devops/'>DevOps (8)</a></li><li><a href='/blog/categories/docker/'>Docker (3)</a></li><li><a href='/blog/categories/hadoop/'>Hadoop (8)</a></li><li><a href='/blog/categories/language/'>Language (3)</a></li><li><a href='/blog/categories/machine-learning/'>Machine-Learning (5)</a></li><li><a href='/blog/categories/search-engine/'>Search-Engine (5)</a></li><li><a href='/blog/categories/spark/'>Spark (6)</a></li><li><a href='/blog/categories/tools/'>Tools (11)</a></li></ul>
 </section>
 <section>
   <h2>友情链接</h2>
@@ -537,23 +1275,23 @@ PMD 检查源码，分析源代码</p>
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/20140127">我的Ansible playbook</a>
+        <a href="/blog/20140220">编写Nutch插件</a>
       </li>
     
       <li class="post">
-        <a href="/blog/20140126">/boot 目录空间不足</a>
+        <a href="/blog/20140214">CentOS上编译 Hadoop 2.2.0</a>
       </li>
     
       <li class="post">
-        <a href="/blog/20140125">Rdesktop 快速入门</a>
+        <a href="/blog/20140208">在CentOS上安装HBase 0.96</a>
       </li>
     
       <li class="post">
-        <a href="/blog/20140122">在Centos 6.5上安装docker</a>
+        <a href="/blog/20140207">在CentOS上安装ZooKeeper集群</a>
       </li>
     
       <li class="post">
-        <a href="/blog/20131223">运行mahout的朴素贝叶斯分类器</a>
+        <a href="/blog/20140206">Hadoop多用户的配置(Hadoop 2.x)</a>
       </li>
     
   </ul>

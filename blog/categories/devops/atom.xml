@@ -1,0 +1,479 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: DevOps | 研究研究]]></title>
+  <link href="http://www.yanjiuyanjiu.com/blog/categories/devops/atom.xml" rel="self"/>
+  <link href="http://www.yanjiuyanjiu.com/"/>
+  <updated>2014-03-16T17:09:01+08:00</updated>
+  <id>http://www.yanjiuyanjiu.com/</id>
+  <author>
+    <name><![CDATA[soulmachine]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[给CentOS安装UEK内核]]></title>
+    <link href="http://www.yanjiuyanjiu.com/blog/20140131"/>
+    <updated>2014-01-31T22:05:00+08:00</updated>
+    <id>http://www.yanjiuyanjiu.com/blog/install-uek-for-centos</id>
+    <content type="html"><![CDATA[<p>最近给CentOS 6.5 安装了docker，不过每次运行都会报警：</p>
+
+<blockquote>
+  <p>WARNING: You are running linux kernel version 2.6.32-431.3.1.el6.x86_64, which might be unstable running docker. Please upgrade your kernel to 3.8.0.</p>
+</blockquote>
+
+<p>给CentOS 升级内核，有三种途径，一种是yum官方源里有更新的版本，一种途径是自己编译，另一种途径是使用别人编译好了的内核。</p>
+
+<p>CentOS yum源是出了名的更新慢，目前没有 3.8版内核，第二种途径很麻烦，工作量很大，因此本文用第三种。例如UEK，Oracle提供了一个公共的yum源，<a href="http://public-yum.oracle.com/">http://public-yum.oracle.com/</a></p>
+
+<h2 id="yum">添加yum源</h2>
+
+<p>UEK的稳定版还是 2.6 内核的，beta版的内核是3.8的，所以我们使用beta源</p>
+
+<pre><code>sudo wget http://public-yum.oracle.com/beta/public-yum-ol6-beta.repo -P /etc/yum.repos.d
+</code></pre>
+
+<p>由于UEK3还没有加入到正式版本中，还目前属于测试阶段，，需要手工将 <code>enabled=0</code>改为 <code>enabled=1</code></p>
+
+<pre><code>sudo vim /etc/yum.repos.d/public-yum-ol6-beta.repo
+</code></pre>
+
+<h2 id="gpg-key">添加GPG key</h2>
+
+<pre><code>sudo wget http://public-yum.oracle.com/RPM-GPG-KEY-oracle-ol6 -O /etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+gpg --quiet --with-fingerprint /etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+</code></pre>
+
+<h2 id="yum-1">更新yum源</h2>
+
+<pre><code>sudo yum update
+</code></pre>
+
+<h2 id="kernel">列出所有的kernel</h2>
+
+<pre><code>yum list kernel*
+</code></pre>
+
+<!-- more -->
+
+<h2 id="kernel-1">安装 kernel</h2>
+
+<pre><code>sudo yum install kernel-uek
+</code></pre>
+
+<h2 id="etcgrubconf">修改/etc/grub.conf</h2>
+<p>修改 <code>/etc/grub.conf</code>，将<code>default</code>设置为UEK，一般新安装的内核会在一个，所以设置 <code>default=0</code>。</p>
+
+<h2 id="section">重启</h2>
+
+<pre><code>sudo reboot
+uname -r
+3.8.13-16.el6uek.x86_64
+</code></pre>
+
+<p>内核切换成功了。</p>
+
+<h2 id="docker">测试一下，docker不再报警了</h2>
+
+<pre><code>sudo docker service docker stop
+sudo docker -d
+</code></pre>
+
+<p><code>Ctrl+C</code> 终止 docker，然后用 <code>sudo service docker start</code> 再次启动docker。</p>
+
+<h2 id="section-1">参考资料</h2>
+<p><a href="http://public-yum.oracle.com/">Public Yum Server from Oracle</a></p>
+
+<p><a href="http://blog.liulantao.com/Technology/2013/09/23/kernel-uek-3813-upgrade-notes.html">UEK R3升级手记</a></p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[我的Ansible playbook]]></title>
+    <link href="http://www.yanjiuyanjiu.com/blog/20140129"/>
+    <updated>2014-01-29T22:08:00+08:00</updated>
+    <id>http://www.yanjiuyanjiu.com/blog/my-ansible-playbook</id>
+    <content type="html"><![CDATA[<p><strong>前提</strong>，安装好Ansible，参考我的上一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20140127">Ansible 快速入门</a></p>
+
+<pre><code>---
+- hosts: all
+  sudo: True
+  remote_user: work
+  vars:
+    ant_version: 1.9.3
+    maven_version: 3.1.1
+    scala_version: 2.10.3
+    sbt_version: 0.12.4
+
+  tasks:
+  ########## for CentOS and RedHat ##########
+    - name: Install the libselinux-python package  # because ansible needs it
+      yum: name=libselinux-python state=installed
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+    - name: Disable SELinux in conf file
+      selinux: state=disabled
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+    - name: update YUM repositories
+      shell: 'yum -y update'
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+    - name: Install OpenJDK
+      yum: name=java-1.7.0-openjdk-devel state=present
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+    - name: Set JAVA_HOME environment variable
+      lineinfile: dest='/etc/profile' regexp='^#?\s*export JAVA_HOME=(.*)$' line='export JAVA_HOME=/usr/lib/jvm/java' state=present
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+    - name: install the 'Development tools' package group
+      yum: name="@Development tools" state=present
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+    - name: upgrade all packages
+      shell: 'yum -y upgrade'
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+
+  ########## for Ubuntu and Debian ##########
+    - name: Run "apt-get update" to update the source list
+      apt: update_cache=yes
+      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+    - name: Install OpenJDK
+      apt: pkg=openjdk-7-jdk state=present
+      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+    - name: Set JAVA_HOME environment variable
+      lineinfile: dest='/etc/profile' regexp='^#?\s*export JAVA_HOME=(.*)$' line='export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-amd64' state=present
+      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+    - name: Install build-essential
+      apt: pkg=build-essential state=present
+      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+    - name: Update all packages to the latest version
+      apt: upgrade=dist
+      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+
+  ########## Common opreations for all OS ##########
+    # Create local directories
+    - file: path=~/local/bin state=directory
+      sudo: no
+    - file: path=~/local/sbin state=directory
+      sudo: no
+    - file: path=~/local/src state=directory
+      sudo: no
+    - file: path=~/local/opt state=directory
+      sudo: no
+    - file: path=~/local/var state=directory
+      sudo: no
+    - lineinfile: dest=~/.bashrc regexp='^#?\s*export PATH=(.*)/local/bin(.*)$' line="export PATH=$PATH:$HOME/local/bin" state=present
+      sudo: no
+    - lineinfile: dest=~/.bashrc regexp='^#?\s*export PATH=(.*)/local/sbin(.*)$' line="export PATH=$PATH:$HOME/local/sbin" state=present
+      sudo: no
+
+    - name: Set CLASSPATH and PATH environment variables
+      lineinfile: $item
+      with_items:
+        - dest='/etc/profile' regexp='^#?\s*export CLASSPATH=(.*)$' line='export CLASSPATH=.:$JAVA_HOME/lib/*.jar:$JAVA_HOME/jre/lib/*.jar' state=present
+        - dest='/etc/profile' regexp='^#?\s*export PATH=(.*)JAVA_HOME(.*)$' line="export PATH=$PATH:$JAVA_HOME/bin" state=present
+
+    ###### Since Ant in yum and apt is too old, download the .tar.bz2 file and install it
+    # Install Apache Ant
+    - name: Download Apache Ant
+      get_url: url=http://mirror.cc.columbia.edu/pub/software/apache//ant/binaries/apache-ant--bin.tar.bz2 dest=/tmp/apache-ant--bin.tar.bz2
+    - name: Untar Ant
+      shell: chdir=/tmp creates=/opt/apache-ant- tar -jxf apache-ant--bin.tar.bz2 -C /opt
+    - lineinfile: dest=/etc/profile regexp='^#?\s*export ANT_HOME=(.*)$' line='export ANT_HOME=/opt/apache-ant-' state=present
+    - lineinfile: dest=/etc/profile regexp='^#?\s*export PATH=(.*)ANT_HOME(.*)$' line="export PATH=$PATH:$ANT_HOME/bin" state=present
+
+    # Install Apache Maven, since there is no Maven package in yum and apt repo
+    - name: Download Apache Maven
+      get_url: url=http://apache.claz.org/maven/maven-3/3.1.1/binaries/apache-maven--bin.tar.gz dest=/tmp/apache-maven--bin.tar.gz
+    - name: Untar Maven
+      shell: chdir=/tmp creates=/opt/apache-maven- tar -zxf apache-maven--bin.tar.gz -C /opt
+    - lineinfile: dest=/etc/profile regexp='^#?\s*export MAVEN_HOME=(.*)$' line='export MAVEN_HOME=/opt/apache-maven-' state=present
+    - lineinfile: dest=/etc/profile regexp='^#?\s*export PATH=(.*)MAVEN_HOME(.*)$' line="export PATH=$PATH:$MAVEN_HOME/bin" state=present
+
+    # Install the scala compiler, because the scala compiler in yum and apt repo is too old
+    - name: Download Scala
+      get_url: url=http://www.scala-lang.org/files/archive/scala-.tgz dest=/tmp/scala-.tgz
+    - name: Untar Scala
+      shell: chdir=/tmp creates=/opt/scala- tar -zxf scala-.tgz -C /opt
+    - lineinfile: dest=/etc/profile regexp='^#?\s*export SCALA_HOME=(.*)$' line='export SCALA_HOME=/opt/scala-' state=present
+    - lineinfile: dest=/etc/profile regexp='^#?\s*export PATH=(.*)SCALA_HOME(.*)$' line="export PATH=$PATH:$SCALA_HOME/bin" state=present
+
+    # Install sbt
+    - name: Download sbt
+      get_url: url=http://repo.scala-sbt.org/scalasbt/sbt-native-packages/org/scala-sbt/sbt///sbt.tgz dest=/tmp/sbt-.tgz
+    - name: Untar sbt
+      shell: chdir=/tmp creates=/opt/sbt- tar -zxf sbt-.tgz -C /opt
+    - name: Rename sbt directory
+      shell: chdir=/opt creates=/opt/sbt- mv sbt/ sbt-/
+    - lineinfile: dest=/etc/profile regexp='^#?\s*export SBT_HOME=(.*)$' line='export SBT_HOME=/opt/sbt-' state=present
+    - lineinfile: dest=/etc/profile regexp='^#?\s*export PATH=(.*)SBT_HOME(.*)$' line="export PATH=$PATH:$SBT_HOME/bin" state=present
+
+    # Install Go
+    - name: Download Go
+      get_url: url=https://go.googlecode.com/files/go1.2.linux-amd64.tar.gz dest=/tmp/go1.2.linux-amd64.tar.gz
+    - name: Untar Go
+      shell: chdir=/tmp creates=/opt/go tar -zxf go1.2.linux-amd64.tar.gz -C /opt
+    - lineinfile: dest=/etc/profile regexp='^#?\s*export GOROOT=(.*)$' line='export GOROOT=/opt/go' state=present
+    - lineinfile: dest=/etc/profile regexp='^#?\s*export PATH=(.*)GOROOT(.*)$' line="export PATH=$PATH:$GOROOT/bin" state=present
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Ansible 快速入门]]></title>
+    <link href="http://www.yanjiuyanjiu.com/blog/20140127"/>
+    <updated>2014-01-27T12:10:00+08:00</updated>
+    <id>http://www.yanjiuyanjiu.com/blog/ansible-tutorial</id>
+    <content type="html"><![CDATA[<p>Ansible 是一个比Puppet, Chef 更轻量的provisioning 工具，不需要启动daemon进程。这点跟跟pssh差不多，但是比pssh更加强大。</p>
+
+<h2 id="section">前提</h2>
+<ul>
+  <li>所使用的remote_user要能够SSH无密码登录到所有机器，配置方法见<a href="http://www.yanjiuyanjiu.com/blog/20120102/">SSH无密码登录的配置</a></li>
+  <li>
+    <p>remote_use sudo的时候不需要密码，配置方法如下，</p>
+
+    <pre><code>  sudo chmod +w /etc/sudoers
+  sudo vim /etc/sudoers
+</code></pre>
+
+    <p>找到 <code>root    ALL=(ALL:ALL) ALL</code>，在下面添加一行</p>
+
+    <pre><code> username    ALL=(ALL:ALL) NOPASSWD:ALL
+</code></pre>
+
+    <p>保存退出，然后恢复为只读，</p>
+
+    <pre><code>  sudo chmod +w /etc/sudoers 
+</code></pre>
+  </li>
+</ul>
+
+<p>如果忘记了以上两点，运行任何ansible命令的时候，会卡住不动很久。</p>
+
+<p>如果发现在 “GATHERING FACTS”这里卡住，多半是sudo需要密码，试试加上-K选项，例如<code>ansible-playbook -K playbook.yml</code>，参考<a href="https://groups.google.com/forum/#!topic/ansible-project/FL0mxyxOo4M">Running ansible on local Linux desktop hangs on Gathering Facts</a>。</p>
+
+<p><code>-vvvv</code>表示调试模式，加上后会输出很多中间信息，帮助你调试。</p>
+
+<h2 id="ansible">1. 安装Ansible</h2>
+<p>只需要在一台机器上安装，其他机器不需要安装任何东西，这就是ansible比puppet, chef方便的地方。</p>
+
+<pre><code>sudo yum install ansible
+</code></pre>
+
+<p>或者</p>
+
+<pre><code>sudo apt-get install ansible
+</code></pre>
+
+<p>在<code>/etc/ansible/hosts</code>添加想要操作的机器(这个<code>hosts</code>文件也叫做<a href="http://docs.ansible.com/intro_inventory.html">Inventory</a>)，且这些机器都是能<a href="http://www.yanjiuyanjiu.com/blog/20120102">SSH无密码登录的</a>，然后测试一下：</p>
+
+<pre><code>ansible all -a "/bin/echo hello"
+</code></pre>
+
+<p>如果都成功了，说明安装成功。</p>
+
+<p>使用ansible有两种方式：Ad-hoc command 和 playbook。前者用于临时类批量操作，后者用于配置管理，类似与Puppet。</p>
+
+<h2 id="ad-hoc-commands">2. Ad-Hoc Commands</h2>
+<p>Ad-hoc命令的形式一般如下：</p>
+
+<pre><code>ansible groupname -m module -a arguments
+</code></pre>
+
+<!-- more -->
+<p>例如：</p>
+
+<pre><code>ansible all -m yum -a "name=wget state=present"
+</code></pre>
+
+<p>参考<a href="http://docs.ansible.com/intro_adhoc.html">Introduction To Ad-Hoc Commands</a></p>
+
+<h2 id="playbook">3. Playbook</h2>
+
+<p>对于稳定的配置，就要使用playbook了。</p>
+
+<p>一个playbook由多个play组成，一个play由多个task组成，参考<a href="http://docs.ansible.com/playbooks_intro.html">Intro to Playbooks</a>。</p>
+
+<p>一个playbook的文件内容通常是如下形式：</p>
+
+<pre><code>---
+- hosts: groupname
+  remote_user: yourname
+  sudo: yes
+
+  tasks:
+    - task1
+    - task2
+</code></pre>
+
+<p>一个play的文件内容通常是如下形式：</p>
+
+<pre><code>- task1
+- task2
+</code></pre>
+
+<p>例如，批量安装wget和gcc的playbook，可以这么写：</p>
+
+<pre><code>---
+- hosts: all
+  remote_user: username
+  sudo: yes
+    
+  tasks:
+    - yum: name=wget state=present
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+    - yum: name=gcc state=present
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+</code></pre>
+
+<p>这个play包含了2个task。执行一下这个playbook，看看效果:</p>
+
+<pre><code>ansible-playbook wget_playbook.yml
+</code></pre>
+
+<p>接下来再举一个例子，我们写两个play，<code>play_debian.yml</code>和<code>play_centos.yml</code>，以及一个playbook，<code>playbook.yml</code>。</p>
+
+<p>play_cenos.yml:</p>
+
+<pre><code>- yum: name=wget state=present
+- yum: name=gcc state=present
+</code></pre>
+
+<p>play_deban.yml:</p>
+
+<pre><code>- apt: pkg=wget state=present
+- apt: pkg=gcc state=present
+</code></pre>
+
+<p>playbook.yml:</p>
+
+<pre><code>---
+- hosts: all
+  remote_user: username
+  sudo: yes
+
+  tasks:
+    - include: play_centos.yml
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+    - include: play_debian.yml
+      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+</code></pre>
+
+<p>执行这个playbook:</p>
+
+<pre><code>ansible-playbook playbook.yml
+</code></pre>
+
+<h2 id="section-1">4. 进阶</h2>
+<p>想要进一步了解ansible，可以学习官网的例子, <a href="https://github.com/ansible/ansible-examples/">ansible examples</a>。</p>
+
+<p>一定要仔细阅读官网给出的最佳实践规范，<a href="http://docs.ansible.com/playbooks_best_practices.html">Best Practices</a>。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[/boot 目录空间不足]]></title>
+    <link href="http://www.yanjiuyanjiu.com/blog/20140126"/>
+    <updated>2014-01-26T22:07:00+08:00</updated>
+    <id>http://www.yanjiuyanjiu.com/blog/boot-space-insufficient</id>
+    <content type="html"><![CDATA[<p>今天在服务器上执行 <code>sudo yum -y update</code>的时候报错：</p>
+
+<blockquote>
+  <p>… needs 18MB on the /boot filesystem</p>
+</blockquote>
+
+<h2 id="section">1. 列出所有的内核文件</h2>
+
+<pre><code>rpm -q kernel
+kernel-2.6.32-431.el6.x86_64
+kernel-2.6.32-431.3.1.el6.x86_64
+</code></pre>
+
+<p>发现有多个内核，因此可以删除所有不再使用的内核文件，来释放空间。</p>
+
+<h2 id="section-1">2. 查看当前正在使用的内核</h2>
+
+<pre><code>uname -r
+2.6.32-431.3.1.el6.x86_64
+</code></pre>
+
+<p>注意，如果你是刚刚 <code>yum -y update</code>过，需要重启一下，内核才会更新，不重启的话<code>uname -r</code>还是显示的旧的。</p>
+
+<h2 id="section-2">3. 删除没有使用的内核</h2>
+
+<pre><code>rpm -e 2.6.32-431.el6.x86_64
+rpm -e xxx
+</code></pre>
+
+<p>将<code>rpm -q kernel</code>显示的内核复制粘贴到<code>xxx</code>位置。</p>
+
+<h2 id="section-3">4. 手动删除其他文件</h2>
+<p>把所有未使用的版本全部删除。</p>
+
+<pre><code>sudo rm -rf /lib/modules/2.6.32-431.el6.x86_64
+sudo rm -rf /usr/src/kernels/2.6.32-431.el6.x86_64
+sudo rm -rf /usr/src/kernels/2.6.32-431.el6.x86_64.debug
+sudo rm /boot/*2.6.32-431*
+</code></pre>
+
+<h2 id="grub">5. 删除grub里的条目</h2>
+<p>上面的步骤做完了后，最后，把grub里未使用的内核删掉，条目序号是从0开始编号的，删除条目后，记得把<code>default</code>设置为正确的序号。</p>
+
+<h2 id="yum-update">6. 再执行 yum update</h2>
+
+<pre><code>sudo yum -y update
+</code></pre>
+
+<h2 id="section-4">参考资料</h2>
+<p><a href="http://rajaruan.blog.51cto.com/2771737/868293">boot目录空间不足</a></p>
+
+<p><a href="http://www.xiaohuai.com/3301">yum update -y，提示/boot 空间不足的解决方法</a></p>
+
+<p><a href="http://forum.ubuntu.org.cn/viewtopic.php?f=97&amp;t=334647">如何卸载自己编译的内核？【已解决，方法见6L】</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Rdesktop 快速入门]]></title>
+    <link href="http://www.yanjiuyanjiu.com/blog/20140125"/>
+    <updated>2014-01-25T22:05:00+08:00</updated>
+    <id>http://www.yanjiuyanjiu.com/blog/rdesktop-tutorial</id>
+    <content type="html"><![CDATA[<p>rdesktop是一款Linux下兼容Windows Remote Desktop Protocal(RDP)协议的客户端，可以用它连接开启了3389的windows机器。输入<code>rdesktop</code>可以看到该命令的所有选项，其中最常用的选项如下：
+&gt; -u: user name
+&gt; -p: password (- to prompt)
+&gt; -f: full-screen mode
+&gt; -g: desktop geometry (WxH)
+&gt; -x: RDP5 experience (m[odem 28.8], b[roadband], l[an] or hex nr.)</p>
+
+<p>举几个例子，</p>
+
+<pre><code>rdesktop -u feng -p 123456 -xl -f 192.168.1.250
+</code></pre>
+
+<p>这条命令表示，-xl表示客户端和win机器在同一个局域网，因此可以画质调节到最好，-f表示全屏，这条命令最好在局域网下使用。</p>
+
+<pre><code>rdesktop -u feng -p 123456 -xm -f 192.168.1.250
+</code></pre>
+
+<p>跟上一条命令相比，把-xl换成了-xm，画质调节到最差</p>
+
+<pre><code>rdesktop -u feng -p 123456 -xm -g 1024x768 192.168.1.250
+</code></pre>
+
+<p>跟上一条命令相比，将全屏改成了分辨率1024x768</p>
+]]></content>
+  </entry>
+  
+</feed>

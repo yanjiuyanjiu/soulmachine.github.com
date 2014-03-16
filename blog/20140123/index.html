@@ -1,0 +1,465 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>CentOS 6.5 升级内核到 3.10.28 - 研究研究</title>
+  <meta name="author" content="soulmachine">
+
+  
+  <meta name="description" content="一个关于机器学习的技术博客">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://www.yanjiuyanjiu.com/blog/20140123">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/bootstrap/bootstrap.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/stylesheets/bootstrap/responsive.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/stylesheets/syntax/syntax.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <style type="text/css">
+    body {
+      padding-bottom: 40px;
+    }
+    h1 {
+      margin-bottom: 15px;
+    }
+    img {
+      max-width: 100%;
+    }
+    .sharing, .meta, .pager {
+      margin: 20px 0px 20px 0px;
+    }
+    .page-footer p {
+      text-align: center;
+    }
+  </style>
+  <script src="/javascripts/libs/jquery.js"></script>
+  <script src="/javascripts/libs/modernizr-2.0.js"></script>
+  <script src="/javascripts/libs/bootstrap.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="研究研究" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<!-- <link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css"> -->
+<!-- <link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css"> -->
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-7583537-4']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <nav role="navigation"><div class="navbar navbar-inverse">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </a>
+
+      <a class="brand" href="/">研究研究</a>
+
+      <div class="nav-collapse">
+        <ul class="nav">
+  <li><a href="/">Home</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about/">About</a></li>
+  <li><a href="/notes/">读书笔记</a></li>
+</ul>
+
+
+        <ul class="nav pull-right" data-subscription="rss">
+          <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+          
+        </ul>
+
+        
+          <form class="pull-right navbar-search" action="http://google.com/search" method="get">
+            <fieldset role="search">
+              <input type="hidden" name="q" value="site:www.yanjiuyanjiu.com" />
+              <input class="search-query" type="text" name="q" results="0" placeholder="Search"/>
+            </fieldset>
+          </form>
+        
+      </div>
+    </div>
+  </div>
+</div>
+</nav>
+  <div class="container">
+    <div class="row-fluid">
+      
+<article class="hentry span9" role="article">
+
+  
+  <header class="page-header">
+    
+      <h1 class="entry-title">CentOS 6.5 升级内核到 3.10.28</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-23T00:02:00+08:00" pubdate data-updated="true">Jan 23<span>rd</span>, 2014</time>
+        
+		
+         | <a href="#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>本文适用于CentOS 6.4, CentOS 6.5，亲测可行，估计也适用于其他Linux发行版。</p>
+
+<h2 id="section">1. 准备工作</h2>
+
+<h3 id="section-1">1.1 下载源码包</h3>
+<p>Linux内核版本有两种：稳定版和开发版 ，Linux内核版本号由3个数字组成：r.x.y</p>
+
+<ul>
+  <li>r: 主版本号</li>
+  <li>x: 次版本号，偶数表示稳定版本；奇数表示开发中版本。</li>
+  <li>y: 修订版本号 ， 表示修改的次数</li>
+</ul>
+
+<p>去 <a href="http://www.kernel.org">http://www.kernel.org</a> 首页，可以看到有stable, longterm等版本，longterm是比stable更稳定的版本，会长时间更新，因此我选择 3.10.28，</p>
+
+<pre><code>wget  https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.10.28.tar.xz
+</code></pre>
+
+<h3 id="section-2">1.2 解压</h3>
+
+<pre><code>tar -xf linux-3.10.28.tar.xz
+</code></pre>
+
+<h3 id="section-3">1.3 更新当前系统</h3>
+
+<pre><code>sudo yum update
+sudo yum upgrade
+</code></pre>
+
+<h3 id="section-4">1.4 安装编译内核所需要的软件包</h3>
+
+<pre><code>sudo yum groupinstall "Development Tools" # 一口气安装编译时所需的一切工具
+sudo yum install ncurses-devel #必须这样才能让 make *config 这个指令正确地执行。
+sudo yum install qt-devel #如果你没有 X 环境，这一条可以不用
+sudo yum install hmaccalc zlib-devel binutils-devel elfutils-libelf-devel #创建 CentOS-6 内核时需要它们
+</code></pre>
+
+<h2 id="section-5">2 配置文件</h2>
+
+<h3 id="section-6">2.1 查看当前系统内核</h3>
+
+<pre><code>uname -r
+2.6.32-358.11.1.el6.x86_64
+</code></pre>
+
+<h3 id="section-7">2.2 将当前系统的配置文件拷贝到当前目录</h3>
+
+<pre><code>cp /boot/config-2.6.32-358.11.1.el6.x86_64 .config
+</code></pre>
+
+<h3 id="section-8">2.3 使用旧内核配置，并自动接受每个新增选项的默认设置</h3>
+
+<pre><code>sh -c 'yes "" | make oldconfig'
+</code></pre>
+
+<p><code>make oldconfig</code>会读取当前目录下的<code>.config</code>文件，在<code>.config</code>文件里没有找到的选项则提示用户填写，然后备份<code>.config</code>文件为<code>.config.old</code>，并生成新的<code>.config</code>文件，参考 <a href="http://stackoverflow.com/questions/4178526/what-does-make-oldconfig-do-exactly-linux-kernel-makefile">http://stackoverflow.com/questions/4178526/what-does-make-oldconfig-do-exactly-linux-kernel-makefile</a></p>
+
+<h2 id="section-9">3 编译</h2>
+
+<pre><code>sudo make -j8 bzImage #生成内核文件
+sudo make -j8 modules #编译模块
+sudo make -j8 modules_install #编译安装模块
+</code></pre>
+
+<p>要严格按照这个顺序进行编译，<strong>不能合并成一句</strong>，<code>sudo make -j8 bzImage modules modules_install</code>。</p>
+
+<p><code>-j</code>后面的数字是线程数，用于加快编译速度，一般的经验是，有多少G内存，就填写那个数字，例如有8G内存，则为<code>-j8</code>。</p>
+
+<h2 id="section-10">4 安装</h2>
+
+<pre><code>sudo make install
+</code></pre>
+
+<p>如果出现了 <code>ERROR: modinfo: could not find module xxx</code>，数量少的话，可以忽略。</p>
+
+<h2 id="grub">5 修改Grub引导顺序</h2>
+
+<p>安装完成后，需要修改Grub引导顺序，让新安装的内核作为默认内核。</p>
+
+<p>编辑 <code>grub.conf</code>文件，</p>
+
+<pre><code>sudo vim /etc/grub.conf
+</code></pre>
+
+<p>数一下刚刚新安装的内核在哪个位置，从0开始，然后设置default为那个数字，一般新安装的内核在第一个位置，所以设置<code>default=0</code>。</p>
+
+<h2 id="section-11">6 重启</h2>
+
+<pre><code>sudo reboot
+</code></pre>
+
+<p>重启后，看一下当前内核版本号，</p>
+
+<pre><code>uname -r
+3.10.28
+</code></pre>
+
+<p>成功啦！！</p>
+
+<h2 id="section-12">7 如果失败，则重新循环</h2>
+
+<p>如果失败，重新开始的话，要清理上次编译的现场 </p>
+
+<pre><code>make mrproper #清理上次编译的现场 
+</code></pre>
+
+<p>然后转到第2步，重新开始。</p>
+
+<h2 id="section-13">参考资料</h2>
+<ul>
+  <li><a href="http://xmodulo.com/2013/07/how-to-upgrade-the-kernel-on-centos.html">How to upgrade the kernel on CentOS</a></li>
+  <li><a href="http://winotes.net/centos-64-upgrade-to-kernel-3x.html">CentOS 6.4 升级到 3.x Kernel</a></li>
+  <li><a href="http://my.oschina.net/qichang/blog/101542">CentOS Linux 升级内核步骤和方法</a></li>
+</ul>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">soulmachine</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-23T00:02:00+08:00" pubdate data-updated="true">Jan 23<span>rd</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/devops/'>DevOps</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  <!-- AddThis Button BEGIN -->
+  <div class="addthis_toolbox addthis_default_style addthis_32x32_style">
+    <a class="addthis_button_sinaweibo"></a>
+    <a class="addthis_button_facebook"></a>
+    <a class="addthis_button_twitter"></a>
+    <a class="addthis_button_google_plusone_share"></a>
+    <a class="addthis_button_delicious"></a>
+    <a class="addthis_button_digg"></a>
+    <a class="addthis_button_reddit"></a>
+    <a class="addthis_button_compact"></a><a class="addthis_counter addthis_bubble_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=undefined"></script>
+  <!-- AddThis Button END -->
+  
+  
+  
+</div>
+
+    
+    
+	
+    <section>
+      <div id="duoshuo_thread" aria-live="polite"><!-- Duoshuo Comment BEGIN -->
+<div class="ds-thread" data-thread-key="/blog/20140123" data-title="CentOS 6.5 升级内核到 3.10.28"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"yanjiuyanjiu"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = 'http://static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		|| document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+</script>
+<!-- Duoshuo Comment END --></div>
+    </section>
+    
+    <ul class="pager">
+      
+      <li class="previous"><a class="basic-alignment left"
+        href="/blog/20140122" title="Previous Post:
+        在Centos 6.5上安装docker">&laquo; 在Centos 6.5上安装docker</a></li>
+      
+      <li><a href="/blog/archives">Blog Archives</a></li>
+      
+      <li class="next"><a class="basic-alignment right" href="/blog/20140124"
+        title="Next Post: 集群时间同步--架设内网NTP服务器">集群时间同步--架设内网NTP服务器
+        &raquo;</a></li>
+      
+    </ul>
+  </footer>
+</article>
+
+<aside class="sidebar-nav span3">
+  
+    <section>
+  <h2>公告</h2>
+  <p>独学而无友，则孤陋而寡闻，我每周在清华举办机器学习读书会，欢迎大家前来交流切磋。</p>
+  <p>详情请见<a href="http://q.weibo.com/1644133">读书会微博群</a></p>
+</section>
+<section>
+  <h2>分类目录</h2>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>Algorithm (1)</a></li><li><a href='/blog/categories/devops/'>DevOps (8)</a></li><li><a href='/blog/categories/docker/'>Docker (3)</a></li><li><a href='/blog/categories/hadoop/'>Hadoop (8)</a></li><li><a href='/blog/categories/language/'>Language (3)</a></li><li><a href='/blog/categories/machine-learning/'>Machine-Learning (5)</a></li><li><a href='/blog/categories/search-engine/'>Search-Engine (5)</a></li><li><a href='/blog/categories/spark/'>Spark (6)</a></li><li><a href='/blog/categories/tools/'>Tools (11)</a></li></ul>
+</section>
+<section>
+  <h2>友情链接</h2>
+  <ul>
+    <li>
+      <a href="http://yewen.us/" title="大学同学，ACM高手，曾在百度，现在人人网">笨狗随手留下</a>
+    </li>
+	<li>
+      <a href="http://blog.liancheng.info/" title="网易，百度，技术高手">连城</a>
+    </li>
+    <li>
+      <a href="http://www.rational.so/" title="系统方向的清华博士">阎栋</a>
+    </li>
+	<li>
+      <a href="http://www.parallellabs.com/" title="冠诚，IBM研究院研究员">并行实验室</a>
+    </li>
+	<li>
+      <a href="http://shenfeng.me/" title="http-kit, clojure">沈峰</a>
+    </li>
+	<li>
+      <a href="http://www.lihaipeng.info/" title="百度商业产品高级研发工程师">李海鹏</a>
+    </li>
+	<li>
+      <a href="http://www.chioka.in/" title="Google工程师">Eric</a>
+    </li>
+    <li>
+      <a href="http://blog.csdn.net/lgnlgn" title="好朋友，曾在赶集网，现在老家的猫扑">梁兄的技术博客</a>
+    </li>
+    <li>
+      <a href="http://www.doesbetter.com/" title="机器学习，北邮">王孝舒的博客</a>
+    </li>
+    <li>
+      <a href="http://www.foreverlee.net/" title="机器学习，中科院计算所">ForeverLee</a>
+    </li>
+  </ul>
+</section>
+
+
+
+
+<section>
+  <h2>最新文章</h2>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/20140220">编写Nutch插件</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20140214">CentOS上编译 Hadoop 2.2.0</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20140208">在CentOS上安装HBase 0.96</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20140207">在CentOS上安装ZooKeeper集群</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/20140206">Hadoop多用户的配置(Hadoop 2.x)</a>
+      </li>
+    
+  </ul>
+</section><section>
+<h2>最新评论</h2>
+<ul class="ds-recent-comments" data-num-items="5" data-show-avatars="1" data-show-time="1" data-show-title="1" data-show-admin="0" data-excerpt-length="32"></ul>
+
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo" class="page-footer"><!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX", "output/HTML-CSS"],
+  tex2jax: {
+    inlineMath: [ ['$', '$'] ],
+    displayMath: [ ['$$', '$$']],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  messageStyle: "none",
+  "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] }
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+<p>
+  Copyright &copy; 2014 - soulmachine -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

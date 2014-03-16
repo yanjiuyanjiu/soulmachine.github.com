@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: spark | 研究研究]]></title>
+  <title><![CDATA[Category: Spark | 研究研究]]></title>
   <link href="http://www.yanjiuyanjiu.com/blog/categories/spark/atom.xml" rel="self"/>
   <link href="http://www.yanjiuyanjiu.com/"/>
-  <updated>2014-01-27T22:22:09+08:00</updated>
+  <updated>2014-03-16T17:09:01+08:00</updated>
   <id>http://www.yanjiuyanjiu.com/</id>
   <author>
     <name><![CDATA[soulmachine]]></name>
@@ -12,6 +12,161 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Spark开发环境的配置]]></title>
+    <link href="http://www.yanjiuyanjiu.com/blog/20140130"/>
+    <updated>2014-01-30T16:36:00+08:00</updated>
+    <id>http://www.yanjiuyanjiu.com/blog/spark-development-environment</id>
+    <content type="html"><![CDATA[<p><strong>软件版本</strong>：Spark 0.9</p>
+
+<p>配置Spark开发环境，其实分为三个层次，一种是针对运维人员，把Spark安装部署到集群；一种是针对普通开发者，引入Spark的jar包，调用Spark提供的接口，编写分布式程序，写好后编译成jar，就可以提交到Spark集群去运行了；第三种是针对Spark开发者，为了给Spark贡献代码，需要git clone Spark的代码，然后导入IDE，为Spark开发代码。</p>
+
+<h2 id="spark">1 部署Spark集群</h2>
+<p>这种是运维人员在生产环境下，搭建起一个Spark集群。</p>
+
+<h3 id="spark-1">（可选）创建新用户 Spark</h3>
+<p>一般我倾向于把需要启动daemon进程，对外提供服务的程序，即服务器类的程序，安装在单独的用户下面。这样可以做到隔离，运维方面，安全性也提高了。</p>
+
+<p>创建一个新的group,</p>
+
+<pre><code>$ sudo groupadd spark
+</code></pre>
+
+<p>创建一个新的用户，并加入group,</p>
+
+<pre><code>$ sudo useradd -g spark spark
+</code></pre>
+
+<p>给新用户设置密码，</p>
+
+<pre><code>$ sudo passwd spark
+</code></pre>
+
+<p>在每台机器上创建 spark 新用户，并配置好SSH无密码，参考我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20120102/">SSH无密码登录的配置</a></p>
+
+<p>假设有三台机器，hostname分别是 master, worker01, worker02。</p>
+
+<h3 id="spark-">1.1 下载 Spark 预编译好的二进制包</h3>
+<p>如果你需要用到HDFS，则要针对Hadoop 1.x 和Hadoop 2.x 选择不同的版本。这里我选择 Hadoop 2.x 版。</p>
+
+<pre><code>spark@master $ wget http://d3kbcqa49mib13.cloudfront.net/spark-0.9.0-incubating-bin-hadoop1.tgz
+spark@master $ tar zxf spark-0.9.0-incubating-bin-hadoop1.tgz -C ~/local/opt
+</code></pre>
+
+<h3 id="tgzscp">1.2 将tgz压缩包scp到所有机器，解压到相同的路径</h3>
+
+<pre><code>spark@master $ scp spark-0.9.0-incubating-bin-hadoop1.tgz spark@worker01:~
+spark@master $ ssh worker01
+spark@worker01 $ tar zxf spark-0.9.0-incubating-bin-hadoop1.tgz -C ~/local/opt
+spark@worker01 $ exit
+spark@master $ scp spark-0.9.0-incubating-bin-hadoop1.tgz spark@worker02:~
+spark@master $ ssh worker02
+spark@worker02 $ tar zxf spark-0.9.0-incubating-bin-hadoop1.tgz -C ~/local/opt
+spark@worker02 $ exit
+</code></pre>
+
+<h3 id="section">1.3 修改配置文件</h3>
+<p>Spark 0.9 以后，配置文件简单多了，只有一个必须要配置，就是 <code>conf/slaves</code> 这个文件。在这个文件里添加slave的hostname。</p>
+
+<h3 id="slave">1.4 拷贝配置文件到所有slave</h3>
+
+<pre><code>spark@master $ spark@master $ scp ./conf/slaves spark@worker01:~/local/opt/spark-0.9.0-incubating-bin-hadoop1/conf
+spark@master $ spark@master $ scp ./conf/slaves spark@worker02:~/local/opt/spark-0.9.0-incubating-bin-hadoop1/conf
+</code></pre>
+
+<h3 id="spark-2">1.5 启动Spark集群</h3>
+
+<pre><code>spark@master $ ./sbin/start-all.sh
+</code></pre>
+
+<!-- more -->
+
+<p>也可以一台一台启动，先启动 master</p>
+
+<pre><code>spark@master $ ./sbin/start-master.sh
+</code></pre>
+
+<p>启动两台 slave，</p>
+
+<pre><code>spark@worker01 $ ./sbin/start-slave.sh 1 spark://master:7077
+spark@worker02 $ ./sbin/start-slave.sh 2 spark://master:7077
+</code></pre>
+
+<p>其中，<code>1</code>, <code>2</code> 是 worker的编号，可以是任意数字，只要不重复即可，<code>spark://master:7077</code> 是 master 的地址。以后向集群提交作业的时候，也需要这个地址。</p>
+
+<h3 id="section-1">1.6 测试一下，向集群提交一个作业</h3>
+
+<pre><code>spark@master $ ./bin/run-example org.apache.spark.examples.SparkPi spark://master:7077
+</code></pre>
+
+<h2 id="section-2">2 配置普通开发环境</h2>
+<p>TODO</p>
+
+<h2 id="spark-3">3 配置Spark开发环境</h2>
+<p>当你需要修改Spark的代码，或给Spark添加代码，就需要阅读本节了。</p>
+
+<h3 id="git-clone-">3.1 git clone 代码</h3>
+
+<pre><code>git clone git@github.com:apache/incubator-spark.git
+</code></pre>
+
+<h3 id="section-3">3.2 编译</h3>
+<p>Spark脚本会自动下载对应版本的sbt和scala编译器，因此机器事先不需要安装sbt和scala</p>
+
+<p>按照 github 官方repo首页的文档，输入如下一行命令即可开始编译，</p>
+
+<pre><code>./sbt/sbt assembly
+</code></pre>
+
+<h3 id="section-4">3.3 运行一个例子</h3>
+
+<pre><code>./run-example org.apache.spark.examples.SparkPi local
+</code></pre>
+
+<p>说明安装成功了。</p>
+
+<h3 id="spark-shell">3.4 试用 spark shell</h3>
+<!-- more -->
+
+<p>./spark-shell</p>
+
+<p>会出现<code>scala&gt;</code>提示符号，可见spark脚本自动下载了scala编译器，其实就是一个jar，例如<code>scala-compiler-2.10.3.jar</code>。</p>
+
+<h3 id="scala">3.5 安装scala</h3>
+<p>开发Spark的时候，由于Intellij Idea 需要调用外部的sbt和scala，因此机器上还是需要安装scala和sbt。</p>
+
+<p>打开 <code>projects/SparkBuild.scala</code>，搜索<code>scalaVersion</code>，获得spark所使用的scala编译器版本，然后去scala官网<a href="http://www.scala-lang.org/">http://www.scala-lang.org/</a>，下载该版本的scala编译器，并设置<code>SCALA_HOME</code>环境变量，将bin目录加入PATH。例如下载scala-2.10.3.tgz，解压到/opt，设置环境变量如下：</p>
+
+<pre><code>sudo vim /etc/profile
+export SCALA_HOME=/opt/scala-2.10.3
+export PATH=$PATH:$SCALA_HOME/bin
+</code></pre>
+
+<h3 id="sbt">3.6 安装sbt</h3>
+
+<p>打开<code>projects/build.properties</code>，可以看到spark所使用的sbt版本号，去
+官网<a href="http://www.scala-sbt.org/">http://www.scala-sbt.org/</a>下载该版本的sbt，双击安装。并设置<code>SBT_HOME</code>环境变量，将bin目录加入PATH。</p>
+
+<h3 id="idea">3.7 下载并安装idea</h3>
+
+<p>Spark核心团队的hashjoin曾在我博客上留言，说他们都使用idea在开发spark，我用过<a href="www.scala-ide.org">Scala IDE</a>和idea，两者各有优劣，总的来说，idea要好用一些，虽然我是老牌eclipse用户，但我还是转向了idea。</p>
+
+<p>去idea官网下载idea的tar.gz包，解压就行。运行idea，安装scala插件。</p>
+
+<h3 id="idea-1">3.8 生成idea项目文件</h3>
+<p>在源码根目录，使用如下命令</p>
+
+<pre><code>./sbt/sbt gen-idea
+</code></pre>
+
+<p>就生成了idea项目文件。</p>
+
+<h3 id="open-project">3.9 Open Project</h3>
+<p>使用 idea，点击<code>File-&gt;Open project</code>，浏览到 <code>incubator-spark</code>文件夹，打开项目，就可以修改Spark代码了。</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[使用docker打造spark集群]]></title>
@@ -761,98 +916,6 @@ $ bin/stop-all.sh
   <li><a href="http://rdc.taobao.com/team/jm/archives/1823">Spark随谈（二）—— 安装攻略</a></li>
   <li><a href="http://www.cnblogs.com/jerrylead/archive/2012/08/13/2636115.html">Spark安装与学习</a></li>
 </ol>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[使用Scala IDE 阅读spark源码 -- 将sbt项目转化为eclipse项目]]></title>
-    <link href="http://www.yanjiuyanjiu.com/blog/20130611"/>
-    <updated>2013-06-11T11:48:00+08:00</updated>
-    <id>http://www.yanjiuyanjiu.com/blog/read-spark-source-code-using-scala-ide</id>
-    <content type="html"><![CDATA[<p>阅读Spark源代码，最简单的方式是下载源码包，解压后用纯文本方式来阅读源码。这样效率不高，可以用sbteclipse这个插件，将sbt项目文件转化为eclipse项目文件，然后导入到Scala IDE，用eclipse来阅读源码，效率大大提高。</p>
-
-<p><strong>环境</strong>：Windows 7, JDK 1.6</p>
-
-<ol>
-  <li>安装 scala。去官网 <a href="http://www.scala-lang.org/">http://www.scala-lang.org/</a> ，下载MSI，安装，按默认设置即可。</li>
-  <li>
-    <p>安装 sbt。去官网 <a href="http://www.scala-sbt.org/">http://www.scala-sbt.org/</a> ， 下载MSI，安装，按默认设置即可。
-Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt时它会自动下载对应的scala编译器。</p>
-  </li>
-  <li>
-    <p>安装 Scala IDE。 去官网 <a href="http://scala-ide.org/">http://scala-ide.org/</a>，点击”Get the SDK”绿色按钮，下载。这个IDE的好处是，自带了scala编译器，解压即可使用。</p>
-  </li>
-  <li>
-    <p>下载spark源码。 去官网 <a href="http://spark-project.org/">http://spark-project.org/</a> 下载源码，当前版本是 0.7.2, source package 大约4M左右。解压源码，例如 解压到 d:spark-0.7.0\</p>
-  </li>
-  <li>
-    <p>添加 sbteclipse 插件依赖。spark已经添加了依赖，这一步什么也不需要做。</p>
-
-    <p>这个插件的作用，就是能够读取sbt的配置文件，生成一个eclipse的工程文件。有了eclipse工程文件，就可以导入到eclipse了。</p>
-
-    <p>spark已经添加了依赖，见 d:\spark-0.7.2\project\plugins.sbt，有一行</p>
-
-    <p>addSbtPlugin(“com.typesafe.sbteclipse” % “sbteclipse-plugin” % “2.1.1”)</p>
-  </li>
-  <li>
-    <p>启动cmd，启动sbt。</p>
-
-    <blockquote>
-      <p>cd  d:\spark-0.7.0<br />
- sbt</p>
-    </blockquote>
-
-    <p>Linux下则是</p>
-
-    <blockquote>
-      <p>cd  d:\spark-0.7.0<br />
- sbt/sbt</p>
-    </blockquote>
-
-    <p>开始下载各种依赖包，需要等待很长时间。</p>
-  </li>
-  <li>
-    <p><strong>翻@_@墙。见本文最后一段。</strong></p>
-
-    <p><!--more--></p>
-  </li>
-  <li>
-    <p>等sbt提升符&gt;出现后，输入eclipse命令，开始生成eclipse工程文件，需要耐心等待一段时间</p>
-
-    <blockquote>
-      <p>&gt;eclipse<br />
- [info] About to create Eclipse project files for your project(s).<br />
- [info] Successfully created Eclipse project files for project(s):<br />
- [info] spark-examples  <br />
- [info] spark-streaming <br />
- [info] spark-repl<br />
- [info] spark-bagel<br />
- [info] spark-core  </p>
-    </blockquote>
-
-    <p>这样就生成成功了，去core, bagel, streaming, repl, examples 五个文件夹下，可以看到有一个.project和.classpath文件。从这里也可以看出，spark源码由五个项目组成。</p>
-  </li>
-  <li>用 Scala IDE 导入这5个工程，选择 d:\spark-0.7.2 文件夹，可以一次性导入5个项目。
-项目图标上有红色感叹号，是因为jar包的路径不对，右击某个项目，选择 “Build Path -&gt; Configure Build Path” ，删除所有的jar，点击 “Add external jars”，浏览到 d:\spark-0.7.2\lib_managed\jars，添加所有的jar，这是红色感叹号就消失了。每个项目都如此操作一番。</li>
-</ol>
-
-<p><strong>注意：第8步在国内是无法成功的，因为一些maven仓库被墙，例如 twitter4j.org这个仓库就被墙了。因此需要翻@_@墙。</strong></p>
-
-<p>我平时用goagent翻@_@墙，不过goagent只能让浏览器翻@_@墙，如何让goagent变成全局代理呢？即所有http协议都经过goagent。可以用 Proxifier，它可以把goagent变成操作系统全局的http代理。</p>
-
-<p>不过 spark 在访问maven仓库时，用的是https网址，即https协议，虽然goagent可以用来访问https页面，但 goagent 和 Proxifier 使用时，https协议总是链接不通（参考 <a href="https://code.google.com/p/goagent/issues/detail?id=5210">https://code.google.com/p/goagent/issues/detail?id=5210</a>）。</p>
-
-<p>于是我又想到了另一个方法，用SSH翻@_@墙。去网上找一个免费的ssh，安装 Bitvise SSH Client，然后在”Services”标签页面，勾选”SOCKS/HTTP Proxy Forwarding”，这样来翻@_@墙，Proxifier  使用  Bitvise SSH Client 提供的代理。</p>
-
-<p>翻@_@墙成功后，再输入 eclipse，当到达 twitter4j.org 时，会发现 SUCCESS了。耐心等待，最后会成功生成.project文件。</p>
-
-<p>用Scala IDE 导入项目，就可以开始阅读spark 源码了 :)</p>
-
-<p>如果不想折腾，可以下载我已经生成好的项目, <a href="http://pan.baidu.com/share/link?shareid=534521368&amp;uk=2466605404">spark-0.7.2.zip</a>。解压，启动Scala IDE，选择菜单<code>File-&gt;Import-&gt;General-&gt;Existing projects into workspace</code>，浏览到 spark-0.7.2目录，批量导入5个项目。导入后项目图标有红色感叹号，这是因为你的电脑上路径和我的路径不一样，找不到引用的jar了。右击项目，选择<code>Build Path-&gt;Configure Build Path</code>，选择<code>Libraries</code>标签，这时可以看到所有jar都有红叉叉，全选，删除，然后点击<code>Add External Jars</code>，浏览到<code>spark-0.7.2\lib_managed\jars</code>，把所有jar都导入，导入后红色感叹号就消失了。对每个项目都执行上述操作。</p>
-
-<p><strong>2013-07-27 更新</strong>：eclipse项目上有红色小叉叉图标，之前一直没解决，今天解决了，主要原因是，<strong>Scala IDE 版本不对！</strong> scala-ide.org 官网最新的的3.0.1只支持scala 2.10，不再支持2.9.3。由于Spark目前使用scala 2.9.3写的，所以我们要下载支持 scala 2.9.3 版，scala ide 3.0.0是支持 2.9.3的，不过首选要下载 eclipse JUNO，不要使用新版的eclipse，例如eclipse Indigo, Kepler都不行。</p>
-
-<p>因此，正确的做法是，先下载 eclipse juno，然后下载 3.0.0 的zip包，解压，然后启动eclipse，点击菜单”help-&gt;Install New Software”，浏览到刚刚解压的<code>site</code>文件夹，就可以安装scala ide插件了。</p>
 ]]></content>
   </entry>
   

@@ -114,7 +114,7 @@
       
   <header class="page-header">
     
-      <h1 class="entry-title"><a href="/blog/20130829">简洁的Scala</a></h1>
+      <h1 class="entry-title"><a href="/blog/20140131">给CentOS安装UEK内核</a></h1>
     
     
       <p class="meta">
@@ -130,92 +130,890 @@
   
 
 
-<time datetime="2013-08-29T21:38:00+08:00" pubdate data-updated="true">Aug 29<span>th</span>, 2013</time>
+<time datetime="2014-01-31T22:05:00+08:00" pubdate data-updated="true">Jan 31<span>st</span>, 2014</time>
         
 		
-         | <a href="/blog/20130829#duoshuo_thread">Comments</a>
+         | <a href="/blog/20140131#duoshuo_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>Scala语言是很注重一致性(consistency)的，Scala的简洁性(concision)都是由其一致性带来的。</p>
+  <div class="entry-content"><p>最近给CentOS 6.5 安装了docker，不过每次运行都会报警：</p>
 
-<p>Scala的看上去很复杂，但是它在概念上是非常一致的。弄清了几个概念后，也就不觉得复杂了，反倒是比Java的简单。</p>
+<blockquote>
+  <p>WARNING: You are running linux kernel version 2.6.32-431.3.1.el6.x86_64, which might be unstable running docker. Please upgrade your kernel to 3.8.0.</p>
+</blockquote>
 
-<h1 id="oo--fp">1. OO + FP</h1>
+<p>给CentOS 升级内核，有三种途径，一种是yum官方源里有更新的版本，一种途径是自己编译，另一种途径是使用别人编译好了的内核。</p>
 
-<h2 id="section">1.1 一切都是对象</h2>
+<p>CentOS yum源是出了名的更新慢，目前没有 3.8版内核，第二种途径很麻烦，工作量很大，因此本文用第三种。例如UEK，Oracle提供了一个公共的yum源，<a href="http://public-yum.oracle.com/">http://public-yum.oracle.com/</a></p>
 
-<p>更精确地说，应该是“一切值都是对象”。</p>
+<h2 id="yum">添加yum源</h2>
 
+<p>UEK的稳定版还是 2.6 内核的，beta版的内核是3.8的，所以我们使用beta源</p>
+
+<pre><code>sudo wget http://public-yum.oracle.com/beta/public-yum-ol6-beta.repo -P /etc/yum.repos.d
+</code></pre>
+
+<p>由于UEK3还没有加入到正式版本中，还目前属于测试阶段，，需要手工将 <code>enabled=0</code>改为 <code>enabled=1</code></p>
+
+<pre><code>sudo vim /etc/yum.repos.d/public-yum-ol6-beta.repo
+</code></pre>
+
+<h2 id="gpg-key">添加GPG key</h2>
+
+<pre><code>sudo wget http://public-yum.oracle.com/RPM-GPG-KEY-oracle-ol6 -O /etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+gpg --quiet --with-fingerprint /etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+</code></pre>
+
+<h2 id="yum-1">更新yum源</h2>
+
+<pre><code>sudo yum update
+</code></pre>
+
+<h2 id="kernel">列出所有的kernel</h2>
+
+<pre><code>yum list kernel*
+</code></pre>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20140131">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20140130">Spark开发环境的配置</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-30T16:36:00+08:00" pubdate data-updated="true">Jan 30<span>th</span>, 2014</time>
+        
+		
+         | <a href="/blog/20140130#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><strong>软件版本</strong>：Spark 0.9</p>
+
+<p>配置Spark开发环境，其实分为三个层次，一种是针对运维人员，把Spark安装部署到集群；一种是针对普通开发者，引入Spark的jar包，调用Spark提供的接口，编写分布式程序，写好后编译成jar，就可以提交到Spark集群去运行了；第三种是针对Spark开发者，为了给Spark贡献代码，需要git clone Spark的代码，然后导入IDE，为Spark开发代码。</p>
+
+<h2 id="spark">1 部署Spark集群</h2>
+<p>这种是运维人员在生产环境下，搭建起一个Spark集群。</p>
+
+<h3 id="spark-1">（可选）创建新用户 Spark</h3>
+<p>一般我倾向于把需要启动daemon进程，对外提供服务的程序，即服务器类的程序，安装在单独的用户下面。这样可以做到隔离，运维方面，安全性也提高了。</p>
+
+<p>创建一个新的group,</p>
+
+<pre><code>$ sudo groupadd spark
+</code></pre>
+
+<p>创建一个新的用户，并加入group,</p>
+
+<pre><code>$ sudo useradd -g spark spark
+</code></pre>
+
+<p>给新用户设置密码，</p>
+
+<pre><code>$ sudo passwd spark
+</code></pre>
+
+<p>在每台机器上创建 spark 新用户，并配置好SSH无密码，参考我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20120102/">SSH无密码登录的配置</a></p>
+
+<p>假设有三台机器，hostname分别是 master, worker01, worker02。</p>
+
+<h3 id="spark-">1.1 下载 Spark 预编译好的二进制包</h3>
+<p>如果你需要用到HDFS，则要针对Hadoop 1.x 和Hadoop 2.x 选择不同的版本。这里我选择 Hadoop 2.x 版。</p>
+
+<pre><code>spark@master $ wget http://d3kbcqa49mib13.cloudfront.net/spark-0.9.0-incubating-bin-hadoop1.tgz
+spark@master $ tar zxf spark-0.9.0-incubating-bin-hadoop1.tgz -C ~/local/opt
+</code></pre>
+
+<h3 id="tgzscp">1.2 将tgz压缩包scp到所有机器，解压到相同的路径</h3>
+
+<pre><code>spark@master $ scp spark-0.9.0-incubating-bin-hadoop1.tgz spark@worker01:~
+spark@master $ ssh worker01
+spark@worker01 $ tar zxf spark-0.9.0-incubating-bin-hadoop1.tgz -C ~/local/opt
+spark@worker01 $ exit
+spark@master $ scp spark-0.9.0-incubating-bin-hadoop1.tgz spark@worker02:~
+spark@master $ ssh worker02
+spark@worker02 $ tar zxf spark-0.9.0-incubating-bin-hadoop1.tgz -C ~/local/opt
+spark@worker02 $ exit
+</code></pre>
+
+<h3 id="section">1.3 修改配置文件</h3>
+<p>Spark 0.9 以后，配置文件简单多了，只有一个必须要配置，就是 <code>conf/slaves</code> 这个文件。在这个文件里添加slave的hostname。</p>
+
+<h3 id="slave">1.4 拷贝配置文件到所有slave</h3>
+
+<pre><code>spark@master $ spark@master $ scp ./conf/slaves spark@worker01:~/local/opt/spark-0.9.0-incubating-bin-hadoop1/conf
+spark@master $ spark@master $ scp ./conf/slaves spark@worker02:~/local/opt/spark-0.9.0-incubating-bin-hadoop1/conf
+</code></pre>
+
+<h3 id="spark-2">1.5 启动Spark集群</h3>
+
+<pre><code>spark@master $ ./sbin/start-all.sh
+</code></pre>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20140130">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20140129">我的Ansible Playbook</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-29T22:08:00+08:00" pubdate data-updated="true">Jan 29<span>th</span>, 2014</time>
+        
+		
+         | <a href="/blog/20140129#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><strong>前提</strong>，安装好Ansible，参考我的上一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20140127">Ansible 快速入门</a></p>
+
+<pre><code>---
+- hosts: all
+  sudo: True
+  remote_user: work
+  vars:
+    ant_version: 1.9.3
+    maven_version: 3.1.1
+    scala_version: 2.10.3
+    sbt_version: 0.12.4
+
+  tasks:
+  ########## for CentOS and RedHat ##########
+    - name: Install the libselinux-python package  # because ansible needs it
+      yum: name=libselinux-python state=installed
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+    - name: Disable SELinux in conf file
+      selinux: state=disabled
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+    - name: update YUM repositories
+      shell: 'yum -y update'
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+    - name: Install OpenJDK
+      yum: name=java-1.7.0-openjdk-devel state=present
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+    - name: Set JAVA_HOME environment variable
+      lineinfile: dest='/etc/profile' regexp='^#?\s*export JAVA_HOME=(.*)$' line='export JAVA_HOME=/usr/lib/jvm/java' state=present
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+    - name: install the 'Development tools' package group
+      yum: name="@Development tools" state=present
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+    - name: upgrade all packages
+      shell: 'yum -y upgrade'
+      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+
+  ########## for Ubuntu and Debian ##########
+    - name: Run "apt-get update" to update the source list
+      apt: update_cache=yes
+      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+    - name: Install OpenJDK
+      apt: pkg=openjdk-7-jdk state=present
+      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+    - name: Set JAVA_HOME environment variable
+      lineinfile: dest='/etc/profile' regexp='^#?\s*export JAVA_HOME=(.*)$' line='export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-amd64' state=present
+      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+    - name: Install build-essential
+      apt: pkg=build-essential state=present
+      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+    - name: Update all packages to the latest version
+      apt: upgrade=dist
+      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+
+  ########## Common opreations for all OS ##########
+    # Create local directories
+    - file: path=~/local/bin state=directory
+      sudo: no
+    - file: path=~/local/sbin state=directory
+      sudo: no
+    - file: path=~/local/src state=directory
+      sudo: no
+    - file: path=~/local/opt state=directory
+      sudo: no
+    - file: path=~/local/var state=directory
+      sudo: no
+    - lineinfile: dest=~/.bashrc regexp='^#?\s*export PATH=(.*)/local/bin(.*)$' line="export PATH=$PATH:$HOME/local/bin" state=present
+      sudo: no
+    - lineinfile: dest=~/.bashrc regexp='^#?\s*export PATH=(.*)/local/sbin(.*)$' line="export PATH=$PATH:$HOME/local/sbin" state=present
+      sudo: no
+
+    - name: Set CLASSPATH and PATH environment variables
+      lineinfile: $item
+      with_items:
+        - dest='/etc/profile' regexp='^#?\s*export CLASSPATH=(.*)$' line='export CLASSPATH=.:$JAVA_HOME/lib/*.jar:$JAVA_HOME/jre/lib/*.jar' state=present
+        - dest='/etc/profile' regexp='^#?\s*export PATH=(.*)JAVA_HOME(.*)$' line="export PATH=$PATH:$JAVA_HOME/bin" state=present
+
+    ###### Since Ant in yum and apt is too old, download the .tar.bz2 file and install it
+    # Install Apache Ant
+    - name: Download Apache Ant
+      get_url: url=http://mirror.cc.columbia.edu/pub/software/apache//ant/binaries/apache-ant--bin.tar.bz2 dest=/tmp/apache-ant--bin.tar.bz2
+    - name: Untar Ant
+      shell: chdir=/tmp creates=/opt/apache-ant- tar -jxf apache-ant--bin.tar.bz2 -C /opt
+    - lineinfile: dest=/etc/profile regexp='^#?\s*export ANT_HOME=(.*)$' line='export ANT_HOME=/opt/apache-ant-' state=present
+    - lineinfile: dest=/etc/profile regexp='^#?\s*export PATH=(.*)ANT_HOME(.*)$' line="export PATH=$PATH:$ANT_HOME/bin" state=present
+
+    # Install Apache Maven, since there is no Maven package in yum and apt repo
+    - name: Download Apache Maven
+      get_url: url=http://apache.claz.org/maven/maven-3/3.1.1/binaries/apache-maven--bin.tar.gz dest=/tmp/apache-maven--bin.tar.gz
+    - name: Untar Maven
+      shell: chdir=/tmp creates=/opt/apache-maven- tar -zxf apache-maven--bin.tar.gz -C /opt
+    - lineinfile: dest=/etc/profile regexp='^#?\s*export MAVEN_HOME=(.*)$' line='export MAVEN_HOME=/opt/apache-maven-' state=present
+    - lineinfile: dest=/etc/profile regexp='^#?\s*export PATH=(.*)MAVEN_HOME(.*)$' line="export PATH=$PATH:$MAVEN_HOME/bin" state=present
+
+    # Install the scala compiler, because the scala compiler in yum and apt repo is too old
+    - name: Download Scala
+      get_url: url=http://www.scala-lang.org/files/archive/scala-.tgz dest=/tmp/scala-.tgz
+    - name: Untar Scala
+      shell: chdir=/tmp creates=/opt/scala- tar -zxf scala-.tgz -C /opt
+    - lineinfile: dest=/etc/profile regexp='^#?\s*export SCALA_HOME=(.*)$' line='export SCALA_HOME=/opt/scala-' state=present
+    - lineinfile: dest=/etc/profile regexp='^#?\s*export PATH=(.*)SCALA_HOME(.*)$' line="export PATH=$PATH:$SCALA_HOME/bin" state=present
+
+    # Install sbt
+    - name: Download sbt
+      get_url: url=http://repo.scala-sbt.org/scalasbt/sbt-native-packages/org/scala-sbt/sbt///sbt.tgz dest=/tmp/sbt-.tgz
+    - name: Untar sbt
+      shell: chdir=/tmp creates=/opt/sbt- tar -zxf sbt-.tgz -C /opt
+    - name: Rename sbt directory
+      shell: chdir=/opt creates=/opt/sbt- mv sbt/ sbt-/
+    - lineinfile: dest=/etc/profile regexp='^#?\s*export SBT_HOME=(.*)$' line='export SBT_HOME=/opt/sbt-' state=present
+    - lineinfile: dest=/etc/profile regexp='^#?\s*export PATH=(.*)SBT_HOME(.*)$' line="export PATH=$PATH:$SBT_HOME/bin" state=present
+
+    # Install Go
+    - name: Download Go
+      get_url: url=https://go.googlecode.com/files/go1.2.linux-amd64.tar.gz dest=/tmp/go1.2.linux-amd64.tar.gz
+    - name: Untar Go
+      shell: chdir=/tmp creates=/opt/go tar -zxf go1.2.linux-amd64.tar.gz -C /opt
+    - lineinfile: dest=/etc/profile regexp='^#?\s*export GOROOT=(.*)$' line='export GOROOT=/opt/go' state=present
+    - lineinfile: dest=/etc/profile regexp='^#?\s*export PATH=(.*)GOROOT(.*)$' line="export PATH=$PATH:$GOROOT/bin" state=present
+</code></pre>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20140128">Restore Octopress at a New Computer</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-28T00:04:00+08:00" pubdate data-updated="true">Jan 28<span>th</span>, 2014</time>
+        
+		
+         | <a href="/blog/20140128#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>OS: Ubuntu 12.04 64-bit</p>
+
+<h2 id="install-ruby">1. Install ruby</h2>
+
+<h3 id="install-ruby-via-rvm">1.1 Install ruby via RVM</h3>
+
+<pre><code>$ \curl -sSL https://get.rvm.io | bash -s stable --ruby
+</code></pre>
+
+<h3 id="integrating-rvm-with-gnome-terminalhttpsrvmiointegrationgnome-terminal">1.2 <a href="https://rvm.io/integration/gnome-terminal">Integrating RVM with gnome-terminal</a></h3>
+<p><code>/etc/profile</code>, <code>~/.bash_profile</code> are for login shell, and <code>~/.bashrc</code> is for interactive shell, and RVM’s path is added to <code>~/.bash_profile</code>, so you need to set the shell as a login shell.</p>
+
+<h3 id="give-it-a-try">1.3 Give it a try</h3>
+<p>Exit current shell, and open a new shell,</p>
+
+<pre><code>ruby -v
+</code></pre>
+
+<p>You have successfully installed ruby.</p>
+
+<h2 id="install-python">2. Install Python</h2>
+
+<pre><code>$ sudo apt-get install -y python
+</code></pre>
+
+<p>Because <a href="http://pygments.org/">Pygments</a> syntax highlighting needs Python.</p>
+
+<h2 id="clone-your-blog-to-the-new-machine">3. Clone your blog to the new machine</h2>
+<p>First you need to clone the <code>source</code> branch to the local octopress folder.</p>
+
+<pre><code>$ git clone -b source git@github.com:username/username.github.com.git octopress
+</code></pre>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20140128">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20140127">Ansible 快速入门</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-27T12:10:00+08:00" pubdate data-updated="true">Jan 27<span>th</span>, 2014</time>
+        
+		
+         | <a href="/blog/20140127#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Ansible 是一个比Puppet, Chef 更轻量的provisioning 工具，不需要启动daemon进程。这点跟跟pssh差不多，但是比pssh更加强大。</p>
+
+<h2 id="section">前提</h2>
 <ul>
+  <li>所使用的remote_user要能够SSH无密码登录到所有机器，配置方法见<a href="http://www.yanjiuyanjiu.com/blog/20120102/">SSH无密码登录的配置</a></li>
   <li>
-    <p>整数, 浮点数等基本类型(primitive type)是对象  </p>
+    <p>remote_use sudo的时候不需要密码，配置方法如下，</p>
 
-    <pre><code>  123.toByte
-  3.14.toInt
+    <pre><code>  sudo chmod +w /etc/sudoers
+  sudo vim /etc/sudoers
 </code></pre>
 
-    <p>在Java中，primitive type不是对象，打破了一致性。</p>
-  </li>
-  <li>
-    <p>函数是对象</p>
+    <p>找到 <code>root    ALL=(ALL:ALL) ALL</code>，在下面添加一行</p>
 
-    <pre><code>  val compare = (x: Int, y: Int) =&gt; x &gt; y
-  compare(1, 2)
+    <pre><code> username    ALL=(ALL:ALL) NOPASSWD:ALL
 </code></pre>
-  </li>
-  <li>
-    <p>不再有静态方法(static method)和静态属性(static field)。Java中的静态方法(static method)和静态属性(static field)，有点打破了面向对象，因为它们不属于一个实例，而是属于类。在Scala中，静态方法和静态属性也属于对象，具体来说，属于Scala中的单例object。这样，静态成员和普通成员统一了起来，都附属于某个实例(instance)。</p>
 
-    <pre><code>  object Dog {
-    val sound = "wang wang" //static field
-  }
+    <p>保存退出，然后恢复为只读，</p>
+
+    <pre><code>  sudo chmod +w /etc/sudoers 
 </code></pre>
   </li>
 </ul>
 
-<h2 id="section-1">1.2 函数是值</h2>
+<p>如果忘记了以上两点，运行任何ansible命令的时候，会卡住不动很久。</p>
 
-<p>函数是一等公民，跟普通的值没区别</p>
+<p>如果发现在 “GATHERING FACTS”这里卡住，多半是sudo需要密码，试试加上-K选项，例如<code>ansible-playbook -K playbook.yml</code>，参考<a href="https://groups.google.com/forum/#!topic/ansible-project/FL0mxyxOo4M">Running ansible on local Linux desktop hangs on Gathering Facts</a>。</p>
+
+<p><code>-vvvv</code>表示调试模式，加上后会输出很多中间信息，帮助你调试。</p>
+
+<h2 id="ansible">1. 安装Ansible</h2>
+<p>只需要在一台机器上安装，其他机器不需要安装任何东西，这就是ansible比puppet, chef方便的地方。</p>
+
+<pre><code>sudo yum install ansible
+</code></pre>
+
+<p>或者</p>
+
+<pre><code>sudo apt-get install ansible
+</code></pre>
+
+<p>在<code>/etc/ansible/hosts</code>添加想要操作的机器(这个<code>hosts</code>文件也叫做<a href="http://docs.ansible.com/intro_inventory.html">Inventory</a>)，且这些机器都是能<a href="http://www.yanjiuyanjiu.com/blog/20120102">SSH无密码登录的</a>，然后测试一下：</p>
+
+<pre><code>ansible all -a "/bin/echo hello"
+</code></pre>
+
+<p>如果都成功了，说明安装成功。</p>
+
+<p>使用ansible有两种方式：Ad-hoc command 和 playbook。前者用于临时类批量操作，后者用于配置管理，类似与Puppet。</p>
+
+<h2 id="ad-hoc-commands">2. Ad-Hoc Commands</h2>
+<p>Ad-hoc命令的形式一般如下：</p>
+
+<pre><code>ansible groupname -m module -a arguments
+</code></pre>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20140127">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20140126">/boot 目录空间不足</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-26T22:07:00+08:00" pubdate data-updated="true">Jan 26<span>th</span>, 2014</time>
+        
+		
+         | <a href="/blog/20140126#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>今天在服务器上执行 <code>sudo yum -y update</code>的时候报错：</p>
+
+<blockquote>
+  <p>… needs 18MB on the /boot filesystem</p>
+</blockquote>
+
+<h2 id="section">1. 列出所有的内核文件</h2>
+
+<pre><code>rpm -q kernel
+kernel-2.6.32-431.el6.x86_64
+kernel-2.6.32-431.3.1.el6.x86_64
+</code></pre>
+
+<p>发现有多个内核，因此可以删除所有不再使用的内核文件，来释放空间。</p>
+
+<h2 id="section-1">2. 查看当前正在使用的内核</h2>
+
+<pre><code>uname -r
+2.6.32-431.3.1.el6.x86_64
+</code></pre>
+
+<p>注意，如果你是刚刚 <code>yum -y update</code>过，需要重启一下，内核才会更新，不重启的话<code>uname -r</code>还是显示的旧的。</p>
+
+<h2 id="section-2">3. 删除没有使用的内核</h2>
+
+<pre><code>rpm -e 2.6.32-431.el6.x86_64
+rpm -e xxx
+</code></pre>
+
+<p>将<code>rpm -q kernel</code>显示的内核复制粘贴到<code>xxx</code>位置。</p>
+
+<h2 id="section-3">4. 手动删除其他文件</h2>
+<p>把所有未使用的版本全部删除。</p>
+
+<pre><code>sudo rm -rf /lib/modules/2.6.32-431.el6.x86_64
+sudo rm -rf /usr/src/kernels/2.6.32-431.el6.x86_64
+sudo rm -rf /usr/src/kernels/2.6.32-431.el6.x86_64.debug
+sudo rm /boot/*2.6.32-431*
+</code></pre>
+
+<h2 id="grub">5. 删除grub里的条目</h2>
+<p>上面的步骤做完了后，最后，把grub里未使用的内核删掉，条目序号是从0开始编号的，删除条目后，记得把<code>default</code>设置为正确的序号。</p>
+
+<h2 id="yum-update">6. 再执行 yum update</h2>
+
+<pre><code>sudo yum -y update
+</code></pre>
+
+<h2 id="section-4">参考资料</h2>
+<p><a href="http://rajaruan.blog.51cto.com/2771737/868293">boot目录空间不足</a></p>
+
+<p><a href="http://www.xiaohuai.com/3301">yum update -y，提示/boot 空间不足的解决方法</a></p>
+
+<p><a href="http://forum.ubuntu.org.cn/viewtopic.php?f=97&amp;t=334647">如何卸载自己编译的内核？【已解决，方法见6L】</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20140125">Rdesktop 快速入门</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-25T22:05:00+08:00" pubdate data-updated="true">Jan 25<span>th</span>, 2014</time>
+        
+		
+         | <a href="/blog/20140125#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>rdesktop是一款Linux下兼容Windows Remote Desktop Protocal(RDP)协议的客户端，可以用它连接开启了3389的windows机器。输入<code>rdesktop</code>可以看到该命令的所有选项，其中最常用的选项如下：
+&gt; -u: user name
+&gt; -p: password (- to prompt)
+&gt; -f: full-screen mode
+&gt; -g: desktop geometry (WxH)
+&gt; -x: RDP5 experience (m[odem 28.8], b[roadband], l[an] or hex nr.)</p>
+
+<p>举几个例子，</p>
+
+<pre><code>rdesktop -u feng -p 123456 -xl -f 192.168.1.250
+</code></pre>
+
+<p>这条命令表示，-xl表示客户端和win机器在同一个局域网，因此可以画质调节到最好，-f表示全屏，这条命令最好在局域网下使用。</p>
+
+<pre><code>rdesktop -u feng -p 123456 -xm -f 192.168.1.250
+</code></pre>
+
+<p>跟上一条命令相比，把-xl换成了-xm，画质调节到最差</p>
+
+<pre><code>rdesktop -u feng -p 123456 -xm -g 1024x768 192.168.1.250
+</code></pre>
+
+<p>跟上一条命令相比，将全屏改成了分辨率1024x768</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20140124">集群时间同步&#8211;架设内网NTP服务器</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-24T16:40:00+08:00" pubdate data-updated="true">Jan 24<span>th</span>, 2014</time>
+        
+		
+         | <a href="/blog/20140124#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>环境：CentOS 6.5</p>
+
+<p>对于一个Linux集群，集群内的机器保持时间同步是很重要的，不然会出现很多问题。</p>
+
+<p>本文主要描述如何在集群内架设一台NTP服务器，其他机器都与这台服务器保持时间同步。</p>
+
+<h2 id="ntp">1 安装NTP</h2>
+<p>在所有机器上执行，</p>
+
+<pre><code>$ sudo yum install ntp
+</code></pre>
+
+<h3 id="section">2 调整时区</h3>
+<p>把所有机器的时区调整为上海时区，即”+8000”时区。</p>
+
+<p>先看一下机器的时区是否是对的，</p>
+
+<pre><code>$ date -R
+</code></pre>
+
+<p>如果不是”+8000”，则要修改时区，</p>
+
+<pre><code>$ cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+</code></pre>
+
+<h3 id="bios">3 （可选）同步BIOS时间</h3>
+<p>Linux系统上面BIOS时间与linux系统时间是分开的，所以调整了时间之后，还需要使用<code>hwclock</code>才能将修改过的时间写入BIOS中。</p>
+
+<p>在<code>/etc/sysconfig/ntpd</code>中添加一行:</p>
+
+<pre><code>SYNC_HWCLOCK=yes
+</code></pre>
+
+<h2 id="ntp-1">4 配置NTP服务器</h2>
+<p>选择一台能够上网的机器作为NTP服务器，以后这台服务器提供时间同步服务，集群内的其他机器不需要上网去跟公共的NTP服务器同步了。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/20140124">继续阅读 &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header class="page-header">
+    
+      <h1 class="entry-title"><a href="/blog/20140123">CentOS 6.5 升级内核到 3.10.28</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-01-23T00:02:00+08:00" pubdate data-updated="true">Jan 23<span>rd</span>, 2014</time>
+        
+		
+         | <a href="/blog/20140123#duoshuo_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>本文适用于CentOS 6.4, CentOS 6.5，亲测可行，估计也适用于其他Linux发行版。</p>
+
+<h2 id="section">1. 准备工作</h2>
+
+<h3 id="section-1">1.1 下载源码包</h3>
+<p>Linux内核版本有两种：稳定版和开发版 ，Linux内核版本号由3个数字组成：r.x.y</p>
 
 <ul>
-  <li>
-    <p>可以当作参数传递</p>
-
-    <pre><code>  val  compare = (x: Int , y: Int ) =&gt; x &gt;  y
-  list sortWith compare
-</code></pre>
-  </li>
-  <li>
-    <p>不管它是实例的方法</p>
-
-    <pre><code>  class AComparator  {
-    def  compare(x: Int , y: Int ) = x &gt;  y
-  }
-  list sortWith ( new  AComparator ).compare
-</code></pre>
-  </li>
-  <li>
-    <p>还是匿名子句</p>
-
-    <pre><code>  object  annonymous extends scala.Function2[Int , Int , Boolean] {
-    override  def  apply(x: Int , y: Int ) = x &gt;  y
-  }
-  list sortWith annonymous 
-</code></pre>
-  </li>
+  <li>r: 主版本号</li>
+  <li>x: 次版本号，偶数表示稳定版本；奇数表示开发中版本。</li>
+  <li>y: 修订版本号 ， 表示修改的次数</li>
 </ul>
 
-<h2 id="section-2">1.3 一切操作都是函数调用</h2>
+<p>去 <a href="http://www.kernel.org">http://www.kernel.org</a> 首页，可以看到有stable, longterm等版本，longterm是比stable更稳定的版本，会长时间更新，因此我选择 3.10.28，</p>
+
+<pre><code>wget  https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.10.28.tar.xz
+</code></pre>
+
+<h3 id="section-2">1.2 解压</h3>
+
+<pre><code>tar -xf linux-3.10.28.tar.xz
+</code></pre>
+
+<h3 id="section-3">1.3 更新当前系统</h3>
+
+<pre><code>sudo yum update
+sudo yum upgrade
+</code></pre>
+
+<h3 id="section-4">1.4 安装编译内核所需要的软件包</h3>
+
+<pre><code>sudo yum groupinstall "Development Tools" # 一口气安装编译时所需的一切工具
+sudo yum install ncurses-devel #必须这样才能让 make *config 这个指令正确地执行。
+sudo yum install qt-devel #如果你没有 X 环境，这一条可以不用
+sudo yum install hmaccalc zlib-devel binutils-devel elfutils-libelf-devel #创建 CentOS-6 内核时需要它们
+</code></pre>
+
+<h2 id="section-5">2 配置文件</h2>
+
+<h3 id="section-6">2.1 查看当前系统内核</h3>
+
+<pre><code>uname -r
+2.6.32-358.11.1.el6.x86_64
+</code></pre>
+
+<h3 id="section-7">2.2 将当前系统的配置文件拷贝到当前目录</h3>
+
+<pre><code>cp /boot/config-2.6.32-358.11.1.el6.x86_64 .config
+</code></pre>
+
+<h3 id="section-8">2.3 使用旧内核配置，并自动接受每个新增选项的默认设置</h3>
+
+<pre><code>sh -c 'yes "" | make oldconfig'
+</code></pre>
+
+<p><code>make oldconfig</code>会读取当前目录下的<code>.config</code>文件，在<code>.config</code>文件里没有找到的选项则提示用户填写，然后备份<code>.config</code>文件为<code>.config.old</code>，并生成新的<code>.config</code>文件，参考 <a href="http://stackoverflow.com/questions/4178526/what-does-make-oldconfig-do-exactly-linux-kernel-makefile">http://stackoverflow.com/questions/4178526/what-does-make-oldconfig-do-exactly-linux-kernel-makefile</a></p>
+
+<h2 id="section-9">3 编译</h2>
+
+<pre><code>sudo make -j8 bzImage #生成内核文件
+sudo make -j8 modules #编译模块
+sudo make -j8 modules_install #编译安装模块
+</code></pre>
+
+<p>要严格按照这个顺序进行编译，<strong>不能合并成一句</strong>，<code>sudo make -j8 bzImage modules modules_install</code>。</p>
+
+<p><code>-j</code>后面的数字是线程数，用于加快编译速度，一般的经验是，有多少G内存，就填写那个数字，例如有8G内存，则为<code>-j8</code>。</p>
+
+<h2 id="section-10">4 安装</h2>
+
+<pre><code>sudo make install
+</code></pre>
+
+<p>如果出现了 <code>ERROR: modinfo: could not find module xxx</code>，数量少的话，可以忽略。</p>
+
+<h2 id="grub">5 修改Grub引导顺序</h2>
+
+<p>安装完成后，需要修改Grub引导顺序，让新安装的内核作为默认内核。</p>
+
+<p>编辑 <code>grub.conf</code>文件，</p>
+
+<pre><code>sudo vim /etc/grub.conf
+</code></pre>
+
+<p>数一下刚刚新安装的内核在哪个位置，从0开始，然后设置default为那个数字，一般新安装的内核在第一个位置，所以设置<code>default=0</code>。</p>
+
+<h2 id="section-11">6 重启</h2>
+
+<pre><code>sudo reboot
+</code></pre>
+
+<p>重启后，看一下当前内核版本号，</p>
+
+<pre><code>uname -r
+3.10.28
+</code></pre>
+
+<p>成功啦！！</p>
+
+<h2 id="section-12">7 如果失败，则重新循环</h2>
+
+<p>如果失败，重新开始的话，要清理上次编译的现场 </p>
+
+<pre><code>make mrproper #清理上次编译的现场 
+</code></pre>
+
+<p>然后转到第2步，重新开始。</p>
+
+<h2 id="section-13">参考资料</h2>
+<ul>
+  <li><a href="http://xmodulo.com/2013/07/how-to-upgrade-the-kernel-on-centos.html">How to upgrade the kernel on CentOS</a></li>
+  <li><a href="http://winotes.net/centos-64-upgrade-to-kernel-3x.html">CentOS 6.4 升级到 3.x Kernel</a></li>
+  <li><a href="http://my.oschina.net/qichang/blog/101542">CentOS Linux 升级内核步骤和方法</a></li>
+</ul>
 </div>
   
-  
-    <footer>
-      <a rel="full-article" href="/blog/20130829">继续阅读 &rarr;</a>
-    </footer>
   
 
 
@@ -226,7 +1024,7 @@
       
   <header class="page-header">
     
-      <h1 class="entry-title"><a href="/blog/20130617">安装Spark集群(在CentOS上)</a></h1>
+      <h1 class="entry-title"><a href="/blog/20140122">在Centos 6.5上安装docker</a></h1>
     
     
       <p class="meta">
@@ -242,1183 +1040,62 @@
   
 
 
-<time datetime="2013-06-17T22:16:00+08:00" pubdate data-updated="true">Jun 17<span>th</span>, 2013</time>
+<time datetime="2014-01-22T15:25:00+08:00" pubdate data-updated="true">Jan 22<span>nd</span>, 2014</time>
         
 		
-         | <a href="/blog/20130617#duoshuo_thread">Comments</a>
+         | <a href="/blog/20140122#duoshuo_thread">Comments</a>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p><strong>环境</strong>:CentOS 6.4, Hadoop 1.1.2, JDK 1.7, Spark 0.7.2, Scala 2.9.3</p>
+  <div class="entry-content"><h2 id="enable-epel-repo-on-centos">1 Enable EPEL Repo on CentOS</h2>
 
-<p>折腾了几天，终于把Spark 集群安装成功了，其实比hadoop要简单很多，由于网上搜索到的博客大部分都还停留在需要依赖mesos的版本，走了不少弯路。</p>
+<p>参考 <a href="http://www.centosblog.com/enable-epel-repo-on-centos-5-and-centos-6/">Enable EPEL Repo on CentOS 5 and CentOS 6</a></p>
 
-<h1 id="jdk-17">1. 安装 JDK 1.7</h1>
-<pre><code>yum search openjdk-devel
-sudo yum install java-1.7.0-openjdk-devel.x86_64
-/usr/sbin/alternatives --config java
-/usr/sbin/alternatives --config javac
-sudo vim /etc/profile
-# add the following lines at the end
-export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.19.x86_64
-export JRE_HOME=$JAVA_HOME/jre
-export PATH=$PATH:$JAVA_HOME/bin
-export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
-# save and exit vim
-# make the bash profile take effect immediately
-$ source /etc/profile
-# test
-$ java -version
+<pre><code>rpm -Uvh http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
 </code></pre>
 
-<p>参考我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20120423/">安装和配置CentOS服务器的详细步骤</a>。</p>
+<h2 id="install-docker">2 Install docker</h2>
 
-<h1 id="scala-293">2. 安装 Scala 2.9.3</h1>
-<p>Spark 0.7.2 依赖 Scala 2.9.3, 我们必须要安装Scala 2.9.3.</p>
-
-<p>下载 <a href="http://www.scala-lang.org/downloads/distrib/files/scala-2.9.3.tgz">scala-2.9.3.tgz</a> 并 保存到home目录.</p>
-
-<pre><code>$ tar -zxf scala-2.9.3.tgz
-$ sudo mv scala-2.9.3 /usr/lib
-$ sudo vim /etc/profile
-# add the following lines at the end
-export SCALA_HOME=/usr/lib/scala-2.9.3
-export PATH=$PATH:$SCALA_HOME/bin
-# save and exit vim
-#make the bash profile take effect immediately
-source /etc/profile
-# test
-$ scala -version
+<pre><code>yum install docker-io --enablerepo=epel
 </code></pre>
 
-<h1 id="spark">3. 下载预编译好的Spark</h1>
-<p>下载预编译好的Spark, <a href="http://www.spark-project.org/download-spark-0.7.2-prebuilt-hadoop1">spark-0.7.2-prebuilt-hadoop1.tgz</a>. </p>
+<h2 id="docker-daemon-">3 启动 docker daemon 进程</h2>
 
-<p>如果你想从零开始编译，则下载源码包，但是我不建议你这么做，因为有一个Maven仓库，twitter4j.org, 被墙了，导致编译时需要翻墙，非常麻烦。如果你有DIY精神，并能顺利翻墙，则可以试试这种方式。</p>
-
-<h1 id="section">4. 本地模式</h1>
-
-<h2 id="section-1">4.1 解压</h2>
-
-<pre><code>$ tar -zxf spark-0.7.2-prebuilt-hadoop1.tgz
+<pre><code>sudo docker -d &amp;
 </code></pre>
 
-<h2 id="sparkexamplesjar-">4.2 设置SPARK_EXAMPLES_JAR 环境变量</h2>
+<p>这时，有警告，说内核版本过低，</p>
 
-<pre><code>$ vim ~/.bash_profile
-# add the following lines at the end
-export SPARK_EXAMPLES_JAR=$HOME/spark-0.7.2/examples/target/scala-2.9.3/spark-examples_2.9.3-0.7.2.jar
-# save and exit vim
-#make the bash profile take effect immediately
-$ source /etc/profile
+<blockquote>
+  <p>WARNING: You are running linux kernel version 2.6.32-431.el6.x86_64, which might be unstable running docker. Please upgrade your kernel to 3.8.0.</p>
+</blockquote>
+
+<p>如果你在公司，且公司内部都是通过代理上网，则可以把代理服务器告诉docker，用如下命令(参考<a href="https://github.com/dotcloud/docker/issues/402">这里</a>)：</p>
+
+<pre><code>sudo HTTP_PROXY=http://xxx:port docker -d &amp;
 </code></pre>
 
-<p>这一步其实最关键，很不幸的是，官方文档和网上的博客，都没有提及这一点。我是偶然看到了这两篇帖子，<a href="https://groups.google.com/forum/?fromgroups#!topic/spark-users/nQ6wB2lcFN8">Running SparkPi</a>, <a href="https://groups.google.com/forum/#!msg/spark-users/x5UczgI-Xm8/wzMm3Mb77-oJ">Null pointer exception when running ./run spark.examples.SparkPi local</a>，才补上了这一步，之前死活都无法运行SparkPi。</p>
+<h2 id="section">4 升级内核</h2>
 
-<h2 id="sparkhomesparkhomebinpath">4.3 （可选）设置 SPARK_HOME环境变量，并将SPARK_HOME/bin加入PATH</h2>
-<pre><code>$ vim ~/.bash_profile
-# add the following lines at the end
-export SPARK_HOME=$HOME/spark-0.7.2
-export PATH=$PATH:$SPARK_HOME/bin
-# save and exit vim
-#make the bash profile take effect immediately
-$ source /etc/profile
+<p>见我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20131024">CentOS 6.4 升级内核到 3.11.6</a></p>
+
+<h2 id="ubuntu-">5 下载 ubuntu 镜像</h2>
+
+<pre><code>sudo docker pull ubuntu
 </code></pre>
 
-<h2 id="sparkpi">4.4 现在可以运行SparkPi了</h2>
+<h2 id="hello-world">6 运行 hello world</h2>
 
-<pre><code>$ cd ~/spark-0.7.2
-$ ./run spark.examples.SparkPi local 
+<pre><code>sudo docker run ubuntu /bin/echo hello world
+hello world
 </code></pre>
 
-<h1 id="section-2">5. 集群模式</h1>
-
+<p>安装成功了！！</p>
 </div>
   
-  
-    <footer>
-      <a rel="full-article" href="/blog/20130617">继续阅读 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20130614">Installing Spark on CentOS</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-06-14T19:06:00+08:00" pubdate data-updated="true">Jun 14<span>th</span>, 2013</time>
-        
-		
-         | <a href="/blog/20130614#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><strong>Environment</strong>:CentOS 6.4, Hadoop 1.1.2, JDK 1.7, Spark 0.7.2, Scala 2.9.3</p>
-
-<p>After a few days hacking , I have found that installing a Spark cluster is exteremely easy :)</p>
-
-<h1 id="install-jdk-17">1. Install JDK 1.7</h1>
-<pre><code>yum search openjdk-devel
-sudo yum install java-1.7.0-openjdk-devel.x86_64
-/usr/sbin/alternatives --config java
-/usr/sbin/alternatives --config javac
-sudo vim /etc/profile
-# add the following lines at the end
-export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.19.x86_64
-export JRE_HOME=$JAVA_HOME/jre
-export PATH=$PATH:$JAVA_HOME/bin
-export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
-# save and exit vim
-# make the bash profile take effect immediately
-$ source /etc/profile
-# test
-$ java -version
-</code></pre>
-
-<h1 id="install-scala-293">2. Install Scala 2.9.3</h1>
-<p>Spark 0.7.2 depends on Scala 2.9.3, So we must install Scala of version 2.9.3.</p>
-
-<p>Download <a href="http://www.scala-lang.org/downloads/distrib/files/scala-2.9.3.tgz">scala-2.9.3.tgz</a> and save it to home directory.</p>
-
-<pre><code>$ tar -zxf scala-2.9.3.tgz
-$ sudo mv scala-2.9.3 /usr/lib
-$ sudo vim /etc/profile
-# add the following lines at the end
-export SCALA_HOME=/usr/lib/scala-2.9.3
-export PATH=$PATH:$SCALA_HOME/bin
-# save and exit vim
-# make the bash profile take effect immediately
-source /etc/profile
-# test
-$ scala -version
-</code></pre>
-
-<h1 id="download-prebuilt-packages">3. Download prebuilt packages</h1>
-<p>Download prebuilt packages, <a href="http://www.spark-project.org/download-spark-0.7.2-prebuilt-hadoop1">spark-0.7.2-prebuilt-hadoop1.tgz</a>. </p>
-
-<p>If you want to compile it from scratch, download the source package, but I don’t recommend this way, because in Chinese Mainland the GFW has blocked one of maven repositories, twitter4j.org, which makes the compilation an impossible mission unless you can conquer GFW.</p>
-
-<h1 id="local-mode">4. Local Mode</h1>
-
-<h2 id="untar-the-tarball">4.1 Untar the tarball</h2>
-
-<pre><code>$ tar -zxf spark-0.7.2-prebuilt-hadoop1.tgz
-</code></pre>
-
-<h2 id="set-the-sparkexamplesjar-environment-variable">4.2 Set the SPARK_EXAMPLES_JAR environment variable</h2>
-<pre><code>$ vim ~/.bash_profile
-# add the following lines at the end
-export SPARK_EXAMPLES_JAR=$HOME/spark-0.7.2/examples/target/scala-2.9.3/spark-examples_2.9.3-0.7.2.jar
-# save and exit vim
-# make the bash profile take effect immediately
-$ source /etc/profile
-</code></pre>
-
-<p>This is the most important step that must be done , but unfortunately the official docs and most web blogs haven’t mentioned this. I found this step when I bumped into these posts, <a href="https://groups.google.com/forum/?fromgroups#!topic/spark-users/nQ6wB2lcFN8">Running SparkPi</a>, <a href="https://groups.google.com/forum/#!msg/spark-users/x5UczgI-Xm8/wzMm3Mb77-oJ">Null pointer exception when running ./run spark.examples.SparkPi local</a>.</p>
-
-<h2 id="optionalset-sparkhome-and-add-sparkhomebin-to-path">4.3 (Optional)Set SPARK_HOME and add SPARK_HOME/bin to PATH</h2>
-
-<pre><code>$ vim ~/.bash_profile
-# add the following lines at the end
-export SPARK_HOME=$HOME/spark-0.7.2
-export PATH=$PATH:$SPARK_HOME/bin
-# save and exit vim
-# make the bash profile take effect immediately
-$ source /etc/profile
-</code></pre>
-
-<h2 id="now-you-can-run-sparkpi">4.4 Now you can run SparkPi.</h2>
-
-<pre><code>$ cd ~/spark-0.7.2
-$ ./run spark.examples.SparkPi local 
-</code></pre>
-
-<h1 id="cluster-mode">5. Cluster Mode</h1>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/20130614">继续阅读 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20130612">在CentOS上安装Hadoop</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-06-12T12:39:00+08:00" pubdate data-updated="true">Jun 12<span>th</span>, 2013</time>
-        
-		
-         | <a href="/blog/20130612#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Ubuntu上安装，请参考我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20120103/">在Ubuntu上安装Hadoop</a>。</p>
-
-<p><strong>环境</strong>：CentOS 6.4, JDK 1.7, Hadoop 1.1.2</p>
-
-<h2 id="vmware-workstation-">1. 用vmware workstation 创建三台虚拟机</h2>
-<p>首先用vmware workstation 新建一台CentOS 6.4，装好操作系统，选择 Basic Server，安装JDK，参考我的另一篇博客，<a href="http://www.yanjiuyanjiu.com/blog/20120423/">安装和配置CentOS服务器的详细步骤</a>。安装好后然后用浅拷贝<code>Create a linked clone</code> 克隆出两台作为slave，这样有了三台虚拟机。启动三台机器，假设IP分别为<code>192.168.1.131, 192.168.1.132, 192.168.1.133</code>, 131做为master 和 SecondaryNameNode, 身兼两职， 132和133为 slaves。</p>
-
-<h2 id="section">2 关闭防火墙</h2>
-<p>临时关闭防火墙</p>
-
-<pre><code>$ sudo service iptables stop
-</code></pre>
-
-<p>下次开机后，防火墙还是会启动。</p>
-
-<p>永久关闭防火墙</p>
-
-<pre><code>$ sudo chkconfig iptables off
-</code></pre>
-
-<p>由于这几台虚拟机是开发机，不是生产环境，因此不必考虑安全性，可以永久关闭防火墙，还能给开发阶段带来很多便利。</p>
-
-<h2 id="hostname">3. 修改hostname</h2>
-<p>这一步看起来貌似不必要，其实是必须的，否则最后运行wordcount等例子时，会出现“Too many fetch-failures”。因为HDFS用hostname而不是IP，来相互之间进行通信（见后面的注意1）。</p>
-
-<p>在CentOS上修改hostname，包含两个步骤(假设将hostname1改为hostname2，参考<a href="http://www.ichiayi.com/wiki/tech/linux_hostname">这里</a>，但不需要第一步)：</p>
-
-<ol>
-  <li>将 <code>/etc/sysconfig/network</code> 內的 HOSTNAME 改成 hostname2</li>
-  <li>用<code>hostname</code>命令，临时修改机器名， <code>sudo hostname hostname2</code></li>
-</ol>
-
-<p>用<code>exit</code>命令退出shell，再次登录，命令提示字符串就会变成<code>[dev@hostname2 ~]$</code>。</p>
-
-<p>用上述方法，将131改名为master，132改名为slave01，133改名为slave02。</p>
-
-<p>在三台机器的/etc/hosts文件中，添加以下三行内容</p>
-
-<pre><code>192.168.1.131 master
-192.168.1.132 slave01
-192.168.1.133 slave02
-</code></pre>
-
-<h2 id="section-1">4. 本地模式和伪分布式模式</h2>
-
-<p>为了能顺利安装成功，我们先练习在单台机器上安装Hadoop。在单台机器上，可以配置成本地模式(local mode)和伪分布式模式(Pseudo-Distributed Mode)，参考官方文档<a href="http://hadoop.apache.org/docs/r1.1.2/single_node_setup.html">Single Node Setup</a>。</p>
-
-<p>将 hadoop-1.1.2-bin.tar.gz 上传到三台机器的 home目录下，然后解压。<strong>注意，三台机器hadoop所在目录必须一致，因为master会登陆到slave上执行命令，master认为slave的hadoop路径与自己一样。</strong></p>
-
-<h3 id="confhadoop-envsh-javahome">4.1 编辑 conf/hadoop-env.sh，设置 JAVA_HOME</h3>
-
-<pre><code>cd hadoop-1.1.2
-vim conf/hadoop-env.sh
-</code></pre>
-
-<p>注释掉第8行的JAVA_HOME，设置正确的JDK位置</p>
-
-<pre><code>export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.19.x86_64
-</code></pre>
-
-<h3 id="section-2">4.2 测试本地模式是否正常</h3>
-<p>默认情况下，Hadoop就被配置为本地模式，现在就可以开始测试一下。</p>
-
-<pre><code>$ mkdir input 
-$ cp conf/*.xml input 
-$ bin/hadoop jar hadoop-examples-*.jar grep input output 'dfs[a-z.]+' 
-$ cat output/*
-</code></pre>
-
-<p>可以看到正常的结果，说明本地模式运行成功了，下面开始配置伪分布式模式。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/20130612">继续阅读 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20130611">使用Scala IDE 阅读spark源码 &#8211; 将sbt项目转化为eclipse项目</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-06-11T11:48:00+08:00" pubdate data-updated="true">Jun 11<span>th</span>, 2013</time>
-        
-		
-         | <a href="/blog/20130611#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>阅读Spark源代码，最简单的方式是下载源码包，解压后用纯文本方式来阅读源码。这样效率不高，可以用sbteclipse这个插件，将sbt项目文件转化为eclipse项目文件，然后导入到Scala IDE，用eclipse来阅读源码，效率大大提高。</p>
-
-<p><strong>环境</strong>：Windows 7, JDK 1.6</p>
-
-<ol>
-  <li>安装 scala。去官网 <a href="http://www.scala-lang.org/">http://www.scala-lang.org/</a> ，下载MSI，安装，按默认设置即可。</li>
-  <li>
-    <p>安装 sbt。去官网 <a href="http://www.scala-sbt.org/">http://www.scala-sbt.org/</a> ， 下载MSI，安装，按默认设置即可。
-Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt时它会自动下载对应的scala编译器。</p>
-  </li>
-  <li>
-    <p>安装 Scala IDE。 去官网 <a href="http://scala-ide.org/">http://scala-ide.org/</a>，点击”Get the SDK”绿色按钮，下载。这个IDE的好处是，自带了scala编译器，解压即可使用。</p>
-  </li>
-  <li>
-    <p>下载spark源码。 去官网 <a href="http://spark-project.org/">http://spark-project.org/</a> 下载源码，当前版本是 0.7.2, source package 大约4M左右。解压源码，例如 解压到 d:spark-0.7.0\</p>
-  </li>
-  <li>
-    <p>添加 sbteclipse 插件依赖。spark已经添加了依赖，这一步什么也不需要做。</p>
-
-    <p>这个插件的作用，就是能够读取sbt的配置文件，生成一个eclipse的工程文件。有了eclipse工程文件，就可以导入到eclipse了。</p>
-
-    <p>spark已经添加了依赖，见 d:\spark-0.7.2\project\plugins.sbt，有一行</p>
-
-    <p>addSbtPlugin(“com.typesafe.sbteclipse” % “sbteclipse-plugin” % “2.1.1”)</p>
-  </li>
-  <li>
-    <p>启动cmd，启动sbt。</p>
-
-    <blockquote>
-      <p>cd  d:\spark-0.7.0<br />
- sbt</p>
-    </blockquote>
-
-    <p>Linux下则是</p>
-
-    <blockquote>
-      <p>cd  d:\spark-0.7.0<br />
- sbt/sbt</p>
-    </blockquote>
-
-    <p>开始下载各种依赖包，需要等待很长时间。</p>
-  </li>
-  <li>
-    <p><strong>翻@_@墙。见本文最后一段。</strong></p>
-
-    <p></div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/20130611">继续阅读 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20130412">LaTeX的各种发行版和编辑器的比较</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-04-12T11:01:00+08:00" pubdate data-updated="true">Apr 12<span>th</span>, 2013</time>
-        
-		
-         | <a href="/blog/20130412#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2 id="distribution">发行版(distribution)</h2>
-<p>TeX类似于Linux，有很多不同的发行版(distribution)。</p>
-
-<p>先看看各个发行版的流行程度。</p>
-
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center"><strong>名字</strong></th>
-      <th style="text-align: center"><strong>官网</strong></th>
-      <th style="text-align: center"><strong>PR</strong></th>
-      <th style="text-align: center"><strong>Alexa</strong></th>
-      <th style="text-align: center"><strong>最后更新</strong></th>
-      <th style="text-align: center"><strong>weibo</strong></th>
-      <th style="text-align: center"><strong>quora</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">TeX Live</td>
-      <td style="text-align: center"><a href="http://www.tug.org/texlive/">http://www.tug.org/texlive/</a></td>
-      <td style="text-align: center">7</td>
-      <td style="text-align: center">N/A</td>
-      <td style="text-align: center">2012-07-01</td>
-      <td style="text-align: center">43</td>
-      <td style="text-align: center">N/A</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">MiKTeX</td>
-      <td style="text-align: center"><a href="http://miktex.org/">http://miktex.org/</a></td>
-      <td style="text-align: center">7</td>
-      <td style="text-align: center">188,485</td>
-      <td style="text-align: center">1.3.2 2012-09-24</td>
-      <td style="text-align: center">54</td>
-      <td style="text-align: center">N/A</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">CTeX</td>
-      <td style="text-align: center"><a href="http://www.ctex.org/">http://www.ctex.org/</a></td>
-      <td style="text-align: center">6</td>
-      <td style="text-align: center">252,657</td>
-      <td style="text-align: center">2.9.2 2012-03-30</td>
-      <td style="text-align: center">344</td>
-      <td style="text-align: center">N/A</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">proTeXt</td>
-      <td style="text-align: center"><a href="http://www.tug.org/protext/">http://www.tug.org/protext/</a></td>
-      <td style="text-align: center">7</td>
-      <td style="text-align: center">N/A</td>
-      <td style="text-align: center">3.1.1 2012-07-23</td>
-      <td style="text-align: center">10</td>
-      <td style="text-align: center">N/A</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>其中CTeX和proTeXt都是基于MiKTeX的，再次进行了打包。国内估计用CTeX比较多。</p>
-
-<h2 id="editor">编辑器(editor)</h2>
-<p>编辑器大概分为两种，一种为WYSIWYG，所见即所得，实时预览，类似于Word，另一种是纯文本编辑器，有语法高亮，没有预览功能，需要另外安装一个发行版，编译成PDF后才能预览。</p>
-
-<p>先看看各个编辑器的流行程度。</p>
-
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center"><strong>名字</strong></th>
-      <th style="text-align: center"><strong>官网</strong></th>
-      <th style="text-align: center"><strong>PR</strong></th>
-      <th style="text-align: center"><strong>Alexa</strong></th>
-      <th style="text-align: center"><strong>预览类型</strong></th>
-      <th style="text-align: center"><strong>最后更新</strong></th>
-      <th style="text-align: center"><strong>weibo</strong></th>
-      <th style="text-align: center"><strong>quora</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">TeXmaker</td>
-      <td style="text-align: center"><a href="http://www.xm1math.net/texmaker/">http://www.xm1math.net/texmaker/</a></td>
-      <td style="text-align: center">6</td>
-      <td style="text-align: center">289,311</td>
-      <td style="text-align: center">无预览</td>
-      <td style="text-align: center">4.0.1 2013-03-16</td>
-      <td style="text-align: center">60</td>
-      <td style="text-align: center">N/A</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">TeXworks</td>
-      <td style="text-align: center"><a href="http://www.tug.org/texworks/">http://www.tug.org/texworks/</a></td>
-      <td style="text-align: center">5</td>
-      <td style="text-align: center">90,230</td>
-      <td style="text-align: center">无预览</td>
-      <td style="text-align: center">0.4.4  2012-04</td>
-      <td style="text-align: center">23</td>
-      <td style="text-align: center">N/A</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">TeXstudio</td>
-      <td style="text-align: center"><a href="http://texstudio.sourceforge.net/">http://texstudio.sourceforge.net/</a></td>
-      <td style="text-align: center">6</td>
-      <td style="text-align: center">N/A</td>
-      <td style="text-align: center">无预览</td>
-      <td style="text-align: center">2.5.2 2013-01-08</td>
-      <td style="text-align: center">15</td>
-      <td style="text-align: center">N/A</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">TeXnicCenter</td>
-      <td style="text-align: center"><a href="http://www.texniccenter.org/">http://www.texniccenter.org/</a></td>
-      <td style="text-align: center">7</td>
-      <td style="text-align: center">884,570</td>
-      <td style="text-align: center">无预览</td>
-      <td style="text-align: center">v2.0 beta1 2012-11-03</td>
-      <td style="text-align: center">10</td>
-      <td style="text-align: center">N/A</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">Lyx</td>
-      <td style="text-align: center"><a href="http://www.lyx.org/">http://www.lyx.org/</a></td>
-      <td style="text-align: center">6</td>
-      <td style="text-align: center">261,649</td>
-      <td style="text-align: center">实时预览</td>
-      <td style="text-align: center">2.0.5.1 2013-01-08</td>
-      <td style="text-align: center">56</td>
-      <td style="text-align: center">42</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">Bakoma</td>
-      <td style="text-align: center"><a href="http://www.bakoma-tex.com/">http://www.bakoma-tex.com/</a></td>
-      <td style="text-align: center">5</td>
-      <td style="text-align: center">1,327,901</td>
-      <td style="text-align: center">实时预览</td>
-      <td style="text-align: center">10.10 2013-01-13</td>
-      <td style="text-align: center">3</td>
-      <td style="text-align: center">N/A</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">TeXmacs</td>
-      <td style="text-align: center"><a href="http://www.texmacs.org">http://www.texmacs.org</a></td>
-      <td style="text-align: center">6</td>
-      <td style="text-align: center">1,525,373</td>
-      <td style="text-align: center">实时预览</td>
-      <td style="text-align: center">1.0.7.19 2013-03-27</td>
-      <td style="text-align: center">27</td>
-      <td style="text-align: center">N/A</td>
-    </tr>
-    <tr>
-      <td style="text-align: center">LEd</td>
-      <td style="text-align: center"><a href="http://www.latexeditor.org/">http://www.latexeditor.org/</a></td>
-      <td style="text-align: center">6</td>
-      <td style="text-align: center">624,564</td>
-      <td style="text-align: center">实时预览</td>
-      <td style="text-align: center">0.53 2009-10-09</td>
-      <td style="text-align: center">0</td>
-      <td style="text-align: center">N/A</td>
-    </tr>
-  </tbody>
-</table>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/20130412">继续阅读 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20130402">我的Octopress配置</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-04-02T15:35:00+08:00" pubdate data-updated="true">Apr 2<span>nd</span>, 2013</time>
-        
-		
-         | <a href="/blog/20130402#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2 id="section">实时预览</h2>
-<p>使用如下命令可以实现实时预览：</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line">rake preview
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p><code>rake preview</code> 会自动监视文件的变化，重新生成静态页面。因此修改markdown文件后，只需要在浏览器里刷新一下页面，就立刻可以看到效果。不过如果修改了_config.yml的话，则需要Ctrl+C终止，用<code>rake generate</code>重新生成，才能看到效果。</p>
-
-<h2 id="section-1">嵌入代码块</h2>
-<p>见官方文档<a href="http://octopress.org/docs/blogging/code/">Sharing Code Snippets</a>。</p>
-
-<p>Octopress是一款为hacker量身定制的博客系统，当然内置了代码高亮的功能！它的代码高亮功能是通过Pygments实现的，配色方案用的是Solarized，堪称完美。</p>
-
-<p>Octopress支持多种方式嵌入代码，可以直接嵌入代码，也可以引用github上的gist 。</p>
-
-<p>我喜欢用<strong>三个反引号</strong>直接嵌入代码，比 <code>codeblock</code>要简洁。</p>
-
-<h3 id="mathjax">启用MathJax</h3>
-<p>在<code>source/_includes/custom/footer.html</code>的第一行加入如下代码：</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-</pre></td><td class="code"><pre><code class="javascript"><span class="line"><span class="c">&lt;!--</span> <span class="nx">mathjax</span> <span class="nx">config</span> <span class="nx">similar</span> <span class="nx">to</span> <span class="nx">math</span><span class="p">.</span><span class="nx">stackexchange</span> <span class="o">--&gt;</span>
-</span><span class="line"><span class="o">&lt;</span><span class="nx">script</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/x-mathjax-config&quot;</span><span class="o">&gt;</span>
-</span><span class="line"><span class="nx">MathJax</span><span class="p">.</span><span class="nx">Hub</span><span class="p">.</span><span class="nx">Config</span><span class="p">({</span>
-</span><span class="line">  <span class="nx">jax</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;input/TeX&quot;</span><span class="p">,</span> <span class="s2">&quot;output/HTML-CSS&quot;</span><span class="p">],</span>
-</span><span class="line">  <span class="nx">tex2jax</span><span class="o">:</span> <span class="p">{</span>
-</span><span class="line">    <span class="nx">inlineMath</span><span class="o">:</span> <span class="p">[</span> <span class="p">[</span><span class="s1">&#39;$&#39;</span><span class="p">,</span> <span class="s1">&#39;$&#39;</span><span class="p">]</span> <span class="p">],</span>
-</span><span class="line">    <span class="nx">displayMath</span><span class="o">:</span> <span class="p">[</span> <span class="p">[</span><span class="s1">&#39;$$&#39;</span><span class="p">,</span> <span class="s1">&#39;$$&#39;</span><span class="p">]],</span>
-</span><span class="line">    <span class="nx">processEscapes</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
-</span><span class="line">    <span class="nx">skipTags</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;script&#39;</span><span class="p">,</span> <span class="s1">&#39;noscript&#39;</span><span class="p">,</span> <span class="s1">&#39;style&#39;</span><span class="p">,</span> <span class="s1">&#39;textarea&#39;</span><span class="p">,</span> <span class="s1">&#39;pre&#39;</span><span class="p">,</span> <span class="s1">&#39;code&#39;</span><span class="p">]</span>
-</span><span class="line">  <span class="p">},</span>
-</span><span class="line">  <span class="nx">messageStyle</span><span class="o">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
-</span><span class="line">  <span class="s2">&quot;HTML-CSS&quot;</span><span class="o">:</span> <span class="p">{</span> <span class="nx">preferredFont</span><span class="o">:</span> <span class="s2">&quot;TeX&quot;</span><span class="p">,</span> <span class="nx">availableFonts</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;STIX&quot;</span><span class="p">,</span><span class="s2">&quot;TeX&quot;</span><span class="p">]</span> <span class="p">}</span>
-</span><span class="line"><span class="p">});</span>
-</span><span class="line"><span class="o">&lt;</span><span class="err">/script&gt;</span>
-</span><span class="line"><span class="o">&lt;</span><span class="nx">script</span> <span class="nx">src</span><span class="o">=</span><span class="s2">&quot;http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML&quot;</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;&lt;</span><span class="err">/script&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>这样就引入了MathJax的JS包，可以直接在markdown文件里直接写公式了，例如 $\dfrac {\pi}{2}$。</p>
-
-<p>上面的代码也可以在<code>source/_includes/custom/header.html</code>里添加，不过这样会使得页面的加载速度变慢。还可以在<code>source/_layouts/default.html</code>里添加。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/20130402">继续阅读 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20130401">使用github + Octopress 搭建免费博客</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-04-01T15:14:00+08:00" pubdate data-updated="true">Apr 1<span>st</span>, 2013</time>
-        
-		
-         | <a href="/blog/20130401#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3 id="section">前提条件</h3>
-<p>注册一个github账号。</p>
-
-<p>任何资料，都不如<a href="http://octopress.org/docs/">Octopress</a> 和<a href="https://help.github.com/categories/20/articles">Github Pages</a>的官方文档，建议首先阅读官方文档。</p>
-
-<h3 id="github-pages">GitHub Pages快速体验</h3>
-<p>在GitHub网站上，点击右上角的+号图标，创建一个新的Repo，Repository 的名字必须为 username.github.com。然后点击Settings进入该Repo的设置页面。看到”Automatic Page Generator”，说明这个Repo已经启用了GitHub Page。点击按钮进入设置。</p>
-
-<p>在”Create a GitHub User Page”填写一些基本信息，点击右下角的”Continue to Layout”。布局就用默认的，点击绿色的”Publish”按钮。</p>
-
-<p>大功告成，输入”username.github.com”，看到一个页面没？这就是你刚刚创建的一个页面。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/20130401">继续阅读 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20130327">机器学习的一些通俗易懂的tutorial</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-03-27T21:50:00+08:00" pubdate data-updated="true">Mar 27<span>th</span>, 2013</time>
-        
-		
-         | <a href="/blog/20130327#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>以下记录了我的学习历程，按我的阅读顺序排序。</p>
-
-<h2 id="prior-likelihood-posterior">Prior, Likelihood, Posterior</h2>
-<p>MLAPP第3.2节，讲的很好，用了一个叫 number game 的小游戏做例子，通俗易懂</p>
-
-<h2 id="section">距离和相似度度量</h2>
-<p><a href="http://webdataanalysis.net/reference-and-source/distance-and-similarity/">距离和相似度度量 » webdataanalysis.net</a></p>
-
-<p><a href="http://www.zhihu.com/question/19640394">欧氏距离和余弦相似度的区别是什么？ – 知乎</a></p>
-
-<h2 id="knnk-nearest-neighbor">KNN(K Nearest Neighbor)</h2>
-<p><a href="http://coolshell.cn/articles/8052.html">K Nearest Neighbor 算法 _ 酷壳 – CoolShell</a></p>
-
-<p><a href="http://en.wikipedia.org/wiki/KNN">K-nearest neighbors algorithm – Wikipedia</a></p>
-
-<h2 id="k-means">K-Means</h2>
-<p><a href="http://coolshell.cn/articles/7779.html">K-Means 算法 _ 酷壳 – CoolShell</a></p>
-
-<p><a href="http://en.wikipedia.org/wiki/K-means">k-means clustering – Wikipedia</a></p>
-
-<p><a href="http://kylen314.blog.com/2012/09/10/k-means/">K-Means++ _ 愈宅屋</a></p>
-
-<p><a href="http://www.cnblogs.com/leoo2sk/archive/2010/09/20/k-means.html">算法杂货铺——k均值聚类(K-means) – T2噬菌体 – 博客园</a></p>
-
-<p><a href="http://blog.pluskid.org/?p=17">漫谈 Clustering (1)_ k-means « Free Mind</a></p>
-
-<p><a href="http://www.codeproject.com/Articles/439890/Text-Documents-Clustering-using-K-Means-Algorithm">Text Documents Clustering using K-Means Algorithm – CodeProject</a></p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/20130327">继续阅读 &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header class="page-header">
-    
-      <h1 class="entry-title"><a href="/blog/20130322">一些主流的编程竞赛网站</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-03-22T21:57:00+08:00" pubdate data-updated="true">Mar 22<span>nd</span>, 2013</time>
-        
-		
-         | <a href="/blog/20130322#duoshuo_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>今天把各个主流的编程网站仔细对比了一下，下面从各个角度对比一下这些编程竞赛网站。</p>
-
-<h2 id="section">分类和排名</h2>
-<table border="1" cellspacing="0" cellpadding="0">
-<tbody>
-<tr>
-<td valign="top" width="94">
-<p><a name="OLE_LINK30"></a><a name="OLE_LINK1"><b>网站地址</b></a></p>
-</td>
-<td valign="top" width="57">
-<p><b>类别</b></p>
-</td>
-<td valign="top" width="38">
-<p><b>PR</b></p>
-</td>
-<td valign="top" width="60">
-<p><b>ATR</b></p>
-</td>
-<td valign="top" width="44">
-<p><b>QF</b></p>
-</td>
-<td valign="top" width="151">
-<p><b>主办方</b></p>
-</td>
-<td valign="top" width="47">
-<p><b>备注</b></p>
-</td>
-</tr>
-<tr>
-<td valign="top" width="94">
-<p><a name="_Hlk352791085"></a><a href="http://www.topcoder.com/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://www.topcoder.com']);">TopCoder </a></p>
-</td>
-<td valign="top" width="57">
-<p>综合</p>
-</td>
-<td valign="top" width="38">
-<p>6</p>
-</td>
-<td valign="top" width="60">
-<p>33,586</p>
-</td>
-<td valign="top" width="44">
-<p>4167</p>
-</td>
-<td valign="top" width="151">
-<p>TopCoder公司</p>
-</td>
-<td valign="top" width="47">&nbsp;</td>
-</tr>
-<tr>
-<td valign="top" width="94">
-<p><a href="http://www.codechef.com/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://www.codechef.com']);">CodeChef </a></p>
-</td>
-<td valign="top" width="57">
-<p>综合</p>
-</td>
-<td valign="top" width="38">
-<p>6</p>
-</td>
-<td valign="top" width="60">
-<p>41,217</p>
-</td>
-<td valign="top" width="44">
-<p>5758</p>
-</td>
-<td valign="top" width="151">
-<p>Directi公司</p>
-</td>
-<td valign="top" width="47">&nbsp;</td>
-</tr>
-<tr>
-<td valign="top" width="94">
-<p><a href="http://codeforces.com/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://codeforces.com']);">CodeForces </a></p>
-</td>
-<td valign="top" width="57">
-<p>综合</p>
-</td>
-<td valign="top" width="38">
-<p>5</p>
-</td>
-<td valign="top" width="60">
-<p>73,012</p>
-</td>
-<td valign="top" width="44">
-<p>599</p>
-</td>
-<td valign="top" width="151">
-<p>CodeForces公司</p>
-</td>
-<td valign="top" width="47">&nbsp;</td>
-</tr>
-<tr>
-<td valign="top" width="94">
-<p><a href="http://www.spoj.com/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://www.spoj.com']);">SPOJ</a></p>
-</td>
-<td valign="top" width="57">
-<p>ACM</p>
-</td>
-<td valign="top" width="38">
-<p>3</p>
-</td>
-<td valign="top" width="60">
-<p>75,653</p>
-</td>
-<td valign="top" width="44">
-<p>1520</p>
-</td>
-<td valign="top" width="151">
-<p>Sphere Research Labs</p>
-</td>
-<td valign="top" width="47">&nbsp;</td>
-</tr>
-<tr>
-<td valign="top" width="94">
-<p><a href="http://poj.org/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://poj.org']);">POJ</a></p>
-</td>
-<td valign="top" width="57">
-<p>ACM</p>
-</td>
-<td valign="top" width="38">
-<p>7</p>
-</td>
-<td valign="top" width="60">
-<p>364,925</p>
-</td>
-<td valign="top" width="44">
-<p>N/A</p>
-</td>
-<td valign="top" width="151">
-<p>北京大学</p>
-</td>
-<td valign="top" width="47">&nbsp;</td>
-</tr>
-<tr>
-<td valign="top" width="94">
-<p><a href="http://acm.zju.edu.cn" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://acm.zju.edu.cn']);">ZOJ</a></p>
-</td>
-<td valign="top" width="57">
-<p>ACM</p>
-</td>
-<td valign="top" width="38">
-<p>6</p>
-</td>
-<td valign="top" width="60">
-<p>N/A</p>
-</td>
-<td valign="top" width="44">
-<p>N/A</p>
-</td>
-<td valign="top" width="151">
-<p>浙江大学</p>
-</td>
-<td valign="top" width="47">&nbsp;</td>
-</tr>
-<tr>
-<td valign="top" width="94">
-<p><a href="http://uva.onlinejudge.org/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://uva.onlinejudge.org']);">UVA OJ</a></p>
-</td>
-<td valign="top" width="57">
-<p>ACM</p>
-</td>
-<td valign="top" width="38">
-<p>6</p>
-</td>
-<td valign="top" width="60">
-<p>166,991</p>
-</td>
-<td valign="top" width="44">
-<p>N/A</p>
-</td>
-<td valign="top" width="151">
-<p>University of Virginia</p>
-</td>
-<td valign="top" width="47">&nbsp;</td>
-</tr>
-<tr>
-<td valign="top" width="94">
-<p><a href="http://acm.sgu.ru/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://acm.sgu.ru']);">SGU OJ</a></p>
-</td>
-<td valign="top" width="57">
-<p>ACM</p>
-</td>
-<td valign="top" width="38">
-<p>5</p>
-</td>
-<td valign="top" width="60">
-<p>194,881</p>
-</td>
-<td valign="top" width="44">
-<p>N/A</p>
-</td>
-<td valign="top" width="151">
-<p>Saratov State University</p>
-</td>
-<td valign="top" width="47">&nbsp;</td>
-</tr>
-<tr>
-<td valign="top" width="94">
-<p><a href="https://www.hackerrank.com/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://www.hackerrank.com']);">HackerRank</a></p>
-</td>
-<td valign="top" width="57">
-<p>综合</p>
-</td>
-<td valign="top" width="38">
-<p>5</p>
-</td>
-<td valign="top" width="60">
-<p>126,192</p>
-</td>
-<td valign="top" width="44">
-<p>56</p>
-</td>
-<td valign="top" width="151">
-<p>InterviewStreet公司</p>
-</td>
-<td valign="top" width="47">&nbsp;</td>
-</tr>
-<tr>
-<td valign="top" width="94">
-<p><a href="http://projecteuler.net/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://projecteuler.net']);">Project Euler</a></p>
-</td>
-<td valign="top" width="57">
-<p>数学</p>
-</td>
-<td valign="top" width="38">
-<p>6</p>
-</td>
-<td valign="top" width="60">
-<p>53,854</p>
-</td>
-<td valign="top" width="44">
-<p>428</p>
-</td>
-<td valign="top" width="151">
-<p>Project Euler公司</p>
-</td>
-<td valign="top" width="47">&nbsp;</td>
-</tr>
-<tr>
-<td valign="top" width="94">
-<p><a href="http://www.careercup.com/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://www.careercup.com']);">CareerUp</a></p>
-</td>
-<td valign="top" width="57">
-<p>面试</p>
-</td>
-<td valign="top" width="38">
-<p>4</p>
-</td>
-<td valign="top" width="60">
-<p>51,089</p>
-</td>
-<td valign="top" width="44">
-<p>654</p>
-</td>
-<td valign="top" width="151">
-<p>CareerUp公司</p>
-</td>
-<td valign="top" width="47">&nbsp;</td>
-</tr>
-<tr>
-<td valign="top" width="94">
-<p><a href="http://leetcode.com/" onclick="javascript:_gaq.push(['_trackEvent','outbound-article','http://leetcode.com']);">LeetCode</a></p>
-</td>
-<td valign="top" width="57">
-<p>面试</p>
-</td>
-<td valign="top" width="38">
-<p>4</p>
-</td>
-<td valign="top" width="60">
-<p>188,196</p>
-</td>
-<td valign="top" width="44">
-<p>N/A</p>
-</td>
-<td valign="top" width="151">
-<p>LeetCode公司</p>
-</td>
-<td valign="top" width="47">&nbsp;</td>
-</tr>
-</tbody>
-</table>
-
-<p>说明：PR是Google PageRank的缩写；ATR是Alexa Trafic Rank的缩写，即Alexa排名；QF是Quora Followers的缩写，具体含义是在Quora上关于某Topic的follower数量，例如<a href="http://www.quora.com/CodeChef">CodeChef的topic</a> 有5758个followers。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/20130322">继续阅读 &rarr;</a>
-    </footer>
   
 
 
@@ -1443,7 +1120,7 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
 </section>
 <section>
   <h2>分类目录</h2>
-    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/docker/'>docker (3)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (5)</a></li><li><a href='/blog/categories/sa/'>SA (3)</a></li><li><a href='/blog/categories/spark/'>spark (5)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>Algorithm (1)</a></li><li><a href='/blog/categories/devops/'>DevOps (8)</a></li><li><a href='/blog/categories/docker/'>Docker (3)</a></li><li><a href='/blog/categories/hadoop/'>Hadoop (8)</a></li><li><a href='/blog/categories/language/'>Language (3)</a></li><li><a href='/blog/categories/machine-learning/'>Machine-Learning (5)</a></li><li><a href='/blog/categories/search-engine/'>Search-Engine (5)</a></li><li><a href='/blog/categories/spark/'>Spark (6)</a></li><li><a href='/blog/categories/tools/'>Tools (11)</a></li></ul>
 </section>
 <section>
   <h2>友情链接</h2>
@@ -1489,23 +1166,23 @@ Linux下可以省略以上两步，spark源码自带了一个sbt，且启动sbt�
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/20140127">我的Ansible playbook</a>
+        <a href="/blog/20140220">编写Nutch插件</a>
       </li>
     
       <li class="post">
-        <a href="/blog/20140126">/boot 目录空间不足</a>
+        <a href="/blog/20140214">CentOS上编译 Hadoop 2.2.0</a>
       </li>
     
       <li class="post">
-        <a href="/blog/20140125">Rdesktop 快速入门</a>
+        <a href="/blog/20140208">在CentOS上安装HBase 0.96</a>
       </li>
     
       <li class="post">
-        <a href="/blog/20140122">在Centos 6.5上安装docker</a>
+        <a href="/blog/20140207">在CentOS上安装ZooKeeper集群</a>
       </li>
     
       <li class="post">
-        <a href="/blog/20131223">运行mahout的朴素贝叶斯分类器</a>
+        <a href="/blog/20140206">Hadoop多用户的配置(Hadoop 2.x)</a>
       </li>
     
   </ul>

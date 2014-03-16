@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>我的Ansible playbook - 研究研究</title>
+  <title>Ansible 快速入门 - 研究研究</title>
   <meta name="author" content="soulmachine">
 
   
@@ -112,7 +112,7 @@
   
   <header class="page-header">
     
-      <h1 class="entry-title">我的Ansible Playbook</h1>
+      <h1 class="entry-title">Ansible 快速入门</h1>
     
     
       <p class="meta">
@@ -128,7 +128,7 @@
   
 
 
-<time datetime="2014-01-27T22:08:00+08:00" pubdate data-updated="true">Jan 27<span>th</span>, 2014</time>
+<time datetime="2014-01-27T12:10:00+08:00" pubdate data-updated="true">Jan 27<span>th</span>, 2014</time>
         
 		
          | <a href="#duoshuo_thread">Comments</a>
@@ -138,47 +138,150 @@
   </header>
 
 
-<div class="entry-content"><pre><code>---
-- hosts: all
-  sudo: True
-  remote_user: work     # 要根据自己的集群更改
+<div class="entry-content"><p>Ansible 是一个比Puppet, Chef 更轻量的provisioning 工具，不需要启动daemon进程。这点跟跟pssh差不多，但是比pssh更加强大。</p>
+
+<h2 id="section">前提</h2>
+<ul>
+  <li>所使用的remote_user要能够SSH无密码登录到所有机器，配置方法见<a href="http://www.yanjiuyanjiu.com/blog/20120102/">SSH无密码登录的配置</a></li>
+  <li>
+    <p>remote_use sudo的时候不需要密码，配置方法如下，</p>
+
+    <pre><code>  sudo chmod +w /etc/sudoers
+  sudo vim /etc/sudoers
+</code></pre>
+
+    <p>找到 <code>root    ALL=(ALL:ALL) ALL</code>，在下面添加一行</p>
+
+    <pre><code> username    ALL=(ALL:ALL) NOPASSWD:ALL
+</code></pre>
+
+    <p>保存退出，然后恢复为只读，</p>
+
+    <pre><code>  sudo chmod +w /etc/sudoers 
+</code></pre>
+  </li>
+</ul>
+
+<p>如果忘记了以上两点，运行任何ansible命令的时候，会卡住不动很久。</p>
+
+<p>如果发现在 “GATHERING FACTS”这里卡住，多半是sudo需要密码，试试加上-K选项，例如<code>ansible-playbook -K playbook.yml</code>，参考<a href="https://groups.google.com/forum/#!topic/ansible-project/FL0mxyxOo4M">Running ansible on local Linux desktop hangs on Gathering Facts</a>。</p>
+
+<p><code>-vvvv</code>表示调试模式，加上后会输出很多中间信息，帮助你调试。</p>
+
+<h2 id="ansible">1. 安装Ansible</h2>
+<p>只需要在一台机器上安装，其他机器不需要安装任何东西，这就是ansible比puppet, chef方便的地方。</p>
+
+<pre><code>sudo yum install ansible
+</code></pre>
+
+<p>或者</p>
+
+<pre><code>sudo apt-get install ansible
+</code></pre>
+
+<p>在<code>/etc/ansible/hosts</code>添加想要操作的机器(这个<code>hosts</code>文件也叫做<a href="http://docs.ansible.com/intro_inventory.html">Inventory</a>)，且这些机器都是能<a href="http://www.yanjiuyanjiu.com/blog/20120102">SSH无密码登录的</a>，然后测试一下：</p>
+
+<pre><code>ansible all -a "/bin/echo hello"
+</code></pre>
+
+<p>如果都成功了，说明安装成功。</p>
+
+<p>使用ansible有两种方式：Ad-hoc command 和 playbook。前者用于临时类批量操作，后者用于配置管理，类似与Puppet。</p>
+
+<h2 id="ad-hoc-commands">2. Ad-Hoc Commands</h2>
+<p>Ad-hoc命令的形式一般如下：</p>
+
+<pre><code>ansible groupname -m module -a arguments
+</code></pre>
+
+<!-- more -->
+<p>例如：</p>
+
+<pre><code>ansible all -m yum -a "name=wget state=present"
+</code></pre>
+
+<p>参考<a href="http://docs.ansible.com/intro_adhoc.html">Introduction To Ad-Hoc Commands</a></p>
+
+<h2 id="playbook">3. Playbook</h2>
+
+<p>对于稳定的配置，就要使用playbook了。</p>
+
+<p>一个playbook由多个play组成，一个play由多个task组成，参考<a href="http://docs.ansible.com/playbooks_intro.html">Intro to Playbooks</a>。</p>
+
+<p>一个playbook的文件内容通常是如下形式：</p>
+
+<pre><code>---
+- hosts: groupname
+  remote_user: yourname
+  sudo: yes
 
   tasks:
-  ########## for CentOS and RedHat ##########
-    # update YUM repositories
-    - shell: 'yum -y update'
+    - task1
+    - task2
+</code></pre>
+
+<p>一个play的文件内容通常是如下形式：</p>
+
+<pre><code>- task1
+- task2
+</code></pre>
+
+<p>例如，批量安装wget和gcc的playbook，可以这么写：</p>
+
+<pre><code>---
+- hosts: all
+  remote_user: username
+  sudo: yes
+    
+  tasks:
+    - yum: name=wget state=present
       when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
-
-    - name: Install OpenJDK
-      yum: name=java-1.7.0-openjdk state=present
+    - yum: name=gcc state=present
       when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+</code></pre>
 
-    - name: install the 'Development tools' package group
-      yum: name="@Development tools" state=present
+<p>这个play包含了2个task。执行一下这个playbook，看看效果:</p>
+
+<pre><code>ansible-playbook wget_playbook.yml
+</code></pre>
+
+<p>接下来再举一个例子，我们写两个play，<code>play_debian.yml</code>和<code>play_centos.yml</code>，以及一个playbook，<code>playbook.yml</code>。</p>
+
+<p>play_cenos.yml:</p>
+
+<pre><code>- yum: name=wget state=present
+- yum: name=gcc state=present
+</code></pre>
+
+<p>play_deban.yml:</p>
+
+<pre><code>- apt: pkg=wget state=present
+- apt: pkg=gcc state=present
+</code></pre>
+
+<p>playbook.yml:</p>
+
+<pre><code>---
+- hosts: all
+  remote_user: username
+  sudo: yes
+
+  tasks:
+    - include: play_centos.yml
       when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
-
-    # upgrade all packages
-    - shell: 'yum -y upgrade'
-      when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
-
-
-  ########## for Ubuntu and Debian ##########
-    - name: Run "apt-get update" to update the source list
-      apt: update_cache=yes
-      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
-
-    - name: Install OpenJDK
-      apt: pkg=openjdk-7-jdk state=present
-      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
-
-    - name: Install build-essential
-      apt: pkg=build-essential state=present
-      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
-
-    - name: # Update all packages to the latest version
-      apt: upgrade=dist
+    - include: play_debian.yml
       when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 </code></pre>
+
+<p>执行这个playbook:</p>
+
+<pre><code>ansible-playbook playbook.yml
+</code></pre>
+
+<h2 id="section-1">4. 进阶</h2>
+<p>想要进一步了解ansible，可以学习官网的例子, <a href="https://github.com/ansible/ansible-examples/">ansible examples</a>。</p>
+
+<p>一定要仔细阅读官网给出的最佳实践规范，<a href="http://docs.ansible.com/playbooks_best_practices.html">Best Practices</a>。</p>
 </div>
 
 
@@ -201,8 +304,14 @@
   
 
 
-<time datetime="2014-01-27T22:08:00+08:00" pubdate data-updated="true">Jan 27<span>th</span>, 2014</time>
+<time datetime="2014-01-27T12:10:00+08:00" pubdate data-updated="true">Jan 27<span>th</span>, 2014</time>
       
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/devops/'>DevOps</a>
+  
+</span>
 
 
     </p>
@@ -231,7 +340,7 @@
 	
     <section>
       <div id="duoshuo_thread" aria-live="polite"><!-- Duoshuo Comment BEGIN -->
-<div class="ds-thread" data-thread-key="/blog/20140127" data-title="我的Ansible playbook"></div>
+<div class="ds-thread" data-thread-key="/blog/20140127" data-title="Ansible 快速入门"></div>
 <script type="text/javascript">
 var duoshuoQuery = {short_name:"yanjiuyanjiu"};
 	(function() {
@@ -254,6 +363,10 @@ var duoshuoQuery = {short_name:"yanjiuyanjiu"};
       
       <li><a href="/blog/archives">Blog Archives</a></li>
       
+      <li class="next"><a class="basic-alignment right" href="/blog/20140128"
+        title="Next Post: Restore Octopress at a new computer">Restore Octopress at a new computer
+        &raquo;</a></li>
+      
     </ul>
   </footer>
 </article>
@@ -267,7 +380,7 @@ var duoshuoQuery = {short_name:"yanjiuyanjiu"};
 </section>
 <section>
   <h2>分类目录</h2>
-    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>algorithm (1)</a></li><li><a href='/blog/categories/docker/'>docker (3)</a></li><li><a href='/blog/categories/hadoop/'>hadoop (2)</a></li><li><a href='/blog/categories/language/'>language (3)</a></li><li><a href='/blog/categories/machine-learning/'>machine-learning (5)</a></li><li><a href='/blog/categories/sa/'>SA (3)</a></li><li><a href='/blog/categories/spark/'>spark (5)</a></li><li><a href='/blog/categories/tools/'>tools (10)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/algorithm/'>Algorithm (1)</a></li><li><a href='/blog/categories/devops/'>DevOps (8)</a></li><li><a href='/blog/categories/docker/'>Docker (3)</a></li><li><a href='/blog/categories/hadoop/'>Hadoop (8)</a></li><li><a href='/blog/categories/language/'>Language (3)</a></li><li><a href='/blog/categories/machine-learning/'>Machine-Learning (5)</a></li><li><a href='/blog/categories/search-engine/'>Search-Engine (5)</a></li><li><a href='/blog/categories/spark/'>Spark (6)</a></li><li><a href='/blog/categories/tools/'>Tools (11)</a></li></ul>
 </section>
 <section>
   <h2>友情链接</h2>
@@ -313,23 +426,23 @@ var duoshuoQuery = {short_name:"yanjiuyanjiu"};
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/20140127">我的Ansible playbook</a>
+        <a href="/blog/20140220">编写Nutch插件</a>
       </li>
     
       <li class="post">
-        <a href="/blog/20140126">/boot 目录空间不足</a>
+        <a href="/blog/20140214">CentOS上编译 Hadoop 2.2.0</a>
       </li>
     
       <li class="post">
-        <a href="/blog/20140125">Rdesktop 快速入门</a>
+        <a href="/blog/20140208">在CentOS上安装HBase 0.96</a>
       </li>
     
       <li class="post">
-        <a href="/blog/20140122">在Centos 6.5上安装docker</a>
+        <a href="/blog/20140207">在CentOS上安装ZooKeeper集群</a>
       </li>
     
       <li class="post">
-        <a href="/blog/20131223">运行mahout的朴素贝叶斯分类器</a>
+        <a href="/blog/20140206">Hadoop多用户的配置(Hadoop 2.x)</a>
       </li>
     
   </ul>
